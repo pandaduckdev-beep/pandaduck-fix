@@ -9,7 +9,8 @@ import { AboutPage } from "@/app/components/AboutPage";
 type Screen = "home" | "service" | "form" | "services" | "reviews" | "about";
 
 export interface SelectedService {
-  id: string;
+  id: string; // service_id (TEXT)
+  uuid: string; // services.id (UUID)
   name: string;
   price: number;
   selectedOption?: {

@@ -1,6 +1,7 @@
 import { ChevronLeft, Check, Tag, CheckCircle2, Package } from "lucide-react";
 import { useState } from "react";
 import type { ServiceSelectionData } from "@/app/App";
+import { createRepairRequest } from "@/lib/api";
 
 interface RepairFormProps {
   onNavigate: (screen: string) => void;
@@ -17,16 +18,46 @@ export function RepairForm({ onNavigate, selectionData }: RepairFormProps) {
 
   const [submitted, setSubmitted] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
 
-    // 신청 완료 후 모달 표시
-    setTimeout(() => {
+    if (!selectionData || selectionData.services.length === 0) {
+      setError("선택된 서비스가 없습니다.");
+      return;
+    }
+
+    setSubmitted(true);
+    setError(null);
+
+    try {
+      // Supabase에 수리 신청 데이터 저장
+      await createRepairRequest({
+        customerName: formData.name,
+        customerPhone: formData.phone,
+        customerEmail: undefined,
+        controllerModel: "DualSense", // 기본값, 추후 선택 가능하도록 수정 가능
+        issueDescription: `수거 방법: ${formData.pickupMethod === 'express' ? '택배' : '방문접수'}, 주소: ${formData.address}`,
+        services: selectionData.services.map(service => ({
+          serviceId: service.uuid, // UUID 사용
+          optionId: service.selectedOption?.id,
+          servicePrice: service.price,
+          optionPrice: service.selectedOption?.price || 0
+        })),
+        totalAmount: selectionData.total
+      });
+
+      // 성공 시 모달 표시
+      setTimeout(() => {
+        setSubmitted(false);
+        setShowSuccessModal(true);
+      }, 500);
+    } catch (err) {
       setSubmitted(false);
-      setShowSuccessModal(true);
-    }, 500);
+      setError(err instanceof Error ? err.message : '신청 중 오류가 발생했습니다.');
+      console.error('Failed to submit repair request:', err);
+    }
   };
 
   const handleCloseModal = () => {
@@ -193,6 +224,15 @@ export function RepairForm({ onNavigate, selectionData }: RepairFormProps) {
           </div>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="bg-[#FF3B30]/10 border border-[#FF3B30]/20 rounded-[20px] p-4">
+            <p className="text-sm text-[#FF3B30] text-center">
+              {error}
+            </p>
+          </div>
+        )}
+
         {/* Submit Button */}
         <button
           type="submit"
@@ -207,7 +247,7 @@ export function RepairForm({ onNavigate, selectionData }: RepairFormProps) {
           {submitted ? (
             <>
               <Check className="w-5 h-5" />
-              신청 완료
+              처리중...
             </>
           ) : (
             '수리 신청하기'

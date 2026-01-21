@@ -152,8 +152,12 @@ export function ServiceSelection({ onNavigate, onConfirm }: ServiceSelectionProp
         const selectedOptionId = selectedOptions[service.id];
         const selectedOption = service.options?.find(opt => opt.id === selectedOptionId);
 
+        // supabaseServices에서 UUID 찾기
+        const supabaseService = supabaseServices.find(s => s.service_id === service.id);
+
         return {
-          id: service.id,
+          id: service.id, // service_id (TEXT)
+          uuid: supabaseService?.id || '', // services.id (UUID)
           name: service.name,
           price: service.price,
           selectedOption: selectedOption ? {
