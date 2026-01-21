@@ -277,6 +277,99 @@ export interface Database {
           updated_at?: string;
         };
       };
+      controller_models: {
+        Row: {
+          id: string;
+          model_id: string;
+          model_name: string;
+          description: string | null;
+          is_active: boolean;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          model_id: string;
+          model_name: string;
+          description?: string | null;
+          is_active?: boolean;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          model_id?: string;
+          model_name?: string;
+          description?: string | null;
+          is_active?: boolean;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      controller_service_pricing: {
+        Row: {
+          id: string;
+          controller_model_id: string;
+          service_id: string;
+          price: number;
+          is_available: boolean;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          controller_model_id: string;
+          service_id: string;
+          price: number;
+          is_available?: boolean;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          controller_model_id?: string;
+          service_id?: string;
+          price?: number;
+          is_available?: boolean;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      controller_option_pricing: {
+        Row: {
+          id: string;
+          controller_model_id: string;
+          service_option_id: string;
+          additional_price: number;
+          is_available: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          controller_model_id: string;
+          service_option_id: string;
+          additional_price: number;
+          is_available?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          controller_model_id?: string;
+          service_option_id?: string;
+          additional_price?: number;
+          is_available?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 }
@@ -288,6 +381,9 @@ export type RepairRequest = Database['public']['Tables']['repair_requests']['Row
 export type RepairRequestService = Database['public']['Tables']['repair_request_services']['Row'];
 export type Review = Database['public']['Tables']['reviews']['Row'];
 export type ServiceCombo = Database['public']['Tables']['service_combos']['Row'];
+export type ControllerModel = Database['public']['Tables']['controller_models']['Row'];
+export type ControllerServicePricing = Database['public']['Tables']['controller_service_pricing']['Row'];
+export type ControllerOptionPricing = Database['public']['Tables']['controller_option_pricing']['Row'];
 
 export interface ServiceWithOptions extends Service {
   options?: ServiceOption[];
@@ -297,5 +393,12 @@ export interface RepairRequestWithServices extends RepairRequest {
   services?: Array<RepairRequestService & {
     service?: Service;
     option?: ServiceOption;
+  }>;
+}
+
+export interface ServiceWithPricing extends Service {
+  pricing?: ControllerServicePricing;
+  options?: Array<ServiceOption & {
+    pricing?: ControllerOptionPricing;
   }>;
 }

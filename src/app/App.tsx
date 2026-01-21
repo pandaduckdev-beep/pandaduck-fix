@@ -65,6 +65,7 @@ export default function App() {
         <ServiceSelection
           onNavigate={handleNavigate}
           onConfirm={handleServiceSelection}
+          controllerModel={controllerModel}
         />
       )}
       {currentScreen === "form" && (

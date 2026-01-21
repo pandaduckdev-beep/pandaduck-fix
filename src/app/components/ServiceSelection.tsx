@@ -1,6 +1,6 @@
 import { ChevronLeft, Gamepad2, Zap, Settings, CircuitBoard, Plus, Battery, Wrench, Palette, Tag } from "lucide-react";
-import { useState } from "react";
-import { useServices } from "@/hooks/useServices";
+import { useState, useEffect } from "react";
+import { useServicesWithPricing } from "@/hooks/useServicesWithPricing";
 import { useServiceCombos } from "@/hooks/useServiceCombos";
 import type { ServiceCombo } from "@/types/database";
 import type { ServiceSelectionData } from "@/app/App";
@@ -8,6 +8,7 @@ import type { ServiceSelectionData } from "@/app/App";
 interface ServiceSelectionProps {
   onNavigate: (screen: string) => void;
   onConfirm: (data: ServiceSelectionData) => void;
+  controllerModel: string | null;
 }
 
 interface ServiceOption {
@@ -36,23 +37,30 @@ const iconMap: Record<string, React.ReactNode> = {
   'custom-shell': <Palette className="w-6 h-6" />,
 };
 
-export function ServiceSelection({ onNavigate, onConfirm }: ServiceSelectionProps) {
+export function ServiceSelection({ onNavigate, onConfirm, controllerModel }: ServiceSelectionProps) {
   const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
-  const { services: supabaseServices, loading } = useServices();
+  const { services: supabaseServices, loading } = useServicesWithPricing(controllerModel);
   const { combos, loading: combosLoading } = useServiceCombos();
+
+  // 컨트롤러가 선택되지 않은 경우 컨트롤러 선택 화면으로 이동
+  useEffect(() => {
+    if (!controllerModel) {
+      onNavigate('controller');
+    }
+  }, [controllerModel, onNavigate]);
 
   // Transform Supabase data to match the expected format
   const services: Service[] = supabaseServices.map(service => ({
     id: service.service_id,
     name: service.name,
     description: service.description,
-    price: service.base_price,
+    price: service.pricing?.price || service.base_price, // 모델별 가격 우선 사용
     icon: iconMap[service.service_id] || <Zap className="w-6 h-6" />,
     options: service.options?.map(option => ({
       id: option.id,
       name: option.option_name,
-      price: option.additional_price,
+      price: option.pricing?.additional_price || option.additional_price, // 모델별 옵션 가격 우선 사용
       description: option.option_description
     }))
   }));
