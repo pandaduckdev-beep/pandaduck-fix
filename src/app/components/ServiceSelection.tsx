@@ -3,9 +3,11 @@ import { useState } from "react";
 import { useServices } from "@/hooks/useServices";
 import { useServiceCombos } from "@/hooks/useServiceCombos";
 import type { ServiceCombo } from "@/types/database";
+import type { ServiceSelectionData } from "@/app/App";
 
 interface ServiceSelectionProps {
   onNavigate: (screen: string) => void;
+  onConfirm: (data: ServiceSelectionData) => void;
 }
 
 interface ServiceOption {
@@ -34,7 +36,7 @@ const iconMap: Record<string, React.ReactNode> = {
   'custom-shell': <Palette className="w-6 h-6" />,
 };
 
-export function ServiceSelection({ onNavigate }: ServiceSelectionProps) {
+export function ServiceSelection({ onNavigate, onConfirm }: ServiceSelectionProps) {
   const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const { services: supabaseServices, loading } = useServices();
@@ -139,6 +141,39 @@ export function ServiceSelection({ onNavigate }: ServiceSelectionProps) {
 
   // 최종 가격
   const totalPrice = subtotalPrice - discountAmount;
+
+  // 계속하기 버튼 클릭 핸들러
+  const handleContinue = () => {
+    if (selectedServices.size === 0) return;
+
+    const selectedServicesList = services
+      .filter(service => selectedServices.has(service.id))
+      .map(service => {
+        const selectedOptionId = selectedOptions[service.id];
+        const selectedOption = service.options?.find(opt => opt.id === selectedOptionId);
+
+        return {
+          id: service.id,
+          name: service.name,
+          price: service.price,
+          selectedOption: selectedOption ? {
+            id: selectedOption.id,
+            name: selectedOption.name,
+            price: selectedOption.price
+          } : undefined
+        };
+      });
+
+    const selectionData: ServiceSelectionData = {
+      services: selectedServicesList,
+      subtotal: subtotalPrice,
+      discount: discountAmount,
+      total: totalPrice,
+      discountName: bestCombo?.combo_name
+    };
+
+    onConfirm(selectionData);
+  };
 
   return (
     <div className="min-h-screen bg-white pb-32">
@@ -310,7 +345,7 @@ export function ServiceSelection({ onNavigate }: ServiceSelectionProps) {
           </div>
 
           <button
-            onClick={() => selectedServices.size > 0 && onNavigate('form')}
+            onClick={handleContinue}
             disabled={selectedServices.size === 0}
             className={`w-full py-4 rounded-full transition-all ${
               selectedServices.size > 0

@@ -1,11 +1,13 @@
-import { ChevronLeft, Check } from "lucide-react";
+import { ChevronLeft, Check, Tag } from "lucide-react";
 import { useState } from "react";
+import type { ServiceSelectionData } from "@/app/App";
 
 interface RepairFormProps {
   onNavigate: (screen: string) => void;
+  selectionData: ServiceSelectionData | null;
 }
 
-export function RepairForm({ onNavigate }: RepairFormProps) {
+export function RepairForm({ onNavigate, selectionData }: RepairFormProps) {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -52,21 +54,67 @@ export function RepairForm({ onNavigate }: RepairFormProps) {
           <h3 className="text-lg" style={{ fontWeight: 600 }}>
             서비스 요약
           </h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[#86868B]">홀 이펙트 센서</span>
-              <span style={{ fontWeight: 600 }}>₩89,000</span>
+
+          {selectionData ? (
+            <div className="space-y-3">
+              {/* 선택한 서비스 목록 */}
+              {selectionData.services.map((service) => (
+                <div key={service.id}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#86868B]">{service.name}</span>
+                    <span style={{ fontWeight: 600 }}>₩{service.price.toLocaleString()}</span>
+                  </div>
+                  {service.selectedOption && (
+                    <div className="flex items-center justify-between mt-1 pl-4">
+                      <span className="text-xs text-[#86868B]">ㄴ {service.selectedOption.name}</span>
+                      <span className="text-xs" style={{ fontWeight: 600 }}>
+                        {service.selectedOption.price === 0
+                          ? '기본'
+                          : `+₩${service.selectedOption.price.toLocaleString()}`}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* 할인 정보 */}
+              {selectionData.discount > 0 && (
+                <>
+                  <div className="h-px bg-[rgba(0,0,0,0.1)]"></div>
+                  <div className="bg-white/60 rounded-[16px] p-3 space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Tag className="w-3.5 h-3.5 text-[#FF3B30]" />
+                      <span className="text-[#FF3B30]" style={{ fontWeight: 600 }}>
+                        {selectionData.discountName}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-[#86868B]">서비스 금액</span>
+                    <span style={{ fontWeight: 600 }}>₩{selectionData.subtotal.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-[#FF3B30]">할인 금액</span>
+                    <span className="text-[#FF3B30]" style={{ fontWeight: 600 }}>
+                      -₩{selectionData.discount.toLocaleString()}
+                    </span>
+                  </div>
+                </>
+              )}
+
+              <div className="h-px bg-[rgba(0,0,0,0.1)]"></div>
+              <div className="flex items-center justify-between">
+                <span style={{ fontWeight: 600 }}>총 금액</span>
+                <span className="text-xl" style={{ fontWeight: 700 }}>
+                  ₩{selectionData.total.toLocaleString()}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[#86868B]">헤어 트리거</span>
-              <span style={{ fontWeight: 600 }}>₩45,000</span>
+          ) : (
+            <div className="text-center text-[#86868B] py-4">
+              선택된 서비스가 없습니다
             </div>
-            <div className="h-px bg-[rgba(0,0,0,0.1)]"></div>
-            <div className="flex items-center justify-between">
-              <span style={{ fontWeight: 600 }}>합계</span>
-              <span className="text-xl" style={{ fontWeight: 700 }}>₩134,000</span>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Form Fields */}
