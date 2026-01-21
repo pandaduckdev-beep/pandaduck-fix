@@ -6,9 +6,10 @@ import { createRepairRequest } from "@/lib/api";
 interface RepairFormProps {
   onNavigate: (screen: string) => void;
   selectionData: ServiceSelectionData | null;
+  controllerModel: string | null;
 }
 
-export function RepairForm({ onNavigate, selectionData }: RepairFormProps) {
+export function RepairForm({ onNavigate, selectionData, controllerModel }: RepairFormProps) {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -37,7 +38,7 @@ export function RepairForm({ onNavigate, selectionData }: RepairFormProps) {
         customerName: formData.name,
         customerPhone: formData.phone,
         customerEmail: undefined,
-        controllerModel: "DualSense", // 기본값, 추후 선택 가능하도록 수정 가능
+        controllerModel: controllerModel || "DualSense", // 선택한 기종 사용
         issueDescription: `수거 방법: ${formData.pickupMethod === 'express' ? '택배' : '방문접수'}, 주소: ${formData.address}`,
         services: selectionData.services.map(service => ({
           serviceId: service.uuid, // UUID 사용

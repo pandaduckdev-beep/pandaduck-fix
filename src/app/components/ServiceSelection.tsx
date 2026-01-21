@@ -185,7 +185,7 @@ export function ServiceSelection({ onNavigate, onConfirm }: ServiceSelectionProp
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
           <button
-            onClick={() => onNavigate('home')}
+            onClick={() => onNavigate('controller')}
             className="p-2 hover:bg-[#F5F5F7] rounded-full transition-colors -ml-2"
           >
             <ChevronLeft className="w-6 h-6" />

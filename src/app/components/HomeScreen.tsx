@@ -174,7 +174,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             />
           </div>
           <button
-            onClick={() => onNavigate('service')}
+            onClick={() => onNavigate('controller')}
             className="w-full bg-[#000000] text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
             style={{ fontWeight: 600 }}
           >
