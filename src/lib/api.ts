@@ -4,7 +4,8 @@ import type {
   ServiceOption,
   ServiceWithOptions,
   RepairRequest,
-  Review
+  Review,
+  ServiceCombo
 } from '../types/database';
 
 // ============================================================================
@@ -31,7 +32,7 @@ export async function fetchServices(): Promise<ServiceWithOptions[]> {
       const { data: options } = await supabase
         .from('service_options')
         .select('*')
-        .eq('service_id', service.service_id)
+        .eq('service_id', service.id)  // UUID를 사용
         .eq('is_active', true)
         .order('additional_price', { ascending: true });
 
@@ -67,7 +68,7 @@ export async function fetchService(serviceId: string): Promise<ServiceWithOption
   const { data: options } = await supabase
     .from('service_options')
     .select('*')
-    .eq('service_id', serviceId)
+    .eq('service_id', service.id)  // UUID를 사용
     .eq('is_active', true)
     .order('additional_price', { ascending: true });
 
@@ -253,4 +254,25 @@ export async function fetchAverageRating(): Promise<number> {
 
   const sum = data.reduce((acc, review) => acc + review.rating, 0);
   return Math.round((sum / data.length) * 10) / 10; // 소수점 1자리
+}
+
+// ============================================================================
+// Service Combos API
+// ============================================================================
+
+/**
+ * 활성화된 모든 서비스 콤보 조회
+ */
+export async function fetchServiceCombos(): Promise<ServiceCombo[]> {
+  const { data, error } = await supabase
+    .from('service_combos')
+    .select('*')
+    .eq('is_active', true)
+    .order('discount_value', { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch service combos: ${error.message}`);
+  }
+
+  return data || [];
 }

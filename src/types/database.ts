@@ -242,6 +242,41 @@ export interface Database {
           created_at?: string;
         };
       };
+      service_combos: {
+        Row: {
+          id: string;
+          combo_name: string;
+          description: string | null;
+          discount_type: 'percentage' | 'fixed';
+          discount_value: number;
+          required_service_ids: string[];
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          combo_name: string;
+          description?: string | null;
+          discount_type: 'percentage' | 'fixed';
+          discount_value: number;
+          required_service_ids: string[];
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          combo_name?: string;
+          description?: string | null;
+          discount_type?: 'percentage' | 'fixed';
+          discount_value?: number;
+          required_service_ids?: string[];
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 }
@@ -252,6 +287,7 @@ export type ServiceOption = Database['public']['Tables']['service_options']['Row
 export type RepairRequest = Database['public']['Tables']['repair_requests']['Row'];
 export type RepairRequestService = Database['public']['Tables']['repair_request_services']['Row'];
 export type Review = Database['public']['Tables']['reviews']['Row'];
+export type ServiceCombo = Database['public']['Tables']['service_combos']['Row'];
 
 export interface ServiceWithOptions extends Service {
   options?: ServiceOption[];

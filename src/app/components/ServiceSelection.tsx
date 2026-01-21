@@ -1,6 +1,8 @@
-import { ChevronLeft, Gamepad2, Zap, Settings, CircuitBoard, Plus, Battery, Wrench, Palette } from "lucide-react";
+import { ChevronLeft, Gamepad2, Zap, Settings, CircuitBoard, Plus, Battery, Wrench, Palette, Tag } from "lucide-react";
 import { useState } from "react";
 import { useServices } from "@/hooks/useServices";
+import { useServiceCombos } from "@/hooks/useServiceCombos";
+import type { ServiceCombo } from "@/types/database";
 
 interface ServiceSelectionProps {
   onNavigate: (screen: string) => void;
@@ -36,6 +38,7 @@ export function ServiceSelection({ onNavigate }: ServiceSelectionProps) {
   const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const { services: supabaseServices, loading } = useServices();
+  const { combos, loading: combosLoading } = useServiceCombos();
 
   // Transform Supabase data to match the expected format
   const services: Service[] = supabaseServices.map(service => ({
@@ -82,7 +85,8 @@ export function ServiceSelection({ onNavigate }: ServiceSelectionProps) {
     });
   };
 
-  const totalPrice = services
+  // 할인 적용 전 가격 계산
+  const subtotalPrice = services
     .filter(service => selectedServices.has(service.id))
     .reduce((sum, service) => {
       let price = service.price;
@@ -95,6 +99,46 @@ export function ServiceSelection({ onNavigate }: ServiceSelectionProps) {
       }
       return sum + price;
     }, 0);
+
+  // 적용 가능한 콤보 찾기
+  const applicableCombos = combos.filter(combo => {
+    const selectedServiceIds = Array.from(selectedServices);
+
+    // 특별 케이스: "3개 이상 서비스 할인"은 정확히 매칭하지 않고 개수만 확인
+    if (combo.combo_name.includes('3개 이상') && selectedServiceIds.length >= 3) {
+      return true;
+    }
+
+    // 필요한 모든 서비스가 선택되었는지 확인
+    return combo.required_service_ids.every(requiredId =>
+      selectedServiceIds.includes(requiredId)
+    );
+  });
+
+  // 가장 큰 할인 적용 (중복 할인 방지)
+  const bestCombo = applicableCombos.reduce<ServiceCombo | null>((best, current) => {
+    if (!best) return current;
+
+    const currentDiscount = current.discount_type === 'percentage'
+      ? subtotalPrice * (current.discount_value / 100)
+      : current.discount_value;
+
+    const bestDiscount = best.discount_type === 'percentage'
+      ? subtotalPrice * (best.discount_value / 100)
+      : best.discount_value;
+
+    return currentDiscount > bestDiscount ? current : best;
+  }, null);
+
+  // 할인 금액 계산
+  const discountAmount = bestCombo
+    ? bestCombo.discount_type === 'percentage'
+      ? Math.floor(subtotalPrice * (bestCombo.discount_value / 100))
+      : bestCombo.discount_value
+    : 0;
+
+  // 최종 가격
+  const totalPrice = subtotalPrice - discountAmount;
 
   return (
     <div className="min-h-screen bg-white pb-32">
@@ -225,12 +269,46 @@ export function ServiceSelection({ onNavigate }: ServiceSelectionProps) {
       {/* Sticky Bottom Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 py-6 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[#86868B]">총 예상 금액</span>
-            <span className="text-2xl" style={{ fontWeight: 700 }}>
-              ₩{totalPrice.toLocaleString()}
-            </span>
+          {/* 할인 정보 표시 */}
+          {bestCombo && (
+            <div className="bg-[#F5F5F7] rounded-[20px] p-4 space-y-2">
+              <div className="flex items-center gap-2 text-sm" style={{ fontWeight: 600 }}>
+                <Tag className="w-4 h-4 text-[#FF3B30]" />
+                <span className="text-[#FF3B30]">{bestCombo.combo_name}</span>
+              </div>
+              <p className="text-xs text-[#86868B] leading-relaxed">
+                {bestCombo.description}
+              </p>
+            </div>
+          )}
+
+          {/* 가격 상세 */}
+          <div className="space-y-2">
+            {bestCombo && (
+              <>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-[#86868B]">서비스 금액</span>
+                  <span style={{ fontWeight: 600 }}>
+                    ₩{subtotalPrice.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-[#FF3B30]">할인 금액</span>
+                  <span className="text-[#FF3B30]" style={{ fontWeight: 600 }}>
+                    -₩{discountAmount.toLocaleString()}
+                  </span>
+                </div>
+                <div className="h-px bg-[rgba(0,0,0,0.1)] my-2"></div>
+              </>
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-[#86868B]">총 예상 금액</span>
+              <span className="text-2xl" style={{ fontWeight: 700 }}>
+                ₩{totalPrice.toLocaleString()}
+              </span>
+            </div>
           </div>
+
           <button
             onClick={() => selectedServices.size > 0 && onNavigate('form')}
             disabled={selectedServices.size === 0}
