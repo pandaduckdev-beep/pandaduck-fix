@@ -3,6 +3,7 @@ import { Footer } from "@/app/components/Footer";
 import { useState } from "react";
 import { MenuDrawer } from "@/app/components/MenuDrawer";
 import { ServiceDetailModal } from "@/app/components/ServiceDetailModal";
+import { useServices } from "@/hooks/useServices";
 
 interface ServicesPageProps {
   onNavigate: (screen: string) => void;
@@ -225,9 +226,23 @@ const allServices = [
   },
 ];
 
+// Icon mapping helper
+const iconMap: Record<string, React.ReactNode> = {
+  'hall-effect': <Zap className="w-6 h-6" />,
+  'clicky-buttons': <CircuitBoard className="w-6 h-6" />,
+  'back-buttons': <Plus className="w-6 h-6" />,
+  'battery': <Battery className="w-6 h-6" />,
+  'hair-trigger': <Wrench className="w-6 h-6" />,
+  'custom-shell': <Palette className="w-6 h-6" />,
+};
+
 export function ServicesPage({ onNavigate }: ServicesPageProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<typeof serviceDetails[0] | null>(null);
+  const { services: supabaseServices, loading, error } = useServices();
+
+  // Supabase 데이터 로딩 실패 시 fallback 데이터 사용
+  const services = !loading && (error || supabaseServices.length === 0) ? allServices : supabaseServices;
 
   const handleInfoClick = (serviceId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -283,78 +298,108 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
 
       {/* Services Grid */}
       <section className="max-w-md mx-auto px-6 pb-8">
-        <div className="space-y-4">
-          {allServices.map((service, index) => (
-            <div 
-              key={index}
-              className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                  {service.icon}
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg mb-1" style={{ fontWeight: 600 }}>
-                    {service.name}
-                  </h3>
-                  <p className="text-sm text-[#86868B] mb-3">
-                    {service.description}
-                  </p>
-                  <div className="text-xl mb-3" style={{ fontWeight: 700 }}>
-                    {service.price}
-                  </div>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {service.features.map((feature, i) => (
-                      <span 
-                        key={i}
-                        className="px-3 py-1 bg-white rounded-full text-xs"
-                        style={{ fontWeight: 600 }}
-                      >
-                        {feature}
-                      </span>
-                    ))}
-                  </div>
-                  
-                  {/* Options */}
-                  {service.options && (
-                    <div className="mt-4 pt-4 border-t border-[rgba(0,0,0,0.1)]">
-                      <p className="text-sm mb-3" style={{ fontWeight: 600 }}>
-                        선택 옵션
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-block w-8 h-8 border-4 border-[#86868B] border-t-black rounded-full animate-spin"></div>
+            <p className="mt-4 text-[#86868B]">서비스 정보를 불러오는 중...</p>
+          </div>
+        )}
+
+        {!loading && (
+          <div className="space-y-4">
+            {services.map((service, index) => {
+              // Supabase 데이터인지 로컬 데이터인지 확인
+              const isSupabaseData = 'service_id' in service;
+
+              const features = isSupabaseData
+                ? (Array.isArray(service.features)
+                    ? service.features
+                    : typeof service.features === 'string'
+                      ? JSON.parse(service.features)
+                      : [])
+                : service.features;
+
+              const serviceId = isSupabaseData ? service.service_id : service.id;
+              const serviceName = service.name;
+              const serviceDescription = service.description;
+              const servicePrice = isSupabaseData ? service.base_price.toLocaleString() + '원' : service.price;
+              const serviceOptions = isSupabaseData ? service.options : service.options;
+
+              return (
+                <div
+                  key={isSupabaseData ? service.id : service.id}
+                  className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+                      {isSupabaseData ? (iconMap[service.service_id] || <Zap className="w-6 h-6" />) : service.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg mb-1" style={{ fontWeight: 600 }}>
+                        {serviceName}
+                      </h3>
+                      <p className="text-sm text-[#86868B] mb-3">
+                        {serviceDescription}
                       </p>
-                      <div className="space-y-2">
-                        {service.options.map((option, i) => (
-                          <div 
+                      <div className="text-xl mb-3" style={{ fontWeight: 700 }}>
+                        {servicePrice}
+                      </div>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {features.slice(0, 3).map((feature: string, i: number) => (
+                          <span
                             key={i}
-                            className="bg-white rounded-[16px] p-3 flex items-center justify-between"
+                            className="px-3 py-1 bg-white rounded-full text-xs"
+                            style={{ fontWeight: 600 }}
                           >
-                            <div>
-                              <div className="text-sm" style={{ fontWeight: 600 }}>
-                                {option.name}
-                              </div>
-                              <div className="text-xs text-[#86868B]">
-                                {option.description}
-                              </div>
-                            </div>
-                            <div className="text-sm" style={{ fontWeight: 700 }}>
-                              {option.price === 0 ? '기본' : `+${option.price.toLocaleString()}원`}
-                            </div>
-                          </div>
+                            {feature}
+                          </span>
                         ))}
                       </div>
+
+                      {/* Options */}
+                      {serviceOptions && serviceOptions.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-[rgba(0,0,0,0.1)]">
+                          <p className="text-sm mb-3" style={{ fontWeight: 600 }}>
+                            선택 옵션
+                          </p>
+                          <div className="space-y-2">
+                            {serviceOptions.map((option: any, i: number) => (
+                              <div
+                                key={isSupabaseData ? option.id : i}
+                                className="bg-white rounded-[16px] p-3 flex items-center justify-between"
+                              >
+                                <div>
+                                  <div className="text-sm" style={{ fontWeight: 600 }}>
+                                    {isSupabaseData ? option.option_name : option.name}
+                                  </div>
+                                  <div className="text-xs text-[#86868B]">
+                                    {isSupabaseData ? option.option_description : option.description}
+                                  </div>
+                                </div>
+                                <div className="text-sm" style={{ fontWeight: 700 }}>
+                                  {isSupabaseData
+                                    ? (option.additional_price === 0 ? '기본' : `+${option.additional_price.toLocaleString()}원`)
+                                    : (option.price === 0 ? '기본' : `+${option.price.toLocaleString()}원`)}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+                  <button
+                    onClick={(e) => handleInfoClick(serviceId, e)}
+                    className="w-full bg-[#000000] text-white py-2 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-4"
+                    style={{ fontWeight: 600 }}
+                  >
+                    상세 정보
+                  </button>
                 </div>
-              </div>
-              <button
-                onClick={(e) => handleInfoClick(service.id, e)}
-                className="w-full bg-[#000000] text-white py-2 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-4"
-                style={{ fontWeight: 600 }}
-              >
-                상세 정보
-              </button>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* CTA Section */}

@@ -1,5 +1,6 @@
 import { ChevronLeft, Gamepad2, Zap, Settings, CircuitBoard, Plus, Battery, Wrench, Palette } from "lucide-react";
 import { useState } from "react";
+import { useServices } from "@/hooks/useServices";
 
 interface ServiceSelectionProps {
   onNavigate: (screen: string) => void;
@@ -21,67 +22,35 @@ interface Service {
   options?: ServiceOption[];
 }
 
-const services: Service[] = [
-  {
-    id: "hall-effect",
-    name: "홀 이펙트 센서 업그레이드",
-    description: "자석 센서로 스틱 드리프트 영구 해결",
-    price: 25000,
-    icon: <Zap className="w-6 h-6" />,
-    options: [
-      { id: "basic", name: "기본형", price: 0, description: "홀 이펙트 센서" },
-      { id: "gulikit-tmr", name: "굴리킷 TMR", price: 15000, description: "Gulikit TMR 센서" },
-      { id: "gulikit-tmr720", name: "굴리킷 TMR 720", price: 25000, description: "텐션 조절이 가능한 TMR 센서" },
-    ],
-  },
-  {
-    id: "clicky-buttons",
-    name: "클릭키 버튼 모듈",
-    description: "eXtremeRate 프리미엄 촉감 스위치",
-    price: 25000,
-    icon: <CircuitBoard className="w-6 h-6" />,
-    options: [
-      { id: "light", name: "LIGHT", price: 0, description: "eXtremeRate 스탠다드" },
-      { id: "strong", name: "STRONG", price: 0, description: "eXtremeRate 스탠다드" },
-    ],
-  },
-  {
-    id: "back-buttons",
-    name: "백버튼 모드",
-    description: "프로게이머급 후면 패들 장착",
-    price: 40000,
-    icon: <Plus className="w-6 h-6" />,
-    options: [
-      { id: "rise3", name: "RISE3", price: 0, description: "eXtremeRate 2버튼" },
-      { id: "rise4", name: "RISE4", price: 10000, description: "eXtremeRate 4버튼" },
-    ],
-  },
-  {
-    id: "battery",
-    name: "고용량 배터리",
-    description: "최대 3배 더 긴 플레이타임",
-    price: 15000,
-    icon: <Battery className="w-6 h-6" />,
-  },
-  {
-    id: "hair-trigger",
-    name: "헤어 트리거",
-    description: "경쟁 게임을 위한 더 빠른 반응 속도",
-    price: 25000,
-    icon: <Settings className="w-6 h-6" />,
-  },
-  {
-    id: "custom-shell",
-    name: "커스텀 쉘 교체",
-    description: "프리미엄 쉘로 개성 표현",
-    price: 30000,
-    icon: <Palette className="w-6 h-6" />,
-  },
-];
+// Icon mapping helper
+const iconMap: Record<string, React.ReactNode> = {
+  'hall-effect': <Zap className="w-6 h-6" />,
+  'clicky-buttons': <CircuitBoard className="w-6 h-6" />,
+  'back-buttons': <Plus className="w-6 h-6" />,
+  'battery': <Battery className="w-6 h-6" />,
+  'hair-trigger': <Wrench className="w-6 h-6" />,
+  'custom-shell': <Palette className="w-6 h-6" />,
+};
 
 export function ServiceSelection({ onNavigate }: ServiceSelectionProps) {
   const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const { services: supabaseServices, loading } = useServices();
+
+  // Transform Supabase data to match the expected format
+  const services: Service[] = supabaseServices.map(service => ({
+    id: service.service_id,
+    name: service.name,
+    description: service.description,
+    price: service.base_price,
+    icon: iconMap[service.service_id] || <Zap className="w-6 h-6" />,
+    options: service.options?.map(option => ({
+      id: option.id,
+      name: option.option_name,
+      price: option.additional_price,
+      description: option.option_description
+    }))
+  }));
 
   const toggleService = (serviceId: string) => {
     const newSelected = new Set(selectedServices);
@@ -132,7 +101,7 @@ export function ServiceSelection({ onNavigate }: ServiceSelectionProps) {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
-          <button 
+          <button
             onClick={() => onNavigate('home')}
             className="p-2 hover:bg-[#F5F5F7] rounded-full transition-colors -ml-2"
           >
@@ -171,9 +140,18 @@ export function ServiceSelection({ onNavigate }: ServiceSelectionProps) {
         </div>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="max-w-md mx-auto px-6 py-12 text-center">
+          <div className="inline-block w-8 h-8 border-4 border-[#86868B] border-t-black rounded-full animate-spin"></div>
+          <p className="mt-4 text-[#86868B]">서비스 정보를 불러오는 중...</p>
+        </div>
+      )}
+
       {/* Service Cards */}
-      <div className="max-w-md mx-auto px-6 space-y-3">
-        {services.map((service) => (
+      {!loading && (
+        <div className="max-w-md mx-auto px-6 space-y-3">
+          {services.map((service) => (
           <div
             key={service.id}
             className={`w-full p-6 rounded-[28px] border-2 transition-all ${
@@ -240,8 +218,9 @@ export function ServiceSelection({ onNavigate }: ServiceSelectionProps) {
               </div>
             )}
           </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Sticky Bottom Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-[rgba(0,0,0,0.05)]">
