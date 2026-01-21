@@ -20,7 +20,7 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
             className="text-lg tracking-tight" 
             style={{ fontWeight: 600 }}
           >
-            PandaDuck Pix
+            PandaDuck Fix
           </button>
           <button 
             onClick={() => setIsMenuOpen(true)}
@@ -53,7 +53,7 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
       <section className="max-w-md mx-auto px-6 pb-8">
         <img
           src="https://images.unsplash.com/photo-1556607173-eca49c3c4f47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMG1pbmltYWwlMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc2ODkyNzE5NHww&ixlib=rb-4.1.0&q=80&w=1080"
-          alt="PandaDuck Pix Workshop"
+          alt="PandaDuck Fix Workshop"
           className="w-full h-64 object-cover rounded-[28px]"
         />
       </section>
@@ -65,7 +65,7 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
             우리의 이야기
           </h2>
           <p className="text-sm text-[#86868B] leading-relaxed">
-            PandaDuck Pix는 2021년, 게이밍을 사랑하는 엔지니어들이 모여 시작되었습니다. 
+            PandaDuck Fix는 2021년, 게이밍을 사랑하는 엔지니어들이 모여 시작되었습니다. 
             우리는 단순히 컨트롤러를 수리하는 것을 넘어, 게이머들에게 최상의 경험을 선사하고자 합니다.
           </p>
           <p className="text-sm text-[#86868B] leading-relaxed">
@@ -135,7 +135,7 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
       <section className="max-w-md mx-auto px-6 pb-8">
         <div className="bg-[#000000] text-white rounded-[28px] p-8">
           <h2 className="text-2xl mb-6 text-center" style={{ fontWeight: 700 }}>
-            숫자로 보는 PandaDuck Pix
+            숫자로 보는 PandaDuck Fix
           </h2>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">

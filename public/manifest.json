@@ -1,6 +1,6 @@
 {
-  "name": "PandaDuck Pix - 게임패드 수리 서비스",
-  "short_name": "PandaDuck Pix",
+  "name": "PandaDuck Fix - 게임패드 수리 서비스",
+  "short_name": "PandaDuck Fix",
   "description": "프로 게이머를 위한 전문 듀얼센스 컨트롤러 수리 및 커스터마이징 서비스",
   "start_url": "/",
   "display": "standalone",

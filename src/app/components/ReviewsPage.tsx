@@ -50,7 +50,7 @@ const reviews = [
     date: "2023.12.28",
     rating: 5,
     service: "홀 이펙트 + 클릭키 + 배터리",
-    content: "한번에 여러 작업 맡겼는데 완전 새 컨트롤러 받은 기분이에요. 직원분들도 정말 친절하시고 전문적이십니다. PandaDuck Pix 최고!",
+    content: "한번에 여러 작업 맡겼는데 완전 새 컨트롤러 받은 기분이에요. 직원분들도 정말 친절하시고 전문적이십니다. PandaDuck Fix 최고!",
   },
 ];
 
@@ -67,7 +67,7 @@ export function ReviewsPage({ onNavigate }: ReviewsPageProps) {
             className="text-lg tracking-tight" 
             style={{ fontWeight: 600 }}
           >
-            PandaDuck Pix
+            PandaDuck Fix
           </button>
           <button 
             onClick={() => setIsMenuOpen(true)}
@@ -91,7 +91,7 @@ export function ReviewsPage({ onNavigate }: ReviewsPageProps) {
           고객 후기
         </h1>
         <p className="text-lg text-[#86868B]">
-          PandaDuck Pix를 경험한 고객님들의<br />
+          PandaDuck Fix를 경험한 고객님들의<br />
           생생한 후기를 확인해보세요
         </p>
         
@@ -162,7 +162,7 @@ export function ReviewsPage({ onNavigate }: ReviewsPageProps) {
             당신의 후기를 기다립니다
           </h3>
           <p className="text-[#86868B]">
-            PandaDuck Pix와 함께<br />
+            PandaDuck Fix와 함께<br />
             최고의 게이밍 경험을 만들어보세요
           </p>
           <button

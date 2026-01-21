@@ -133,7 +133,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
           <div className="text-lg tracking-tight" style={{ fontWeight: 600 }}>
-            PandaDuck Pix
+            PandaDuck Fix
           </div>
           <button
             onClick={() => setIsMenuOpen(true)}

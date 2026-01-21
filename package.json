@@ -1,9 +1,9 @@
 {
-  "name": "pandaduck-pix",
+  "name": "pandaduck-fix",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "PandaDuck Pix - 게임패드(듀얼센스) 수리 서비스",
+  "description": "PandaDuck Fix - 게임패드(듀얼센스) 수리 서비스",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

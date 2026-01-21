@@ -252,7 +252,7 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
             className="text-lg tracking-tight" 
             style={{ fontWeight: 600 }}
           >
-            PandaDuck Pix
+            PandaDuck Fix
           </button>
           <button 
             onClick={() => setIsMenuOpen(true)}
