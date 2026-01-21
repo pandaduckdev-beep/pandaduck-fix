@@ -150,43 +150,79 @@ WHERE cm.model_id = 'joycon' AND so.is_active = true
 ON CONFLICT (controller_model_id, service_option_id) DO UPDATE
 SET additional_price = EXCLUDED.additional_price, is_available = EXCLUDED.is_available;
 
--- 10. 인덱스 생성
-CREATE INDEX idx_controller_service_pricing_model ON controller_service_pricing(controller_model_id);
-CREATE INDEX idx_controller_service_pricing_service ON controller_service_pricing(service_id);
-CREATE INDEX idx_controller_option_pricing_model ON controller_option_pricing(controller_model_id);
-CREATE INDEX idx_controller_option_pricing_option ON controller_option_pricing(service_option_id);
+-- 10. 인덱스 생성 (존재하지 않는 경우에만)
+CREATE INDEX IF NOT EXISTS idx_controller_service_pricing_model ON controller_service_pricing(controller_model_id);
+CREATE INDEX IF NOT EXISTS idx_controller_service_pricing_service ON controller_service_pricing(service_id);
+CREATE INDEX IF NOT EXISTS idx_controller_option_pricing_model ON controller_option_pricing(controller_model_id);
+CREATE INDEX IF NOT EXISTS idx_controller_option_pricing_option ON controller_option_pricing(service_option_id);
 
--- 11. updated_at 트리거 추가
-CREATE TRIGGER trigger_update_controller_models_updated_at
-  BEFORE UPDATE ON controller_models
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+-- 11. updated_at 트리거 추가 (존재하지 않는 경우에만)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'trigger_update_controller_models_updated_at'
+  ) THEN
+    CREATE TRIGGER trigger_update_controller_models_updated_at
+      BEFORE UPDATE ON controller_models
+      FOR EACH ROW
+      EXECUTE FUNCTION update_updated_at_column();
+  END IF;
 
-CREATE TRIGGER trigger_update_controller_service_pricing_updated_at
-  BEFORE UPDATE ON controller_service_pricing
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'trigger_update_controller_service_pricing_updated_at'
+  ) THEN
+    CREATE TRIGGER trigger_update_controller_service_pricing_updated_at
+      BEFORE UPDATE ON controller_service_pricing
+      FOR EACH ROW
+      EXECUTE FUNCTION update_updated_at_column();
+  END IF;
 
-CREATE TRIGGER trigger_update_controller_option_pricing_updated_at
-  BEFORE UPDATE ON controller_option_pricing
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'trigger_update_controller_option_pricing_updated_at'
+  ) THEN
+    CREATE TRIGGER trigger_update_controller_option_pricing_updated_at
+      BEFORE UPDATE ON controller_option_pricing
+      FOR EACH ROW
+      EXECUTE FUNCTION update_updated_at_column();
+  END IF;
+END $$;
 
--- 12. RLS 정책 추가
+-- 12. RLS 정책 추가 (존재하지 않는 경우에만)
 ALTER TABLE controller_models ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Controller models are viewable by everyone"
-  ON controller_models FOR SELECT
-  USING (is_active = true);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE tablename = 'controller_models' AND policyname = 'Controller models are viewable by everyone'
+  ) THEN
+    CREATE POLICY "Controller models are viewable by everyone"
+      ON controller_models FOR SELECT
+      USING (is_active = true);
+  END IF;
+END $$;
 
 ALTER TABLE controller_service_pricing ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Controller service pricing is viewable by everyone"
-  ON controller_service_pricing FOR SELECT
-  USING (is_available = true);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE tablename = 'controller_service_pricing' AND policyname = 'Controller service pricing is viewable by everyone'
+  ) THEN
+    CREATE POLICY "Controller service pricing is viewable by everyone"
+      ON controller_service_pricing FOR SELECT
+      USING (is_available = true);
+  END IF;
+END $$;
 
 ALTER TABLE controller_option_pricing ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Controller option pricing is viewable by everyone"
-  ON controller_option_pricing FOR SELECT
-  USING (is_available = true);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE tablename = 'controller_option_pricing' AND policyname = 'Controller option pricing is viewable by everyone'
+  ) THEN
+    CREATE POLICY "Controller option pricing is viewable by everyone"
+      ON controller_option_pricing FOR SELECT
+      USING (is_available = true);
+  END IF;
+END $$;
 
 -- 13. 주석
 COMMENT ON TABLE controller_models IS '컨트롤러 모델 정보 (DualSense, Joy-Con 등)';
