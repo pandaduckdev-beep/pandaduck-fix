@@ -28,15 +28,21 @@ export function useServicesWithPricing(controllerModelId: string | null) {
 
         // 1. 컨트롤러 모델 ID로 UUID 조회
         const controllerModel = await getControllerModelById(controllerModelId);
+
         if (!controllerModel) {
-          throw new Error(`컨트롤러 모델을 찾을 수 없습니다: ${controllerModelId}`);
+          // 컨트롤러 모델 테이블이 없거나 모델을 찾을 수 없는 경우
+          // 임시 UUID를 사용하여 기본 가격으로 서비스 조회
+          console.warn(`Controller model not found: ${controllerModelId}, using base prices`);
+          const data = await getServicesWithPricing('temp-uuid-for-fallback');
+          setServices(data);
+          setControllerModelUuid(null);
+        } else {
+          setControllerModelUuid(controllerModel.id);
+
+          // 2. 해당 모델의 가격이 포함된 서비스 조회
+          const data = await getServicesWithPricing(controllerModel.id);
+          setServices(data);
         }
-
-        setControllerModelUuid(controllerModel.id);
-
-        // 2. 해당 모델의 가격이 포함된 서비스 조회
-        const data = await getServicesWithPricing(controllerModel.id);
-        setServices(data);
       } catch (err) {
         console.error('Error loading services with pricing:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));

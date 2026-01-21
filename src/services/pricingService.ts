@@ -81,59 +81,74 @@ export async function getServicesWithPricing(
     throw servicesError;
   }
 
-  // 2. 해당 컨트롤러의 서비스 가격 조회
-  const servicePricing = await getServicePricingByController(controllerModelId);
-  const pricingMap = new Map(
-    servicePricing.map(p => [p.service_id, p])
-  );
+  try {
+    // 2. 해당 컨트롤러의 서비스 가격 조회 (테이블이 없으면 폴백)
+    const servicePricing = await getServicePricingByController(controllerModelId);
+    const pricingMap = new Map(
+      servicePricing.map(p => [p.service_id, p])
+    );
 
-  // 3. 해당 컨트롤러의 옵션 가격 조회
-  const optionPricing = await getOptionPricingByController(controllerModelId);
-  const optionPricingMap = new Map(
-    optionPricing.map(p => [p.service_option_id, p])
-  );
+    // 3. 해당 컨트롤러의 옵션 가격 조회 (테이블이 없으면 폴백)
+    const optionPricing = await getOptionPricingByController(controllerModelId);
+    const optionPricingMap = new Map(
+      optionPricing.map(p => [p.service_option_id, p])
+    );
 
-  // 4. 서비스에 가격 정보 매핑
-  const servicesWithPricing: ServiceWithPricing[] = (services || [])
-    .map(service => {
-      const pricing = pricingMap.get(service.id);
+    // 4. 서비스에 가격 정보 매핑
+    const servicesWithPricing: ServiceWithPricing[] = (services || [])
+      .map(service => {
+        const pricing = pricingMap.get(service.id);
 
-      // 해당 컨트롤러에서 제공하지 않는 서비스는 제외
-      if (!pricing || !pricing.is_available) {
-        return null;
-      }
+        // 해당 컨트롤러에서 제공하지 않는 서비스는 제외
+        if (!pricing || !pricing.is_available) {
+          return null;
+        }
 
-      return {
-        ...service,
-        pricing,
-        options: (service.service_options || []).map(option => ({
-          ...option,
-          pricing: optionPricingMap.get(option.id)
-        })).filter(opt => opt.pricing?.is_available !== false)
-      };
-    })
-    .filter((s): s is ServiceWithPricing => s !== null);
+        return {
+          ...service,
+          pricing,
+          options: (service.service_options || []).map(option => ({
+            ...option,
+            pricing: optionPricingMap.get(option.id)
+          })).filter(opt => opt.pricing?.is_available !== false)
+        };
+      })
+      .filter((s): s is ServiceWithPricing => s !== null);
 
-  return servicesWithPricing;
+    return servicesWithPricing;
+  } catch (error) {
+    // 테이블이 없을 경우 기본 가격으로 폴백
+    console.warn('Controller pricing tables not found, using base prices:', error);
+    return (services || []).map(service => ({
+      ...service,
+      options: service.service_options || []
+    }));
+  }
 }
 
 /**
  * 컨트롤러 모델 ID로 모델 정보 조회
  */
 export async function getControllerModelById(modelId: string): Promise<ControllerModel | null> {
-  const { data, error } = await supabase
-    .from('controller_models')
-    .select('*')
-    .eq('model_id', modelId)
-    .eq('is_active', true)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('controller_models')
+      .select('*')
+      .eq('model_id', modelId)
+      .eq('is_active', true)
+      .single();
 
-  if (error) {
-    console.error('Error fetching controller model:', error);
+    if (error) {
+      console.error('Error fetching controller model:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    // 테이블이 없을 경우 null 반환
+    console.warn('Controller models table not found:', error);
     return null;
   }
-
-  return data;
 }
 
 /**
