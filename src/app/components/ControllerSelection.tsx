@@ -44,7 +44,7 @@ export function ControllerSelection({ onNavigate, onSelect }: ControllerSelectio
 
     const model = controllerModels.find(m => m.id === selectedModel);
     if (model) {
-      onSelect(model.name);
+      onSelect(model.id); // ID를 전달 (name이 아닌 id)
     }
   };
 
