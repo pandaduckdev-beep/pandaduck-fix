@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import path from 'path'
+import { resolve } from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -46,6 +47,10 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        admin: resolve(__dirname, 'admin.html'),
+      },
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
