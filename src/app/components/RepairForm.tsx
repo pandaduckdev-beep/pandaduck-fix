@@ -1,4 +1,4 @@
-import { ChevronLeft, Check, Tag } from "lucide-react";
+import { ChevronLeft, Check, Tag, CheckCircle2, Package } from "lucide-react";
 import { useState } from "react";
 import type { ServiceSelectionData } from "@/app/App";
 
@@ -16,16 +16,22 @@ export function RepairForm({ onNavigate, selectionData }: RepairFormProps) {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    
-    // Simulate submission
+
+    // 신청 완료 후 모달 표시
     setTimeout(() => {
       setSubmitted(false);
-      onNavigate('home');
-    }, 2000);
+      setShowSuccessModal(true);
+    }, 500);
+  };
+
+  const handleCloseModal = () => {
+    setShowSuccessModal(false);
+    onNavigate('home');
   };
 
   const isFormValid = formData.name && formData.phone && formData.address;
@@ -213,6 +219,77 @@ export function RepairForm({ onNavigate, selectionData }: RepairFormProps) {
           신청 시 서비스 이용약관 및 개인정보 처리방침에 동의하게 됩니다.
         </p>
       </form>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={handleCloseModal}
+          ></div>
+
+          {/* Modal Content */}
+          <div className="relative bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-300">
+            {/* Success Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 bg-[#34C759] rounded-full flex items-center justify-center animate-in zoom-in duration-500 delay-100">
+                <CheckCircle2 className="w-12 h-12 text-white" strokeWidth={2.5} />
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-2xl text-center mb-3" style={{ fontWeight: 700 }}>
+              신청이 완료되었습니다!
+            </h2>
+
+            {/* Description */}
+            <p className="text-center text-[#86868B] mb-6 leading-relaxed">
+              수리 신청이 정상적으로 접수되었습니다.<br />
+              빠른 시일 내에 연락드리겠습니다.
+            </p>
+
+            {/* Request Details */}
+            <div className="bg-[#F5F5F7] rounded-[20px] p-4 mb-6 space-y-2">
+              <div className="flex items-center gap-2 mb-3">
+                <Package className="w-4 h-4 text-[#86868B]" />
+                <span className="text-sm" style={{ fontWeight: 600 }}>신청 정보</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-[#86868B]">고객명</span>
+                <span style={{ fontWeight: 600 }}>{formData.name}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-[#86868B]">연락처</span>
+                <span style={{ fontWeight: 600 }}>{formData.phone}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-[#86868B]">수거 방법</span>
+                <span style={{ fontWeight: 600 }}>
+                  {formData.pickupMethod === 'express' ? '택배' : '방문접수'}
+                </span>
+              </div>
+              {selectionData && (
+                <div className="flex items-center justify-between text-sm pt-2 border-t border-[rgba(0,0,0,0.1)]">
+                  <span className="text-[#86868B]">결제 예정 금액</span>
+                  <span className="text-lg" style={{ fontWeight: 700 }}>
+                    ₩{selectionData.total.toLocaleString()}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={handleCloseModal}
+              className="w-full py-4 bg-[#000000] text-white rounded-full hover:scale-[0.98] active:scale-[0.96] transition-all"
+              style={{ fontWeight: 600 }}
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
