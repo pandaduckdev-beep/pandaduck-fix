@@ -37,12 +37,13 @@ CREATE TABLE IF NOT EXISTS controller_option_pricing (
   UNIQUE(controller_model_id, service_option_id)
 );
 
--- 4. 기본 컨트롤러 모델 데이터 삽입
+-- 4. 기본 컨트롤러 모델 데이터 삽입 (중복 방지)
 INSERT INTO controller_models (model_id, model_name, description, display_order) VALUES
   ('dualsense', 'DualSense', 'PlayStation 5 기본 컨트롤러', 1),
   ('dualsense-edge', 'DualSense Edge', 'PlayStation 5 프로 컨트롤러', 2),
   ('dualshock4', 'DualShock 4', 'PlayStation 4 컨트롤러', 3),
-  ('joycon', 'Nintendo Joy-Con', 'Nintendo Switch 컨트롤러', 4);
+  ('joycon', 'Nintendo Joy-Con', 'Nintendo Switch 컨트롤러', 4)
+ON CONFLICT (model_id) DO NOTHING;
 
 -- 5. DualSense 기본 가격 설정 (기존 services 테이블의 base_price 사용)
 INSERT INTO controller_service_pricing (controller_model_id, service_id, price, is_available)
@@ -53,7 +54,9 @@ SELECT
   true
 FROM controller_models cm
 CROSS JOIN services s
-WHERE cm.model_id = 'dualsense' AND s.is_active = true;
+WHERE cm.model_id = 'dualsense' AND s.is_active = true
+ON CONFLICT (controller_model_id, service_id) DO UPDATE
+SET price = EXCLUDED.price, is_available = EXCLUDED.is_available;
 
 -- 6. DualSense Edge 가격 설정 (10% 할증)
 INSERT INTO controller_service_pricing (controller_model_id, service_id, price, is_available)
@@ -64,7 +67,9 @@ SELECT
   true
 FROM controller_models cm
 CROSS JOIN services s
-WHERE cm.model_id = 'dualsense-edge' AND s.is_active = true;
+WHERE cm.model_id = 'dualsense-edge' AND s.is_active = true
+ON CONFLICT (controller_model_id, service_id) DO UPDATE
+SET price = EXCLUDED.price, is_available = EXCLUDED.is_available;
 
 -- 7. DualShock 4 가격 설정 (기본 가격과 동일)
 INSERT INTO controller_service_pricing (controller_model_id, service_id, price, is_available)
@@ -75,7 +80,9 @@ SELECT
   true
 FROM controller_models cm
 CROSS JOIN services s
-WHERE cm.model_id = 'dualshock4' AND s.is_active = true;
+WHERE cm.model_id = 'dualshock4' AND s.is_active = true
+ON CONFLICT (controller_model_id, service_id) DO UPDATE
+SET price = EXCLUDED.price, is_available = EXCLUDED.is_available;
 
 -- 8. Joy-Con 가격 설정 (백 버튼은 제공 안 함, 나머지는 20% 할증)
 INSERT INTO controller_service_pricing (controller_model_id, service_id, price, is_available)
@@ -86,7 +93,9 @@ SELECT
   CASE WHEN s.service_id = 'back-buttons' THEN false ELSE true END -- 백 버튼 불가
 FROM controller_models cm
 CROSS JOIN services s
-WHERE cm.model_id = 'joycon' AND s.is_active = true;
+WHERE cm.model_id = 'joycon' AND s.is_active = true
+ON CONFLICT (controller_model_id, service_id) DO UPDATE
+SET price = EXCLUDED.price, is_available = EXCLUDED.is_available;
 
 -- 9. 옵션 가격도 동일한 방식으로 설정
 -- DualSense 옵션 (기본)
@@ -98,7 +107,9 @@ SELECT
   true
 FROM controller_models cm
 CROSS JOIN service_options so
-WHERE cm.model_id = 'dualsense' AND so.is_active = true;
+WHERE cm.model_id = 'dualsense' AND so.is_active = true
+ON CONFLICT (controller_model_id, service_option_id) DO UPDATE
+SET additional_price = EXCLUDED.additional_price, is_available = EXCLUDED.is_available;
 
 -- DualSense Edge 옵션 (10% 할증)
 INSERT INTO controller_option_pricing (controller_model_id, service_option_id, additional_price, is_available)
@@ -109,7 +120,9 @@ SELECT
   true
 FROM controller_models cm
 CROSS JOIN service_options so
-WHERE cm.model_id = 'dualsense-edge' AND so.is_active = true;
+WHERE cm.model_id = 'dualsense-edge' AND so.is_active = true
+ON CONFLICT (controller_model_id, service_option_id) DO UPDATE
+SET additional_price = EXCLUDED.additional_price, is_available = EXCLUDED.is_available;
 
 -- DualShock 4 옵션 (기본)
 INSERT INTO controller_option_pricing (controller_model_id, service_option_id, additional_price, is_available)
@@ -120,7 +133,9 @@ SELECT
   true
 FROM controller_models cm
 CROSS JOIN service_options so
-WHERE cm.model_id = 'dualshock4' AND so.is_active = true;
+WHERE cm.model_id = 'dualshock4' AND so.is_active = true
+ON CONFLICT (controller_model_id, service_option_id) DO UPDATE
+SET additional_price = EXCLUDED.additional_price, is_available = EXCLUDED.is_available;
 
 -- Joy-Con 옵션 (20% 할증)
 INSERT INTO controller_option_pricing (controller_model_id, service_option_id, additional_price, is_available)
@@ -131,7 +146,9 @@ SELECT
   true
 FROM controller_models cm
 CROSS JOIN service_options so
-WHERE cm.model_id = 'joycon' AND so.is_active = true;
+WHERE cm.model_id = 'joycon' AND so.is_active = true
+ON CONFLICT (controller_model_id, service_option_id) DO UPDATE
+SET additional_price = EXCLUDED.additional_price, is_available = EXCLUDED.is_available;
 
 -- 10. 인덱스 생성
 CREATE INDEX idx_controller_service_pricing_model ON controller_service_pricing(controller_model_id);
