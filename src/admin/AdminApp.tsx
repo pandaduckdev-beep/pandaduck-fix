@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { ServicesPage } from './pages/ServicesPage';
 import { ControllersPage } from './pages/ControllersPage';
 import { PricingPage } from './pages/PricingPage';
+import { RepairsPage } from './pages/RepairsPage';
 
 type Page = 'dashboard' | 'services' | 'controllers' | 'pricing' | 'repairs' | 'reviews';
 
@@ -28,7 +29,7 @@ function AdminContent() {
       case 'pricing':
         return <PricingPage />;
       case 'repairs':
-        return <div className="text-center py-12 text-gray-600">수리 신청 관리 페이지 (개발 예정)</div>;
+        return <RepairsPage />;
       case 'reviews':
         return <div className="text-center py-12 text-gray-600">리뷰 관리 페이지 (개발 예정)</div>;
       default:

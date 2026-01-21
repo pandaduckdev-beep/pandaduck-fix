@@ -1,7 +1,8 @@
-import { ChevronLeft, Check, Tag, CheckCircle2, Package } from "lucide-react";
+import { ChevronLeft, Check, Tag, CheckCircle2, Package, Gamepad2 } from "lucide-react";
 import { useState } from "react";
 import type { ServiceSelectionData } from "@/app/App";
 import { createRepairRequest } from "@/lib/api";
+import { getControllerModelName } from "@/utils/controllerModels";
 
 interface RepairFormProps {
   onNavigate: (screen: string) => void;
@@ -95,6 +96,15 @@ export function RepairForm({ onNavigate, selectionData, controllerModel }: Repai
 
           {selectionData ? (
             <div className="space-y-3">
+              {/* 선택한 컨트롤러 모델 */}
+              {controllerModel && (
+                <div className="flex items-center gap-2 pb-3 border-b border-[rgba(0,0,0,0.1)]">
+                  <Gamepad2 className="w-4 h-4 text-[#86868B]" />
+                  <span className="text-sm text-[#86868B]">컨트롤러:</span>
+                  <span className="text-sm font-semibold">{getControllerModelName(controllerModel)}</span>
+                </div>
+              )}
+
               {/* 선택한 서비스 목록 */}
               {selectionData.services.map((service) => (
                 <div key={service.id}>
