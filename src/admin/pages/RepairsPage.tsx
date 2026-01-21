@@ -4,15 +4,17 @@ import { Search, Eye, CheckCircle, Clock, XCircle, X } from 'lucide-react';
 import { getControllerModelName } from '@/utils/controllerModels';
 import type { RepairRequest, Service, ServiceOption } from '@/types/database';
 
+interface ServiceWithDetails {
+  service_id: string;
+  selected_option_id: string | null;
+  service_price: number;
+  option_price: number;
+  service?: Service;
+  option?: ServiceOption;
+}
+
 interface RepairRequestWithServices extends RepairRequest {
-  services?: Array<{
-    service_id: string;
-    selected_option_id: string | null;
-    service_price: number;
-    option_price: number;
-    service?: Service;
-    option?: ServiceOption;
-  }>;
+  services?: ServiceWithDetails[];
 }
 
 type RepairStatus = 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
@@ -26,7 +28,7 @@ const STATUS_CONFIG: Record<RepairStatus, { label: string; color: string; icon: 
 };
 
 export function RepairsPage() {
-  const [repairs, setRepairs] = useState<RepairRequest[]>([]);
+  const [repairs, setRepairs] = useState<RepairRequestWithServices[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<RepairStatus | 'all'>('all');
@@ -48,10 +50,58 @@ export function RepairsPage() {
         query = query.eq('status', statusFilter);
       }
 
-      const { data, error } = await query;
+      const { data: repairRequests, error } = await query;
 
       if (error) throw error;
-      setRepairs(data || []);
+
+      // 각 수리 신청에 대한 서비스 목록 조회
+      const repairsWithServices = await Promise.all(
+        (repairRequests || []).map(async (repair) => {
+          const { data: services } = await supabase
+            .from('repair_request_services')
+            .select(`
+              service_id,
+              selected_option_id,
+              service_price,
+              option_price
+            `)
+            .eq('repair_request_id', repair.id);
+
+          // 서비스 상세 정보 조회
+          const servicesWithDetails = await Promise.all(
+            (services || []).map(async (svc) => {
+              const { data: service } = await supabase
+                .from('services')
+                .select('*')
+                .eq('id', svc.service_id)
+                .single();
+
+              let option = null;
+              if (svc.selected_option_id) {
+                const { data: opt } = await supabase
+                  .from('service_options')
+                  .select('*')
+                  .eq('id', svc.selected_option_id)
+                  .single();
+                option = opt;
+              }
+
+              return {
+                ...svc,
+                service,
+                option,
+              };
+            })
+          );
+
+          return {
+            ...repair,
+            services: servicesWithDetails,
+          };
+        })
+      );
+
+      setRepairs(repairsWithServices);
     } catch (error) {
       console.error('Failed to load repairs:', error);
     } finally {
@@ -212,6 +262,7 @@ export function RepairsPage() {
             <tr>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">고객 정보</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">컨트롤러</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">신청 서비스</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">금액</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">상태</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">신청일</th>
@@ -238,6 +289,20 @@ export function RepairsPage() {
                     <span className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm font-medium">
                       {getControllerModelName(repair.controller_model)}
                     </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      {repair.services?.map((svc, index) => (
+                        <div key={index} className="text-sm">
+                          <span className="text-gray-900">{svc.service?.name}</span>
+                          {svc.option && (
+                            <span className="text-gray-500 text-xs ml-1">
+                              ({svc.option.option_name})
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-sm font-semibold">
                     ₩{repair.total_amount.toLocaleString()}

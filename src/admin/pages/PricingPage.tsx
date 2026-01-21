@@ -31,17 +31,22 @@ export function PricingPage() {
 
   const loadData = async () => {
     try {
-      const [controllerData, serviceData] = await Promise.all([
-        getControllerModels(),
-        supabase.from('services').select('*').eq('is_active', true)
-      ]);
+      // 모든 활성 컨트롤러 조회
+      const { data: controllerData } = await supabase
+        .from('controller_models')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order');
 
-      setControllers(controllerData);
-      if (serviceData.data) {
-        setServices(serviceData.data);
-      }
+      const { data: serviceData } = await supabase
+        .from('services')
+        .select('*')
+        .eq('is_active', true);
 
-      if (controllerData.length > 0) {
+      setControllers(controllerData || []);
+      setServices(serviceData || []);
+
+      if (controllerData && controllerData.length > 0) {
         setSelectedController(controllerData[0].id);
       }
     } catch (error) {
@@ -99,28 +104,28 @@ export function PricingPage() {
 
     setSaving(true);
     try {
-      const updates = Array.from(pricingData.values()).map(item => ({
-        controller_model_id: item.controller_model_id,
-        service_id: item.service_id,
-        price: item.price,
-        is_available: item.is_available,
-      }));
+      const updates = Array.from(pricingData.values());
 
-      // Upsert pricing data
-      for (const update of updates) {
-        const { error } = await supabase
-          .from('controller_service_pricing')
-          .upsert(update, {
-            onConflict: 'controller_model_id,service_id'
-          });
-
-        if (error) throw error;
+      if (updates.length === 0) {
+        alert('저장할 변경사항이 없습니다.');
+        setSaving(false);
+        return;
       }
 
+      // Upsert pricing data - Supabase는 unique constraint에 따라 자동으로 upsert됨
+      const { error } = await supabase
+        .from('controller_service_pricing')
+        .upsert(updates, {
+          onConflict: 'controller_model_id, service_id'
+        });
+
+      if (error) throw error;
+
       alert('가격 설정이 저장되었습니다.');
+      await loadPricingData(selectedController);
     } catch (error) {
       console.error('Failed to save pricing:', error);
-      alert('가격 설정 저장에 실패했습니다.');
+      alert(`가격 설정 저장에 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     } finally {
       setSaving(false);
     }
