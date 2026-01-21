@@ -37,10 +37,16 @@ export function ControllersPage() {
         .select('*')
         .order('display_order');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Loaded controllers:', data);
       setControllers(data || []);
     } catch (error) {
       console.error('Failed to load controllers:', error);
+      alert(`컨트롤러 로딩 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     } finally {
       setLoading(false);
     }
@@ -48,16 +54,25 @@ export function ControllersPage() {
 
   const toggleControllerStatus = async (controllerId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
+      console.log('Toggling status:', { controllerId, currentStatus, newStatus: !currentStatus });
+
+      const { data, error } = await supabase
         .from('controller_models')
         .update({ is_active: !currentStatus })
-        .eq('id', controllerId);
+        .eq('id', controllerId)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Toggle error:', error);
+        throw error;
+      }
+
+      console.log('Toggle result:', data);
+      alert(`상태가 ${!currentStatus ? '활성' : '비활성'}으로 변경되었습니다.`);
       await loadControllers();
     } catch (error) {
       console.error('Failed to toggle controller status:', error);
-      alert('컨트롤러 상태 변경에 실패했습니다.');
+      alert(`컨트롤러 상태 변경에 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     }
   };
 
