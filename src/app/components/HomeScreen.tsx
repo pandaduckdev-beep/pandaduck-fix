@@ -51,8 +51,8 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           </p>
           <div className="pt-4">
             <img
-              src="https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBjb250cm9sbGVyfGVufDB8fHx8MTczNzI3MjAwMHww&ixlib=rb-4.1.0&q=80&w=1080"
-              alt="Gaming Controller"
+              src="/images/dualsense-closeup.jpg"
+              alt="DualSense Controller"
               className="w-full h-64 object-cover rounded-[28px]"
             />
           </div>
