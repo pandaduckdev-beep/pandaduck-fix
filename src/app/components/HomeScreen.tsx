@@ -1,12 +1,9 @@
 import { Menu, Zap, CircuitBoard, Plus, Battery } from "lucide-react";
 import { Footer } from "@/app/components/Footer";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MenuDrawer } from "@/app/components/MenuDrawer";
 import { ServiceDetailModal } from "@/app/components/ServiceDetailModal";
-
-interface HomeScreenProps {
-  onNavigate: (screen: string) => void;
-}
 
 const serviceDetails = [
   {
@@ -111,7 +108,8 @@ const serviceDetails = [
   },
 ];
 
-export function HomeScreen({ onNavigate }: HomeScreenProps) {
+export function HomeScreen() {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<typeof serviceDetails[0] | null>(null);
 
@@ -124,7 +122,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
 
   const handleBookService = () => {
     setSelectedService(null);
-    onNavigate('service');
+    navigate('/services');
   };
 
   return (
@@ -148,7 +146,6 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
       <MenuDrawer
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
-        onNavigate={onNavigate}
       />
 
       {/* Hero Section */}
@@ -174,7 +171,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             />
           </div>
           <button
-            onClick={() => onNavigate('controller')}
+            onClick={() => navigate('/controllers')}
             className="w-full bg-[#000000] text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
             style={{ fontWeight: 600 }}
           >

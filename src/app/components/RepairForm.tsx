@@ -1,16 +1,15 @@
 import { ChevronLeft, Check, Tag, CheckCircle2, Package, Gamepad2 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import type { ServiceSelectionData } from "@/app/App";
 import { createRepairRequest } from "@/lib/api";
 import { getControllerModelName } from "@/utils/controllerModels";
 
-interface RepairFormProps {
-  onNavigate: (screen: string) => void;
-  selectionData: ServiceSelectionData | null;
-  controllerModel: string | null;
-}
-
-export function RepairForm({ onNavigate, selectionData, controllerModel }: RepairFormProps) {
+export function RepairForm() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const controllerModel = location.state?.controllerModel as string | null;
+  const selectionData = location.state?.selectionData as ServiceSelectionData | null;
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -64,7 +63,7 @@ export function RepairForm({ onNavigate, selectionData, controllerModel }: Repai
 
   const handleCloseModal = () => {
     setShowSuccessModal(false);
-    onNavigate('home');
+    navigate('/');
   };
 
   const isFormValid = formData.name && formData.phone && formData.address;
@@ -74,8 +73,8 @@ export function RepairForm({ onNavigate, selectionData, controllerModel }: Repai
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
-          <button 
-            onClick={() => onNavigate('service')}
+          <button
+            onClick={() => navigate('/services')}
             className="p-2 hover:bg-[#F5F5F7] rounded-full transition-colors -ml-2"
           >
             <ChevronLeft className="w-6 h-6" />

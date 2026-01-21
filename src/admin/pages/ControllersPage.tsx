@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getControllerModels } from '@/services/pricingService';
 import { supabase } from '@/lib/supabase';
-import { Plus, Edit, Trash2, Check, X } from 'lucide-react';
+import { Plus, Edit, Check, X } from 'lucide-react';
 import type { ControllerModel } from '@/types/database';
 
 interface ControllerFormData {
@@ -31,6 +30,11 @@ export function ControllersPage() {
 
   const loadControllers = async () => {
     try {
+      // 현재 인증 상태 확인
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('Current user:', user);
+      console.log('User authenticated:', !!user);
+
       // 관리자 페이지에서는 모든 컨트롤러를 조회 (비활성 포함)
       const { data, error } = await supabase
         .from('controller_models')
@@ -39,10 +43,14 @@ export function ControllersPage() {
 
       if (error) {
         console.error('Supabase error:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         throw error;
       }
 
       console.log('Loaded controllers:', data);
+      console.log('Total controllers:', data?.length);
+      console.log('Active controllers:', data?.filter(c => c.is_active).length);
+      console.log('Inactive controllers:', data?.filter(c => !c.is_active).length);
       setControllers(data || []);
     } catch (error) {
       console.error('Failed to load controllers:', error);
@@ -56,6 +64,10 @@ export function ControllersPage() {
     try {
       console.log('Toggling status:', { controllerId, currentStatus, newStatus: !currentStatus });
 
+      // 인증 상태 확인
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('User during toggle:', user?.id, user?.email);
+
       const { data, error } = await supabase
         .from('controller_models')
         .update({ is_active: !currentStatus })
@@ -64,6 +76,9 @@ export function ControllersPage() {
 
       if (error) {
         console.error('Toggle error:', error);
+        console.error('Toggle error code:', error.code);
+        console.error('Toggle error message:', error.message);
+        console.error('Toggle error details:', error.details);
         throw error;
       }
 
@@ -109,9 +124,14 @@ export function ControllersPage() {
     e.preventDefault();
 
     try {
+      // 인증 상태 확인
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('User during submit:', user?.id, user?.email);
+
       if (editingController) {
         // 수정
-        const { error } = await supabase
+        console.log('Updating controller:', editingController.id, formData);
+        const { data, error } = await supabase
           .from('controller_models')
           .update({
             model_name: formData.model_name,
@@ -119,13 +139,21 @@ export function ControllersPage() {
             display_order: formData.display_order,
             is_active: formData.is_active,
           })
-          .eq('id', editingController.id);
+          .eq('id', editingController.id)
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          console.error('Update error code:', error.code);
+          console.error('Update error message:', error.message);
+          throw error;
+        }
+        console.log('Update result:', data);
         alert('컨트롤러가 수정되었습니다.');
       } else {
         // 추가
-        const { error } = await supabase
+        console.log('Inserting controller:', formData);
+        const { data, error } = await supabase
           .from('controller_models')
           .insert({
             model_name: formData.model_name,
@@ -133,9 +161,16 @@ export function ControllersPage() {
             description: formData.description,
             display_order: formData.display_order,
             is_active: formData.is_active,
-          });
+          })
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          console.error('Insert error code:', error.code);
+          console.error('Insert error message:', error.message);
+          throw error;
+        }
+        console.log('Insert result:', data);
         alert('컨트롤러가 추가되었습니다.');
       }
 

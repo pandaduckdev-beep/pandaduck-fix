@@ -9,11 +9,10 @@ import {
   LogOut
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface AdminLayoutProps {
   children: ReactNode;
-  currentPage: string;
-  onNavigate: (page: string) => void;
 }
 
 const navItems = [
@@ -25,7 +24,10 @@ const navItems = [
   { id: 'reviews', label: '리뷰 관리', icon: Star },
 ];
 
-export function AdminLayout({ children, currentPage, onNavigate }: AdminLayoutProps) {
+export function AdminLayout({ children }: AdminLayoutProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPage = location.pathname.split('/')[2] || 'dashboard';
   const { logout } = useAuth();
 
   return (
@@ -45,7 +47,7 @@ export function AdminLayout({ children, currentPage, onNavigate }: AdminLayoutPr
             return (
               <button
                 key={item.id}
-                onClick={() => onNavigate(item.id)}
+                onClick={() => navigate(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
                   isActive
                     ? 'bg-black text-white'

@@ -12,7 +12,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.png'],
-      manifest: false, // We're using public/manifest.json instead
+      manifest: false,
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         runtimeCaching: [
@@ -23,7 +23,7 @@ export default defineConfig({
               cacheName: 'unsplash-images-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                maxAgeSeconds: 60 * 60 * 24 * 30,
               },
               cacheableResponse: {
                 statuses: [0, 200],
@@ -31,10 +31,8 @@ export default defineConfig({
             },
           },
         ],
-      },
-      devOptions: {
-        enabled: true,
-        type: 'module',
+        navigateFallback: null,
+        navigateFallbackDenylist: [/^\/api\//, /^\/admin\/?$/],
       },
     }),
   ],
@@ -47,10 +45,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
-        admin: resolve(__dirname, 'admin.html'),
-      },
+      input: resolve(__dirname, 'index.html'),
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],

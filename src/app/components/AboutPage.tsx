@@ -1,13 +1,11 @@
 import { Menu, Target, Award, Users, Heart } from "lucide-react";
 import { Footer } from "@/app/components/Footer";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MenuDrawer } from "@/app/components/MenuDrawer";
 
-interface AboutPageProps {
-  onNavigate: (screen: string) => void;
-}
-
-export function AboutPage({ onNavigate }: AboutPageProps) {
+export function AboutPage() {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -15,9 +13,9 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
       {/* Navigation */}
       <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
-          <button 
-            onClick={() => onNavigate('home')}
-            className="text-lg tracking-tight" 
+          <button
+            onClick={() => navigate('/')}
+            className="text-lg tracking-tight"
             style={{ fontWeight: 600 }}
           >
             PandaDuck Fix
@@ -32,10 +30,9 @@ export function AboutPage({ onNavigate }: AboutPageProps) {
       </nav>
 
       {/* Menu Drawer */}
-      <MenuDrawer 
-        isOpen={isMenuOpen} 
-        onClose={() => setIsMenuOpen(false)} 
-        onNavigate={onNavigate}
+      <MenuDrawer
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
       />
 
       {/* Hero */}

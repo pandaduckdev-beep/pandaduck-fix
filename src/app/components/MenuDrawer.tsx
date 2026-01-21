@@ -1,14 +1,16 @@
 import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface MenuDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigate: (screen: string) => void;
 }
 
-export function MenuDrawer({ isOpen, onClose, onNavigate }: MenuDrawerProps) {
-  const handleNavigate = (screen: string) => {
-    onNavigate(screen);
+export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
+  const navigate = useNavigate();
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
     onClose();
   };
 
@@ -41,28 +43,28 @@ export function MenuDrawer({ isOpen, onClose, onNavigate }: MenuDrawerProps) {
           {/* Menu Items */}
           <nav className="flex-1 px-3 py-6 space-y-1">
             <button
-              onClick={() => handleNavigate('home')}
+              onClick={() => handleNavigate('/')}
               className="w-full text-left px-6 py-4 rounded-[20px] hover:bg-[#F5F5F7] transition-colors"
               style={{ fontWeight: 600 }}
             >
               홈
             </button>
             <button
-              onClick={() => handleNavigate('services')}
+              onClick={() => handleNavigate('/services/list')}
               className="w-full text-left px-6 py-4 rounded-[20px] hover:bg-[#F5F5F7] transition-colors"
               style={{ fontWeight: 600 }}
             >
               제공서비스
             </button>
             <button
-              onClick={() => handleNavigate('reviews')}
+              onClick={() => handleNavigate('/reviews')}
               className="w-full text-left px-6 py-4 rounded-[20px] hover:bg-[#F5F5F7] transition-colors"
               style={{ fontWeight: 600 }}
             >
               후기
             </button>
             <button
-              onClick={() => handleNavigate('about')}
+              onClick={() => handleNavigate('/about')}
               className="w-full text-left px-6 py-4 rounded-[20px] hover:bg-[#F5F5F7] transition-colors"
               style={{ fontWeight: 600 }}
             >

@@ -1,13 +1,11 @@
 import { Menu, Zap, CircuitBoard, Plus, Battery, Wrench, Palette } from "lucide-react";
 import { Footer } from "@/app/components/Footer";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MenuDrawer } from "@/app/components/MenuDrawer";
 import { ServiceDetailModal } from "@/app/components/ServiceDetailModal";
 import { useServices } from "@/hooks/useServices";
-
-interface ServicesPageProps {
-  onNavigate: (screen: string) => void;
-}
+import type { ServiceOption } from "@/types/database";
 
 const serviceDetails = [
   {
@@ -236,13 +234,11 @@ const iconMap: Record<string, React.ReactNode> = {
   'custom-shell': <Palette className="w-6 h-6" />,
 };
 
-export function ServicesPage({ onNavigate }: ServicesPageProps) {
+export function ServicesPage() {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<typeof serviceDetails[0] | null>(null);
-  const { services: supabaseServices, loading, error } = useServices();
-
-  // Supabase 데이터 로딩 실패 시 fallback 데이터 사용
-  const services = !loading && (error || supabaseServices.length === 0) ? allServices : supabaseServices;
+  const { services, loading } = useServices();
 
   const handleInfoClick = (serviceId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -254,7 +250,7 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
 
   const handleBookService = () => {
     setSelectedService(null);
-    onNavigate('service');
+    navigate('/services');
   };
 
   return (
@@ -262,9 +258,9 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
       {/* Navigation */}
       <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
-          <button 
-            onClick={() => onNavigate('home')}
-            className="text-lg tracking-tight" 
+          <button
+            onClick={() => navigate('/')}
+            className="text-lg tracking-tight"
             style={{ fontWeight: 600 }}
           >
             PandaDuck Fix
@@ -279,10 +275,9 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
       </nav>
 
       {/* Menu Drawer */}
-      <MenuDrawer 
-        isOpen={isMenuOpen} 
-        onClose={() => setIsMenuOpen(false)} 
-        onNavigate={onNavigate}
+      <MenuDrawer
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
       />
 
       {/* Hero */}
@@ -307,7 +302,7 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
 
         {!loading && (
           <div className="space-y-4">
-            {services.map((service, index) => {
+            {services.map((service, _index) => {
               // Supabase 데이터인지 로컬 데이터인지 확인
               const isSupabaseData = 'service_id' in service;
 
@@ -363,7 +358,7 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
                             선택 옵션
                           </p>
                           <div className="space-y-2">
-                            {serviceOptions.map((option: any, i: number) => (
+                            {serviceOptions.map((option: ServiceOption, i: number) => (
                               <div
                                 key={isSupabaseData ? option.id : i}
                                 className="bg-white rounded-[16px] p-3 flex items-center justify-between"
@@ -413,7 +408,7 @@ export function ServicesPage({ onNavigate }: ServicesPageProps) {
             나만의 컨트롤러를 만나보세요
           </p>
           <button
-            onClick={() => onNavigate('service')}
+            onClick={() => navigate('/services')}
             className="w-full bg-white text-black py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-6"
             style={{ fontWeight: 600 }}
           >

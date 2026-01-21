@@ -1,10 +1,6 @@
 import { ChevronLeft, Gamepad2, Check } from "lucide-react";
 import { useState } from "react";
-
-interface ControllerSelectionProps {
-  onNavigate: (screen: string) => void;
-  onSelect: (model: string) => void;
-}
+import { useNavigate } from "react-router-dom";
 
 interface ControllerModel {
   id: string;
@@ -36,16 +32,14 @@ const controllerModels: ControllerModel[] = [
   },
 ];
 
-export function ControllerSelection({ onNavigate, onSelect }: ControllerSelectionProps) {
+export function ControllerSelection() {
+  const navigate = useNavigate();
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const handleContinue = () => {
     if (!selectedModel) return;
 
-    const model = controllerModels.find(m => m.id === selectedModel);
-    if (model) {
-      onSelect(model.id); // ID를 전달 (name이 아닌 id)
-    }
+    navigate('/services', { state: { controllerModel: selectedModel } });
   };
 
   return (
@@ -54,7 +48,7 @@ export function ControllerSelection({ onNavigate, onSelect }: ControllerSelectio
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
           <button
-            onClick={() => onNavigate('home')}
+            onClick={() => navigate('/')}
             className="p-2 hover:bg-[#F5F5F7] rounded-full transition-colors -ml-2"
           >
             <ChevronLeft className="w-6 h-6" />

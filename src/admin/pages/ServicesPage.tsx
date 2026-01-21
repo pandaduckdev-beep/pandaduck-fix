@@ -10,7 +10,6 @@ interface ServiceWithOptions extends Service {
 export function ServicesPage() {
   const [services, setServices] = useState<ServiceWithOptions[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingService, setEditingService] = useState<ServiceWithOptions | null>(null);
 
   useEffect(() => {
     loadServices();

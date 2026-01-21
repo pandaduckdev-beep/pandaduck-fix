@@ -1,15 +1,10 @@
-import { ChevronLeft, Gamepad2, Zap, Settings, CircuitBoard, Plus, Battery, Wrench, Palette, Tag } from "lucide-react";
+import { ChevronLeft, Zap, CircuitBoard, Plus, Battery, Wrench, Palette, Tag } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useServicesWithPricing } from "@/hooks/useServicesWithPricing";
 import { useServiceCombos } from "@/hooks/useServiceCombos";
 import type { ServiceCombo } from "@/types/database";
 import type { ServiceSelectionData } from "@/app/App";
-
-interface ServiceSelectionProps {
-  onNavigate: (screen: string) => void;
-  onConfirm: (data: ServiceSelectionData) => void;
-  controllerModel: string | null;
-}
 
 interface ServiceOption {
   id: string;
@@ -37,18 +32,22 @@ const iconMap: Record<string, React.ReactNode> = {
   'custom-shell': <Palette className="w-6 h-6" />,
 };
 
-export function ServiceSelection({ onNavigate, onConfirm, controllerModel }: ServiceSelectionProps) {
+export function ServiceSelection() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const controllerModel = location.state?.controllerModel as string | null;
+
   const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const { services: supabaseServices, loading } = useServicesWithPricing(controllerModel);
-  const { combos, loading: combosLoading } = useServiceCombos();
+  const { combos } = useServiceCombos();
 
   // 컨트롤러가 선택되지 않은 경우 컨트롤러 선택 화면으로 이동
   useEffect(() => {
     if (!controllerModel) {
-      onNavigate('controller');
+      navigate('/controllers');
     }
-  }, [controllerModel, onNavigate]);
+  }, [controllerModel, navigate]);
 
   // Transform Supabase data to match the expected format
   const services: Service[] = supabaseServices.map(service => ({
@@ -184,7 +183,7 @@ export function ServiceSelection({ onNavigate, onConfirm, controllerModel }: Ser
       discountName: bestCombo?.combo_name
     };
 
-    onConfirm(selectionData);
+    navigate('/repair/form', { state: { controllerModel, selectionData } });
   };
 
   return (
@@ -193,7 +192,7 @@ export function ServiceSelection({ onNavigate, onConfirm, controllerModel }: Ser
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
           <button
-            onClick={() => onNavigate('controller')}
+            onClick={() => navigate('/controllers')}
             className="p-2 hover:bg-[#F5F5F7] rounded-full transition-colors -ml-2"
           >
             <ChevronLeft className="w-6 h-6" />

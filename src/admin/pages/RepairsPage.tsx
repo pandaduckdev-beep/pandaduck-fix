@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Search, Eye, CheckCircle, Clock, XCircle, X } from 'lucide-react';
 import { getControllerModelName } from '@/utils/controllerModels';
@@ -19,7 +19,7 @@ interface RepairRequestWithServices extends RepairRequest {
 
 type RepairStatus = 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
 
-const STATUS_CONFIG: Record<RepairStatus, { label: string; color: string; icon: any }> = {
+const STATUS_CONFIG: Record<RepairStatus, { label: string; color: string; icon: React.ReactNode }> = {
   pending: { label: '대기중', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
   confirmed: { label: '확인됨', color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
   in_progress: { label: '진행중', color: 'bg-purple-100 text-purple-800', icon: Clock },
@@ -35,11 +35,7 @@ export function RepairsPage() {
   const [selectedRepair, setSelectedRepair] = useState<RepairRequestWithServices | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
-  useEffect(() => {
-    loadRepairs();
-  }, []);
-
-  const loadRepairs = async () => {
+  const loadRepairs = useCallback(async () => {
     try {
       let query = supabase
         .from('repair_requests')
@@ -107,11 +103,11 @@ export function RepairsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
 
   useEffect(() => {
     loadRepairs();
-  }, [statusFilter]);
+  }, [statusFilter, loadRepairs]);
 
   const filteredRepairs = repairs.filter(repair => {
     if (!searchTerm) return true;

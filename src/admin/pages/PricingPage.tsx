@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { getControllerModels } from '@/services/pricingService';
 import { Save, DollarSign } from 'lucide-react';
 import type { ControllerModel, Service } from '@/types/database';
 
