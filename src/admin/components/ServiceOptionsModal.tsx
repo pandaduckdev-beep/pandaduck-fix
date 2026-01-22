@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { Plus, Trash2, Edit, PlusCircle } from 'lucide-react'
-import type { Service, ServiceOption } from '@/types/database'
+import { Plus, Trash2, Edit, Settings, PlusCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -16,10 +15,10 @@ import { Button } from '@/app/components/ui/button'
 interface ServiceOptionsModalProps {
   isOpen: boolean
   onClose: () => void
-  service: Service | null
-  options: ServiceOption[]
-  onAddOption: (option: Omit<ServiceOption, 'id'>) => Promise<void>
-  onUpdateOption: (id: string, data: Partial<ServiceOption>) => Promise<void>
+  service: any
+  options: any[]
+  onAddOption: (option: any) => Promise<void>
+  onUpdateOption: (id: string, data: any) => Promise<void>
   onDeleteOption: (id: string) => Promise<void>
 }
 
@@ -48,7 +47,7 @@ export function ServiceOptionsModal({
 
     try {
       await onAddOption({
-        service_id: service!.id,
+        service_id: service.id,
         option_name: formData.option_name,
         option_description: formData.option_description,
         additional_price: Number(formData.additional_price) || 0,
@@ -63,7 +62,7 @@ export function ServiceOptionsModal({
     }
   }
 
-  const handleUpdate = async (option: ServiceOption) => {
+  const handleUpdate = async (option: any) => {
     const newPrice = prompt('추가 가격을 입력하세요:', option.additional_price.toString())
     if (newPrice === null) return
 
@@ -168,7 +167,7 @@ export function ServiceOptionsModal({
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {options.map((option) => (
+                  {options.map((option: any) => (
                     <div
                       key={option.id}
                       className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition"
@@ -179,7 +178,7 @@ export function ServiceOptionsModal({
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <div className="text-sm text-gray-500">추가가</div>
+                          <div className="text-sm text-gray-500">추가</div>
                           <div className="font-semibold">
                             ₩{option.additional_price.toLocaleString()}
                           </div>
