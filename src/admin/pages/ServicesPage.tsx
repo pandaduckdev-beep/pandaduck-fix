@@ -65,7 +65,19 @@ export function ServicesPage() {
     }
   }
 
-  const handleAddService = async (service: Omit<Service, 'id'>) => {
+  const handleAddService = async (service: {
+    name: string
+    service_id: string
+    description: string
+    base_price: number
+    duration: string
+    warranty: string
+    features: Json
+    process: Json
+    image_url: string | null
+    is_active: boolean
+    display_order: number
+  }) => {
     const { error } = await supabase.from('services').insert(service)
 
     if (error) throw error
@@ -96,7 +108,10 @@ export function ServicesPage() {
       <AddServiceModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddService}
+        onAdd={async (service) => {
+          await handleAddService(service)
+          toast.success('서비스가 추가되었습니다.')
+        }}
       />
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">

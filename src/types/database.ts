@@ -16,14 +16,13 @@ export interface Database {
           warranty: string
           features: Json
           process: Json
-          icon: string | null
           image_url: string | null
           is_active: boolean
+          display_order: number
           created_at: string
           updated_at: string
         }
         Insert: {
-          id?: string
           service_id: string
           name: string
           description: string
@@ -32,14 +31,11 @@ export interface Database {
           warranty: string
           features: Json
           process: Json
-          icon?: string | null
           image_url?: string | null
           is_active?: boolean
-          created_at?: string
-          updated_at?: string
+          display_order?: number
         }
         Update: {
-          id?: string
           service_id?: string
           name?: string
           description?: string
@@ -48,11 +44,9 @@ export interface Database {
           warranty?: string
           features?: Json
           process?: Json
-          icon?: string | null
           image_url?: string | null
           is_active?: boolean
-          created_at?: string
-          updated_at?: string
+          display_order?: number
         }
       }
       service_options: {

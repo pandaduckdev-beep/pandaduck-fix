@@ -10,13 +10,24 @@ import {
 import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
 import { Button } from '@/app/components/ui/button'
-import type { Service } from '@/types/database'
 import { toast } from 'sonner'
 
 interface AddServiceModalProps {
   isOpen: boolean
   onClose: () => void
-  onAdd: (service: Omit<Service, 'id'>) => Promise<void>
+  onAdd: (service: {
+    name: string
+    service_id: string
+    description: string
+    base_price: number
+    duration: string
+    warranty: string
+    features: any[]
+    process: any[]
+    image_url: string | null
+    is_active: boolean
+    display_order: number
+  }) => Promise<void>
 }
 
 export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps) {
@@ -50,7 +61,9 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
         warranty: '30일',
         features: [],
         process: [],
+        image_url: null,
         is_active: true,
+        display_order: 0,
       })
 
       setFormData({ name: '', service_id: '', description: '', base_price: 0 })
