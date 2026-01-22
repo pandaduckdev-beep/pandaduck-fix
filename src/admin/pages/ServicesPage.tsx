@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Plus, Trash2, Check, X, Settings } from 'lucide-react'
+import { Plus, Trash2, Check, X, Settings, PlusCircle } from 'lucide-react'
 import type { Service, ServiceOption } from '@/types/database'
 import { toast } from 'sonner'
 import { AddServiceModal } from '../components/AddServiceModal'
@@ -87,14 +87,28 @@ export function ServicesPage() {
     await loadServices()
   }
 
-  const handleAddOption = async (option: Omit<ServiceOption, 'id'>) => {
+  const openOptionsModal = async (service: Service) => {
+    // 옵션이 없으면 빈 배열로 설정
+    const options = service.options || []
+    setSelectedService(service)
+    setIsOptionsModalOpen(true)
+  }
+
+  const handleAddOption = async (option: {
+    service_id: string
+    option_name: string
+    option_description: string
+    additional_price: number
+    is_active: boolean
+  }) => {
     const { error } = await supabase.from('service_options').insert(option)
 
     if (error) throw error
+    // 서비스의 옵션 목록 갱신을 위해 서비스 다시 로드
     await loadServices()
   }
 
-  const handleUpdateOption = async (id: string, data: Partial<ServiceOption>) => {
+  const handleUpdateOption = async (id: string, data: { additional_price: number }) => {
     const { error } = await supabase.from('service_options').update(data).eq('id', id)
 
     if (error) throw error
@@ -106,11 +120,6 @@ export function ServicesPage() {
 
     if (error) throw error
     await loadServices()
-  }
-
-  const openOptionsModal = (service: Service) => {
-    setSelectedService(service)
-    setIsOptionsModalOpen(true)
   }
 
   if (loading) {
@@ -182,20 +191,7 @@ export function ServicesPage() {
                 <td className="px-6 py-4 text-sm font-semibold">
                   ₩{service.base_price.toLocaleString()}
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    {service.options?.length || 0}개
-                    {service.options && service.options.length > 0 && (
-                      <button
-                        onClick={() => openOptionsModal(service)}
-                        className="p-1 text-blue-600 hover:bg-blue-50 rounded transition"
-                        title="옵션 관리"
-                      >
-                        <Settings className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </td>
+                <td className="px-6 py-4">{service.options?.length || 0}개</td>
                 <td className="px-6 py-4">
                   <button
                     onClick={() => toggleServiceStatus(service.id, service.is_active)}
@@ -216,6 +212,16 @@ export function ServicesPage() {
                         비활성
                       </>
                     )}
+                  </button>
+                </td>
+                <td className="px-6 py-4">
+                  <button
+                    onClick={() => openOptionsModal(service)}
+                    className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    title="옵션 관리"
+                  >
+                    <Settings className="w-4 h-4" />
+                    옵션 관리
                   </button>
                 </td>
                 <td className="px-6 py-4">
