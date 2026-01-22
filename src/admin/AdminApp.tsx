@@ -1,18 +1,19 @@
-import { Routes, Route } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { LoginPage } from './components/LoginPage';
-import { AdminLayout } from './components/AdminLayout';
-import { Dashboard } from './pages/Dashboard';
-import { ServicesPage } from './pages/ServicesPage';
-import { RepairsPage } from './pages/RepairsPage';
-import { ControllersPage } from './pages/ControllersPage';
-import { PricingPage } from './pages/PricingPage';
+import { Routes, Route } from 'react-router-dom'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { LoginPage } from './components/LoginPage'
+import { AdminLayout } from './components/AdminLayout'
+import { Dashboard } from './pages/Dashboard'
+import { ServicesPage } from './pages/ServicesPage'
+import { RepairsPage } from './pages/RepairsPage'
+import { ControllersPage } from './pages/ControllersPage'
+import { PricingPage } from './pages/PricingPage'
+import { ReviewsPage } from './pages/ReviewsPage'
 
 function AdminContent() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useAuth()
 
   if (!isAuthenticated) {
-    return <LoginPage />;
+    return <LoginPage />
   }
 
   return (
@@ -23,10 +24,10 @@ function AdminContent() {
         <Route path="controllers" element={<ControllersPage />} />
         <Route path="pricing" element={<PricingPage />} />
         <Route path="repairs" element={<RepairsPage />} />
-        <Route path="reviews" element={<div className="text-center py-12 text-gray-600">리뷰 관리 페이지 (개발 예정)</div>} />
+        <Route path="reviews" element={<ReviewsPage />} />
       </Routes>
     </AdminLayout>
-  );
+  )
 }
 
 export function AdminApp() {
@@ -34,7 +35,7 @@ export function AdminApp() {
     <AuthProvider>
       <AdminContent />
     </AuthProvider>
-  );
+  )
 }
 
-export default AdminApp;
+export default AdminApp
