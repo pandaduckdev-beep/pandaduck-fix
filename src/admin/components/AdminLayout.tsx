@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode } from 'react'
 import {
   LayoutDashboard,
   Wrench,
@@ -6,13 +6,13 @@ import {
   DollarSign,
   ClipboardList,
   Star,
-  LogOut
-} from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+  LogOut,
+} from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 interface AdminLayoutProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 const navItems = [
@@ -22,13 +22,13 @@ const navItems = [
   { id: 'pricing', label: '가격 설정', icon: DollarSign },
   { id: 'repairs', label: '수리 신청', icon: ClipboardList },
   { id: 'reviews', label: '리뷰 관리', icon: Star },
-];
+]
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const currentPage = location.pathname.split('/')[2] || 'dashboard';
-  const { logout } = useAuth();
+  const navigate = useNavigate()
+  const location = useLocation()
+  const currentPage = location.pathname.split('/')[2] || 'dashboard'
+  const { logout } = useAuth()
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,23 +41,21 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
         <nav className="p-4 space-y-1">
           {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentPage === item.id;
+            const Icon = item.icon
+            const isActive = currentPage === item.id
 
             return (
               <button
                 key={item.id}
-                onClick={() => navigate(item.id)}
+                onClick={() => navigate(`/admin/${item.id === 'dashboard' ? '' : item.id}`)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                  isActive
-                    ? 'bg-black text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                  isActive ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="font-medium">{item.label}</span>
               </button>
-            );
+            )
           })}
         </nav>
 
@@ -74,10 +72,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Main Content */}
       <main className="ml-64 min-h-screen">
-        <div className="p-8">
-          {children}
-        </div>
+        <div className="p-8">{children}</div>
       </main>
     </div>
-  );
+  )
 }

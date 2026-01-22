@@ -4,19 +4,19 @@ import { LoginPage } from './components/LoginPage';
 import { AdminLayout } from './components/AdminLayout';
 import { Dashboard } from './pages/Dashboard';
 import { ServicesPage } from './pages/ServicesPage';
+import { RepairsPage } from './pages/RepairsPage';
 import { ControllersPage } from './pages/ControllersPage';
 import { PricingPage } from './pages/PricingPage';
-import { RepairsPage } from './pages/RepairsPage';
 
 function AdminContent() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   if (!isAuthenticated) {
     return <LoginPage />;
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout user={user}>
       <Routes>
         <Route index element={<Dashboard />} />
         <Route path="services" element={<ServicesPage />} />
