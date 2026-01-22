@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Plus, Trash2, Check, X } from 'lucide-react'
+import { Plus, Trash2, Check, X, Settings } from 'lucide-react'
 import type { Service, ServiceOption } from '@/types/database'
 import { toast } from 'sonner'
 import { AddServiceModal } from '../components/AddServiceModal'
+import { ServiceOptionsModal } from '../components/ServiceOptionsModal'
 
 interface ServiceWithOptions extends Service {
   options?: ServiceOption[]
@@ -13,6 +14,8 @@ export function ServicesPage() {
   const [services, setServices] = useState<ServiceWithOptions[]>([])
   const [loading, setLoading] = useState(true)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false)
+  const [selectedService, setSelectedService] = useState<Service | null>(null)
 
   useEffect(() => {
     loadServices()
@@ -84,6 +87,32 @@ export function ServicesPage() {
     await loadServices()
   }
 
+  const handleAddOption = async (option: Omit<ServiceOption, 'id'>) => {
+    const { error } = await supabase.from('service_options').insert(option)
+
+    if (error) throw error
+    await loadServices()
+  }
+
+  const handleUpdateOption = async (id: string, data: Partial<ServiceOption>) => {
+    const { error } = await supabase.from('service_options').update(data).eq('id', id)
+
+    if (error) throw error
+    await loadServices()
+  }
+
+  const handleDeleteOption = async (id: string) => {
+    const { error } = await supabase.from('service_options').delete().eq('id', id)
+
+    if (error) throw error
+    await loadServices()
+  }
+
+  const openOptionsModal = (service: Service) => {
+    setSelectedService(service)
+    setIsOptionsModalOpen(true)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -114,6 +143,19 @@ export function ServicesPage() {
         }}
       />
 
+      <ServiceOptionsModal
+        isOpen={isOptionsModalOpen}
+        onClose={() => {
+          setIsOptionsModalOpen(false)
+          setSelectedService(null)
+        }}
+        service={selectedService}
+        options={selectedService?.options || []}
+        onAddOption={handleAddOption}
+        onUpdateOption={handleUpdateOption}
+        onDeleteOption={handleDeleteOption}
+      />
+
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
@@ -123,6 +165,7 @@ export function ServicesPage() {
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">기본 가격</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">옵션 수</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">상태</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">옵션</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">작업</th>
             </tr>
           </thead>
@@ -139,8 +182,19 @@ export function ServicesPage() {
                 <td className="px-6 py-4 text-sm font-semibold">
                   ₩{service.base_price.toLocaleString()}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  {service.options?.length || 0}개
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    {service.options?.length || 0}개
+                    {service.options && service.options.length > 0 && (
+                      <button
+                        onClick={() => openOptionsModal(service)}
+                        className="p-1 text-blue-600 hover:bg-blue-50 rounded transition"
+                        title="옵션 관리"
+                      >
+                        <Settings className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <button
