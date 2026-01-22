@@ -1,20 +1,21 @@
-import { useState } from 'react';
-import { Lock } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useState } from 'react'
+import { Lock, Mail } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 
 export function LoginPage() {
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { login } = useAuth();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const { login } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const success = login(password);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const success = await login(email, password)
     if (!success) {
-      setError('비밀번호가 올바르지 않습니다.');
-      setPassword('');
+      setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+      setPassword('')
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
@@ -30,18 +31,38 @@ export function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              이메일
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                placeholder="이메일을 입력하세요"
+                autoFocus
+              />
+            </div>
+          </div>
+
+          <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               비밀번호
             </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
-              placeholder="관리자 비밀번호를 입력하세요"
-              autoFocus
-            />
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                placeholder="비밀번호를 입력하세요"
+              />
+            </div>
           </div>
 
           {error && (
@@ -59,5 +80,5 @@ export function LoginPage() {
         </form>
       </div>
     </div>
-  );
+  )
 }

@@ -50,11 +50,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
         warranty: '30일',
         features: [],
         process: [],
-        icon: null,
-        image_url: null,
         is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       })
 
       setFormData({ name: '', service_id: '', description: '', base_price: 0 })
