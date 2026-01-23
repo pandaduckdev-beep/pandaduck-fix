@@ -8,6 +8,7 @@ import { RepairForm } from './app/components/RepairForm'
 import { ServicesPage } from './app/components/ServicesPage'
 import { ReviewsPage } from './app/components/ReviewsPage'
 import { AboutPage } from './app/components/AboutPage'
+import { ReviewPage } from './pages/ReviewPage'
 import { AdminApp } from './admin/AdminApp.tsx'
 import './styles/index.css'
 import './test-supabase'
@@ -24,6 +25,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="reviews" element={<ReviewsPage />} />
         <Route path="about" element={<AboutPage />} />
       </Route>
+      <Route path="/review/:token" element={<ReviewPage />} />
       <Route path="/admin/*" element={<AdminApp />} />
     </Routes>
   </BrowserRouter>

@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Search, Eye, CheckCircle, Clock, XCircle, X } from 'lucide-react';
+import { Search, Eye, CheckCircle, Clock, XCircle, X, MessageSquare, Copy, Send } from 'lucide-react';
 import { getControllerModelName } from '@/utils/controllerModels';
 import type { RepairRequest, Service, ServiceOption } from '@/types/database';
+import { generateReviewToken, getReviewUrl, copyToClipboard, openKakaoTalk } from '@/lib/reviewUtils';
+import { toast } from 'sonner';
 
 interface ServiceWithDetails {
   service_id: string;
@@ -34,6 +36,9 @@ export function RepairsPage() {
   const [statusFilter, setStatusFilter] = useState<RepairStatus | 'all'>('all');
   const [selectedRepair, setSelectedRepair] = useState<RepairRequestWithServices | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [showReviewRequestModal, setShowReviewRequestModal] = useState(false);
+  const [reviewRequestRepair, setReviewRequestRepair] = useState<RepairRequestWithServices | null>(null);
+  const [reviewUrl, setReviewUrl] = useState('');
 
   const loadRepairs = useCallback(async () => {
     try {
@@ -203,6 +208,35 @@ export function RepairsPage() {
     }
   };
 
+  const handleRequestReview = async (repair: RepairRequestWithServices) => {
+    try {
+      const token = await generateReviewToken(repair.id);
+      const url = getReviewUrl(token);
+      setReviewUrl(url);
+      setReviewRequestRepair(repair);
+      setShowReviewRequestModal(true);
+    } catch (error) {
+      console.error('Failed to generate review token:', error);
+      toast.error('리뷰 요청 링크 생성에 실패했습니다.');
+    }
+  };
+
+  const handleCopyReviewLink = async () => {
+    try {
+      await copyToClipboard(reviewUrl);
+      toast.success('리뷰 링크가 클립보드에 복사되었습니다.');
+    } catch (error) {
+      console.error('Failed to copy link:', error);
+      toast.error('복사에 실패했습니다.');
+    }
+  };
+
+  const handleSendKakaoTalk = () => {
+    if (reviewRequestRepair) {
+      openKakaoTalk(reviewUrl, reviewRequestRepair.customer_name);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -263,6 +297,7 @@ export function RepairsPage() {
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">상태</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">신청일</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">작업</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">리뷰</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -334,6 +369,18 @@ export function RepairsPage() {
                       </select>
                     </div>
                   </td>
+                  <td className="px-6 py-4">
+                    {repair.status === 'completed' && (
+                      <button
+                        onClick={() => handleRequestReview(repair)}
+                        className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        title="리뷰 요청"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        리뷰 요청
+                      </button>
+                    )}
+                  </td>
                 </tr>
               );
             })}
@@ -346,6 +393,63 @@ export function RepairsPage() {
           </div>
         )}
       </div>
+
+      {/* Review Request Modal */}
+      {showReviewRequestModal && reviewRequestRepair && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold">리뷰 요청</h2>
+                <button
+                  onClick={() => {
+                    setShowReviewRequestModal(false);
+                    setReviewRequestRepair(null);
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-sm text-gray-600 mb-2">고객 정보</p>
+                <p className="font-semibold">{reviewRequestRepair.customer_name}</p>
+                <p className="text-sm text-gray-600">{reviewRequestRepair.customer_phone}</p>
+              </div>
+
+              <div className="bg-blue-50 rounded-lg p-4">
+                <p className="text-sm text-blue-600 mb-2">리뷰 링크</p>
+                <p className="text-xs text-blue-900 break-all font-mono">{reviewUrl}</p>
+              </div>
+
+              <p className="text-sm text-gray-600">
+                고객에게 리뷰 요청을 보낼 방법을 선택하세요.
+              </p>
+
+              <div className="space-y-3">
+                <button
+                  onClick={handleSendKakaoTalk}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition font-medium"
+                >
+                  <Send className="w-5 h-5" />
+                  카카오톡으로 전송
+                </button>
+
+                <button
+                  onClick={handleCopyReviewLink}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-100 text-gray-900 rounded-lg hover:bg-gray-200 transition font-medium"
+                >
+                  <Copy className="w-5 h-5" />
+                  링크 복사
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Detail Modal */}
       {selectedRepair && (
