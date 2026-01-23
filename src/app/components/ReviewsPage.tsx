@@ -4,46 +4,112 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
 import { supabase } from '@/lib/supabase'
+import { maskName } from '@/lib/reviewUtils'
 
 export function ReviewsPage() {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [reviews, setReviews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [averageRating, setAverageRating] = useState(0)
   const [totalReviews, setTotalReviews] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState(0)
+  const PAGE_SIZE = 20
 
-  // 리뷰 데이터 로드
+  // 통계 데이터 로드 (평균 평점, 총 리뷰 수)
   useEffect(() => {
-    const loadReviews = async () => {
+    const loadStats = async () => {
       try {
-        // 승인되고 공개된 리뷰만 가져옴
         const { data, error } = await supabase
           .from('reviews')
-          .select('*')
+          .select('rating')
           .eq('is_approved', true)
           .eq('is_public', true)
-          .order('created_at', { ascending: false })
 
         if (error) throw error
-        setReviews(data || [])
+
         setTotalReviews(data?.length || 0)
 
         // 평균 평점 계산
         if (data && data.length > 0) {
           const sum = data.reduce((acc, review) => acc + review.rating, 0)
           const avg = sum / data.length
-          setAverageRating(Math.round(avg * 10) / 10) // 소수점 한 자리까지
+          setAverageRating(Math.round(avg * 10) / 10)
         }
       } catch (error) {
-        console.error('Failed to load reviews:', error)
-      } finally {
-        setLoading(false)
+        console.error('Failed to load stats:', error)
       }
     }
 
-    loadReviews()
+    loadStats()
   }, [])
+
+  // 리뷰 데이터 로드 (페이징)
+  const loadReviews = async (pageNum: number) => {
+    try {
+      if (pageNum === 0) {
+        setLoading(true)
+      } else {
+        setLoadingMore(true)
+      }
+
+      const from = pageNum * PAGE_SIZE
+      const to = from + PAGE_SIZE - 1
+
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('is_approved', true)
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .range(from, to)
+
+      if (error) throw error
+
+      if (data) {
+        if (pageNum === 0) {
+          setReviews(data)
+        } else {
+          setReviews(prev => [...prev, ...data])
+        }
+
+        // 더 이상 데이터가 없으면 hasMore를 false로
+        if (data.length < PAGE_SIZE) {
+          setHasMore(false)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load reviews:', error)
+    } finally {
+      setLoading(false)
+      setLoadingMore(false)
+    }
+  }
+
+  // 초기 로드
+  useEffect(() => {
+    loadReviews(0)
+  }, [])
+
+  // 무한 스크롤 처리
+  useEffect(() => {
+    const handleScroll = () => {
+      // 페이지 하단에 거의 도달했을 때
+      const scrollPosition = window.innerHeight + window.scrollY
+      const pageHeight = document.documentElement.scrollHeight
+
+      if (scrollPosition >= pageHeight - 500 && !loadingMore && hasMore) {
+        const nextPage = page + 1
+        setPage(nextPage)
+        loadReviews(nextPage)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [page, loadingMore, hasMore])
 
   return (
     <div className="min-h-screen bg-white">
@@ -107,43 +173,61 @@ export function ReviewsPage() {
             <Loader2 className="w-8 h-8 animate-spin text-black" />
           </div>
         ) : (
-          <div className="space-y-4">
-            {reviews.map((review) => (
-              <div key={review.id} className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span style={{ fontWeight: 600 }}>{review.customer_name}</span>
-                      <span className="text-xs text-[#86868B]">
-                        {new Date(review.created_at).toLocaleDateString('ko-KR')}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {[...Array(review.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-current text-[#000000]" />
-                      ))}
+          <>
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <div key={review.id} className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span style={{ fontWeight: 600 }}>{maskName(review.customer_name)}</span>
+                        <span className="text-xs text-[#86868B]">
+                          {new Date(review.created_at).toLocaleDateString('ko-KR')}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {[...Array(review.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-current text-[#000000]" />
+                        ))}
+                      </div>
                     </div>
                   </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {review.service_name.split(',').map((service: string, index: number) => (
+                      <div key={index} className="px-3 py-1.5 bg-white rounded-full">
+                        <span className="text-xs" style={{ fontWeight: 600 }}>
+                          {service.trim()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-sm leading-relaxed">{review.content}</p>
+
+                  {review.image_url && (
+                    <img
+                      src={review.image_url}
+                      alt="Review"
+                      className="w-full h-48 object-cover rounded-[20px]"
+                    />
+                  )}
                 </div>
+              ))}
+            </div>
 
-                <div className="px-3 py-2 bg-white rounded-[16px] inline-block">
-                  <span className="text-sm" style={{ fontWeight: 600 }}>
-                    {review.service_name}
-                  </span>
-                </div>
-
-                <p className="text-sm leading-relaxed">{review.content}</p>
-
-                {review.image_url && (
-                  <img
-                    src={review.image_url}
-                    alt="Review"
-                    className="w-full h-48 object-cover rounded-[20px]"
-                  />
-                )}
+            {loadingMore && (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-black" />
               </div>
-            ))}
-          </div>
+            )}
+
+            {!hasMore && reviews.length > 0 && (
+              <div className="text-center py-8 text-[#86868B] text-sm">
+                모든 리뷰를 불러왔습니다
+              </div>
+            )}
+          </>
         )}
 
         {!loading && reviews.length === 0 && (

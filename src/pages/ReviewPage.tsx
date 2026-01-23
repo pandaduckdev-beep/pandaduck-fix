@@ -296,7 +296,7 @@ export function ReviewPage() {
             <div className="bg-gray-50 rounded-xl p-5 space-y-3">
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-gray-500">고객명</span>
-                <span className="font-medium text-gray-900">{maskName(repairInfo.customer_name)}</span>
+                <span className="font-medium text-gray-900">{repairInfo.customer_name}</span>
               </div>
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-gray-500">컨트롤러</span>
