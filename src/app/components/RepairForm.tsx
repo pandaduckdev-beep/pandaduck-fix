@@ -21,6 +21,7 @@ export function RepairForm() {
   const [submitted, setSubmitted] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showConvenienceModal, setShowConvenienceModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,8 +32,14 @@ export function RepairForm() {
       return;
     }
 
+    // 폼 제출 시 확인 모달 표시
+    setShowConfirmModal(true);
+  };
+
+  const confirmSubmit = async () => {
     setSubmitted(true);
     setError(null);
+    setShowConfirmModal(false);
 
     try {
       // Supabase에 수리 신청 데이터 저장
@@ -252,7 +259,7 @@ export function RepairForm() {
           {/* Convenience Store Delivery Button */}
           <button
             type="button"
-            onClick={() => toast.info('편의점 택배 예약 서비스는 준비 중입니다.')}
+            onClick={() => setShowConvenienceModal(true)}
             className="w-full py-4 bg-white border-2 border-[#000000] rounded-full transition-all hover:scale-[0.98] active:scale-[0.96]"
             style={{ fontWeight: 600 }}
           >
@@ -304,6 +311,194 @@ export function RepairForm() {
         </p>
       </form>
 
+      {/* Convenience Store Modal */}
+      {showConvenienceModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowConvenienceModal(false)}
+          ></div>
+
+          {/* Modal Content */}
+          <div className="relative bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-300">
+            {/* Info Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 bg-[#F5F5F7] rounded-full flex items-center justify-center">
+                <Package className="w-10 h-10" />
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-2xl text-center mb-3" style={{ fontWeight: 700 }}>
+              준비 중인 서비스입니다
+            </h2>
+
+            {/* Description */}
+            <p className="text-center text-[#86868B] mb-6 leading-relaxed">
+              편의점 택배 예약 서비스는 현재 준비 중입니다.<br />
+              <span style={{ fontWeight: 600 }}>위 주소로 직접 보내주시기 바랍니다.</span>
+            </p>
+
+            {/* Company Info */}
+            <div className="bg-[#F5F5F7] rounded-[20px] p-4 mb-6 space-y-2">
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin className="w-4 h-4 text-[#86868B]" />
+                <span className="text-sm" style={{ fontWeight: 600 }}>보내실 주소</span>
+              </div>
+              <p className="text-sm leading-relaxed">
+                서울특별시 강남구 테헤란로 123, 4층<br />
+                PandaDuck Fix (우편번호: 06234)
+              </p>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setShowConvenienceModal(false)}
+              className="w-full py-4 bg-[#000000] text-white rounded-full hover:scale-[0.98] active:scale-[0.96] transition-all"
+              style={{ fontWeight: 600 }}
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowConfirmModal(false)}
+          ></div>
+
+          {/* Modal Content */}
+          <div className="relative bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+            {/* Title */}
+            <h2 className="text-2xl text-center mb-3" style={{ fontWeight: 700 }}>
+              신청 정보 확인
+            </h2>
+
+            {/* Description */}
+            <p className="text-center text-[#86868B] mb-6">
+              입력하신 정보가 맞는지 확인해주세요
+            </p>
+
+            {/* Order Details */}
+            <div className="space-y-4 mb-6">
+              {/* Controller Model */}
+              {controllerModel && (
+                <div className="bg-[#F5F5F7] rounded-[20px] p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Gamepad2 className="w-4 h-4 text-[#86868B]" />
+                    <span className="text-sm" style={{ fontWeight: 600 }}>컨트롤러 모델</span>
+                  </div>
+                  <p className="text-sm pl-6">{getControllerModelName(controllerModel)}</p>
+                </div>
+              )}
+
+              {/* Services */}
+              {selectionData && (
+                <div className="bg-[#F5F5F7] rounded-[20px] p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Package className="w-4 h-4 text-[#86868B]" />
+                    <span className="text-sm" style={{ fontWeight: 600 }}>선택한 서비스</span>
+                  </div>
+                  <div className="space-y-2 pl-6">
+                    {selectionData.services.map((service) => (
+                      <div key={service.id}>
+                        <div className="flex items-center justify-between text-sm">
+                          <span>{service.name}</span>
+                          <span style={{ fontWeight: 600 }}>₩{service.price.toLocaleString()}</span>
+                        </div>
+                        {service.selectedOption && (
+                          <div className="flex items-center justify-between text-xs text-[#86868B] mt-1 pl-2">
+                            <span>ㄴ {service.selectedOption.name}</span>
+                            <span>
+                              {service.selectedOption.price === 0
+                                ? '기본'
+                                : `+₩${service.selectedOption.price.toLocaleString()}`}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {selectionData.discount > 0 && (
+                      <>
+                        <div className="h-px bg-[rgba(0,0,0,0.1)] my-2"></div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-[#FF3B30]">할인</span>
+                          <span className="text-[#FF3B30]" style={{ fontWeight: 600 }}>
+                            -₩{selectionData.discount.toLocaleString()}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    <div className="h-px bg-[rgba(0,0,0,0.1)] my-2"></div>
+                    <div className="flex items-center justify-between">
+                      <span style={{ fontWeight: 600 }}>총 금액</span>
+                      <span className="text-lg" style={{ fontWeight: 700 }}>
+                        ₩{selectionData.total.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Customer Info */}
+              <div className="bg-[#F5F5F7] rounded-[20px] p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <User className="w-4 h-4 text-[#86868B]" />
+                  <span className="text-sm" style={{ fontWeight: 600 }}>고객 정보</span>
+                </div>
+                <div className="space-y-2 pl-6 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#86868B]">이름</span>
+                    <span style={{ fontWeight: 600 }}>{formData.name}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#86868B]">연락처</span>
+                    <span style={{ fontWeight: 600 }}>{formData.phone}</span>
+                  </div>
+                  <div className="flex items-start justify-between">
+                    <span className="text-[#86868B]">주소</span>
+                    <span className="text-right" style={{ fontWeight: 600 }}>{formData.address}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                disabled={submitted}
+                className="flex-1 py-4 bg-white border-2 border-[#000000] text-[#000000] rounded-full hover:scale-[0.98] active:scale-[0.96] transition-all disabled:opacity-50"
+                style={{ fontWeight: 600 }}
+              >
+                다시입력
+              </button>
+              <button
+                onClick={confirmSubmit}
+                disabled={submitted}
+                className="flex-1 py-4 bg-[#000000] text-white rounded-full hover:scale-[0.98] active:scale-[0.96] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                style={{ fontWeight: 600 }}
+              >
+                {submitted ? (
+                  <>
+                    <Check className="w-5 h-5" />
+                    처리중...
+                  </>
+                ) : (
+                  '신청하기'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
@@ -334,7 +529,7 @@ export function RepairForm() {
             </p>
 
             {/* Request Details */}
-            <div className="bg-[#F5F5F7] rounded-[20px] p-4 mb-6 space-y-2">
+            <div className="bg-[#F5F5F7] rounded-[20px] p-4 mb-4 space-y-2">
               <div className="flex items-center gap-2 mb-3">
                 <Package className="w-4 h-4 text-[#86868B]" />
                 <span className="text-sm" style={{ fontWeight: 600 }}>신청 정보</span>
@@ -355,6 +550,37 @@ export function RepairForm() {
                   </span>
                 </div>
               )}
+            </div>
+
+            {/* Shipping Info */}
+            <div className="bg-[#F5F5F7] rounded-[20px] p-4 mb-6 space-y-3">
+              <div className="flex items-center gap-2 mb-2">
+                <MapPin className="w-4 h-4 text-[#86868B]" />
+                <span className="text-sm" style={{ fontWeight: 600 }}>발송 안내</span>
+              </div>
+              <div className="text-xs text-[#86868B] leading-relaxed">
+                아래 주소로 컨트롤러를 보내주세요
+              </div>
+              <div className="bg-white/60 rounded-[16px] p-3 space-y-2 text-sm">
+                <div>
+                  <p className="text-[#86868B] text-xs mb-1">보내실 주소</p>
+                  <p style={{ fontWeight: 600 }}>
+                    서울특별시 강남구 테헤란로 123, 4층<br />
+                    PandaDuck Fix (우편번호: 06234)
+                  </p>
+                </div>
+                <div className="h-px bg-[rgba(0,0,0,0.1)]"></div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[#86868B] text-xs mb-1">받는 사람</p>
+                    <p style={{ fontWeight: 600 }}>PandaDuck Fix 수리센터</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[#86868B] text-xs mb-1">연락처</p>
+                    <p style={{ fontWeight: 600 }}>02-1234-5678</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Close Button */}
