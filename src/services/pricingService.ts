@@ -70,11 +70,12 @@ export async function getOptionPricingByController(
 export async function getServicesWithPricing(
   controllerModelId: string
 ): Promise<ServiceWithPricing[]> {
-  // 1. 모든 활성 서비스 조회
+  // 1. 모든 활성 서비스 조회 (display_order 순으로 정렬)
   const { data: services, error: servicesError } = await supabase
     .from('services')
     .select('*, service_options(*)')
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .order('display_order');
 
   if (servicesError) {
     console.error('Error fetching services:', servicesError);

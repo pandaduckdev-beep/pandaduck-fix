@@ -1,9 +1,10 @@
-import { ChevronLeft, Check, Tag, CheckCircle2, Package, Gamepad2 } from "lucide-react";
+import { ChevronLeft, Check, Tag, CheckCircle2, Package, Gamepad2, MapPin, Phone, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { ServiceSelectionData } from "@/app/App";
 import { createRepairRequest } from "@/lib/api";
 import { getControllerModelName } from "@/utils/controllerModels";
+import { toast } from "sonner";
 
 export function RepairForm() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export function RepairForm() {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,7 +41,7 @@ export function RepairForm() {
         customerPhone: formData.phone,
         customerEmail: undefined,
         controllerModel: controllerModel || "DualSense", // 선택한 기종 사용
-        issueDescription: `수거 방법: ${formData.pickupMethod === 'express' ? '택배' : '방문접수'}, 주소: ${formData.address}`,
+        issueDescription: `고객 주소: ${formData.address}`,
         services: selectionData.services.map(service => ({
           serviceId: service.uuid, // UUID 사용
           optionId: service.selectedOption?.id,
@@ -191,7 +193,7 @@ export function RepairForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-[#86868B] pl-4">수거 주소</label>
+            <label className="text-sm text-[#86868B] pl-4">고객 주소</label>
             <input
               type="text"
               value={formData.address}
@@ -201,37 +203,69 @@ export function RepairForm() {
               style={{ fontWeight: 500 }}
             />
           </div>
+        </div>
 
-          {/* Pickup Method Toggle */}
-          <div className="space-y-2">
-            <label className="text-sm text-[#86868B] pl-4">수거 방법</label>
-            <div className="bg-[#F5F5F7] rounded-[28px] p-1.5 flex gap-1.5">
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, pickupMethod: "express" })}
-                className={`flex-1 py-3 rounded-[20px] transition-all ${
-                  formData.pickupMethod === "express"
-                    ? 'bg-white shadow-sm'
-                    : 'bg-transparent text-[#86868B]'
-                }`}
-                style={{ fontWeight: 600 }}
-              >
-                택배
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, pickupMethod: "dropoff" })}
-                className={`flex-1 py-3 rounded-[20px] transition-all ${
-                  formData.pickupMethod === "dropoff"
-                    ? 'bg-white shadow-sm'
-                    : 'bg-transparent text-[#86868B]'
-                }`}
-                style={{ fontWeight: 600 }}
-              >
-                방문접수
-              </button>
+        {/* Shipping Method Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg pl-4" style={{ fontWeight: 600 }}>
+            발송 방법
+          </h3>
+
+          {/* Company Address Info */}
+          <div className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <MapPin className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm text-[#86868B] mb-1">보내실 주소</p>
+                <p className="text-sm" style={{ fontWeight: 600 }}>
+                  서울특별시 강남구 테헤란로 123, 4층<br />
+                  PandaDuck Fix (우편번호: 06234)
+                </p>
+              </div>
+            </div>
+
+            <div className="h-px bg-[rgba(0,0,0,0.1)]"></div>
+
+            <div className="flex items-start gap-3">
+              <User className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm text-[#86868B] mb-1">받는 사람</p>
+                <p className="text-sm" style={{ fontWeight: 600 }}>
+                  PandaDuck Fix 수리센터
+                </p>
+              </div>
+            </div>
+
+            <div className="h-px bg-[rgba(0,0,0,0.1)]"></div>
+
+            <div className="flex items-start gap-3">
+              <Phone className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm text-[#86868B] mb-1">연락처</p>
+                <p className="text-sm" style={{ fontWeight: 600 }}>
+                  02-1234-5678
+                </p>
+              </div>
             </div>
           </div>
+
+          {/* Convenience Store Delivery Button */}
+          <button
+            type="button"
+            onClick={() => toast.info('편의점 택배 예약 서비스는 준비 중입니다.')}
+            className="w-full py-4 bg-white border-2 border-[#000000] rounded-full transition-all hover:scale-[0.98] active:scale-[0.96]"
+            style={{ fontWeight: 600 }}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Package className="w-5 h-5" />
+              <span>편의점 택배 예약하기</span>
+            </div>
+          </button>
+
+          <p className="text-xs text-center text-[#86868B] px-4">
+            편의점 택배 또는 직접 방문하여 컨트롤러를 보내주세요.<br />
+            접수 후 영업일 기준 1-3일 내 수리가 완료됩니다.
+          </p>
         </div>
 
         {/* Error Message */}
@@ -312,12 +346,6 @@ export function RepairForm() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#86868B]">연락처</span>
                 <span style={{ fontWeight: 600 }}>{formData.phone}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-[#86868B]">수거 방법</span>
-                <span style={{ fontWeight: 600 }}>
-                  {formData.pickupMethod === 'express' ? '택배' : '방문접수'}
-                </span>
               </div>
               {selectionData && (
                 <div className="flex items-center justify-between text-sm pt-2 border-t border-[rgba(0,0,0,0.1)]">
