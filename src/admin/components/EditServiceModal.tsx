@@ -155,6 +155,8 @@ export function EditServiceModal({
       const fileName = `${service.service_id}-${Date.now()}.${fileExt}`
       const filePath = `${fileName}`
 
+      console.log('Uploading file:', filePath)
+
       // Supabase Storage에 업로드
       const { data, error } = await supabase.storage
         .from('service-images')
@@ -163,21 +165,30 @@ export function EditServiceModal({
           upsert: false,
         })
 
-      if (error) throw error
+      if (error) {
+        console.error('Upload error:', error)
+        throw new Error(error.message || '업로드 중 오류가 발생했습니다.')
+      }
+
+      console.log('Upload success:', data)
 
       // Public URL 생성
       const { data: { publicUrl } } = supabase.storage
         .from('service-images')
         .getPublicUrl(filePath)
 
+      console.log('Public URL:', publicUrl)
+
       // 폼 데이터에 URL 설정
       setFormData({ ...formData, image_url: publicUrl })
       toast.success('이미지가 업로드되었습니다.')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to upload image:', error)
-      toast.error('이미지 업로드에 실패했습니다.')
+      toast.error(error.message || '이미지 업로드에 실패했습니다.')
     } finally {
       setUploading(false)
+      // 파일 입력 초기화
+      e.target.value = ''
     }
   }
 

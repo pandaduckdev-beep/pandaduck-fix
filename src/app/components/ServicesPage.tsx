@@ -117,14 +117,6 @@ export function ServicesPage() {
               // Supabase 데이터인지 로컬 데이터인지 확인
               const isSupabaseData = 'service_id' in service;
 
-              const features = isSupabaseData
-                ? (Array.isArray(service.features)
-                    ? service.features
-                    : typeof service.features === 'string'
-                      ? JSON.parse(service.features)
-                      : [])
-                : service.features;
-
               const serviceId = isSupabaseData ? service.service_id : service.id;
               const serviceName = service.name;
               const serviceDescription = service.description;
@@ -149,17 +141,6 @@ export function ServicesPage() {
                       </p>
                       <div className="text-xl mb-3" style={{ fontWeight: 700 }}>
                         {servicePrice}
-                      </div>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {features.slice(0, 3).map((feature: string, i: number) => (
-                          <span
-                            key={i}
-                            className="px-3 py-1 bg-white rounded-full text-xs"
-                            style={{ fontWeight: 600 }}
-                          >
-                            {feature}
-                          </span>
-                        ))}
                       </div>
 
                       {/* Options */}

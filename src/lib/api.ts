@@ -13,14 +13,14 @@ import type {
 // ============================================================================
 
 /**
- * 활성화된 모든 서비스 조회
+ * 활성화된 모든 서비스 조회 (display_order 순으로 정렬)
  */
 export async function fetchServices(): Promise<ServiceWithOptions[]> {
   const { data: services, error: servicesError } = await supabase
     .from('services')
     .select('*')
     .eq('is_active', true)
-    .order('created_at', { ascending: true });
+    .order('display_order', { ascending: true });
 
   if (servicesError) {
     throw new Error(`Failed to fetch services: ${servicesError.message}`);
