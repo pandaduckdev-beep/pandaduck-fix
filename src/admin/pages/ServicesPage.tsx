@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Plus, Trash2, Check, X, Settings, GripVertical } from 'lucide-react'
+import { Plus, Settings, GripVertical } from 'lucide-react'
 import { toast } from 'sonner'
 import { AddServiceModal } from '../components/AddServiceModal'
 import { ServiceOptionsModal } from '../components/ServiceOptionsModal'
 import { EditServiceModal } from '../components/EditServiceModal'
+import type { ControllerModel, ControllerServiceWithOptions } from '@/types/database'
 import {
   DndContext,
   closestCenter,
@@ -23,15 +24,11 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-interface ServiceWithOptions extends any {
-  options?: any[]
-}
-
 interface SortableRowProps {
-  service: any
+  service: ControllerServiceWithOptions
   onToggleStatus: (id: string, status: boolean) => void
-  onEdit: (service: any) => void
-  onOpenOptions: (service: any) => void
+  onEdit: (service: ControllerServiceWithOptions) => void
+  onOpenOptions: (service: ControllerServiceWithOptions) => void
 }
 
 function SortableRow({ service, onToggleStatus, onEdit, onOpenOptions }: SortableRowProps) {
@@ -51,6 +48,10 @@ function SortableRow({ service, onToggleStatus, onEdit, onOpenOptions }: Sortabl
         <div
           {...attributes}
           {...listeners}
+          onPointerDownCapture={(e) => {
+            // Prevent event bubbling to avoid triggering browser shortcuts
+            e.preventDefault()
+          }}
           className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded inline-flex"
         >
           <GripVertical className="w-5 h-5 text-gray-400" />
@@ -64,16 +65,16 @@ function SortableRow({ service, onToggleStatus, onEdit, onOpenOptions }: Sortabl
       </td>
       <td className="px-6 py-4 text-sm text-gray-600 font-mono">{service.service_id}</td>
       <td className="px-6 py-4 text-sm font-semibold">₩{service.base_price.toLocaleString()}</td>
-      <td className="px-6 py-4 text-sm text-gray-600">
-        {service.service_options?.length || 0}개
-      </td>
+      <td className="px-6 py-4 text-sm text-gray-600">{service.options?.length || 0}개</td>
       <td className="px-6 py-4">
         <button
           onClick={() => onToggleStatus(service.id, service.is_active)}
           className={`relative inline-flex items-center h-6 w-11 rounded-full transition-colors ${
             service.is_active ? 'bg-green-600' : 'bg-gray-300'
           }`}
-          title={service.is_active ? '활성 상태 (클릭하여 비활성화)' : '비활성 상태 (클릭하여 활성화)'}
+          title={
+            service.is_active ? '활성 상태 (클릭하여 비활성화)' : '비활성 상태 (클릭하여 활성화)'
+          }
         >
           <span
             className={`inline-block w-4 h-4 transform rounded-full bg-white transition-transform ${
@@ -105,28 +106,56 @@ function SortableRow({ service, onToggleStatus, onEdit, onOpenOptions }: Sortabl
 }
 
 export function ServicesPage() {
-  const [services, setServices] = useState<ServiceWithOptions[]>([])
+  const [services, setServices] = useState<ControllerServiceWithOptions[]>([])
+  const [controllers, setControllers] = useState<ControllerModel[]>([])
+  const [selectedController, setSelectedController] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [selectedService, setSelectedService] = useState<any>(null)
+  const [selectedService, setSelectedService] = useState<ControllerServiceWithOptions | null>(null)
+
+  useEffect(() => {
+    loadControllers()
+  }, [])
 
   useEffect(() => {
     loadServices()
-  }, [])
+  }, [selectedController])
 
-  const loadServices = async () => {
+  const loadControllers = async () => {
     try {
       const { data, error } = await supabase
-        .from('services')
-        .select('*, service_options(*)')
+        .from('controller_models')
+        .select('*')
+        .order('model_name', { ascending: true })
+
+      if (error) throw error
+      setControllers(data || [])
+    } catch (error) {
+      console.error('Failed to load controllers:', error)
+    }
+  }
+
+  const loadServices = async () => {
+    setLoading(true)
+    try {
+      if (!selectedController) {
+        setServices([])
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('controller_services')
+        .select('*, controller_service_options(*)')
+        .eq('controller_model_id', selectedController)
         .order('display_order', { ascending: true })
 
       if (error) throw error
       setServices(data || [])
     } catch (error) {
       console.error('Failed to load services:', error)
+      toast.error('서비스 로드에 실패했습니다.')
     } finally {
       setLoading(false)
     }
@@ -135,7 +164,7 @@ export function ServicesPage() {
   const toggleServiceStatus = async (serviceId: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
-        .from('services')
+        .from('controller_services')
         .update({ is_active: !currentStatus })
         .eq('id', serviceId)
 
@@ -150,7 +179,7 @@ export function ServicesPage() {
 
   const handleUpdateService = async (serviceId: string, data: any) => {
     try {
-      const { error } = await supabase.from('services').update(data).eq('id', serviceId)
+      const { error } = await supabase.from('controller_services').update(data).eq('id', serviceId)
 
       if (error) throw error
       await loadServices()
@@ -162,7 +191,7 @@ export function ServicesPage() {
 
   const handleDeleteService = async (serviceId: string) => {
     try {
-      const { error } = await supabase.from('services').delete().eq('id', serviceId)
+      const { error } = await supabase.from('controller_services').delete().eq('id', serviceId)
 
       if (error) throw error
       await loadServices()
@@ -178,24 +207,26 @@ export function ServicesPage() {
   }
 
   const handleAddService = async (service: any) => {
-    const { error } = await supabase.from('services').insert(service)
+    const newService = {
+      ...service,
+      controller_model_id: selectedController,
+    }
+    const { error } = await supabase.from('controller_services').insert(newService)
 
     if (error) throw error
     await loadServices()
   }
 
-  const openOptionsModal = async (service: any) => {
-    // 최신 옵션 데이터를 다시 로드
+  const openOptionsModal = async (service: ControllerServiceWithOptions) => {
     try {
       const { data, error } = await supabase
-        .from('services')
-        .select('*, service_options(*)')
+        .from('controller_services')
+        .select('*, controller_service_options(*)')
         .eq('id', service.id)
         .single()
 
       if (error) throw error
 
-      console.log('Loaded service with options:', data)
       setSelectedService(data)
       setIsOptionsModalOpen(true)
     } catch (error) {
@@ -207,8 +238,8 @@ export function ServicesPage() {
   const refreshSelectedService = async (serviceId: string) => {
     try {
       const { data, error } = await supabase
-        .from('services')
-        .select('*, service_options(*)')
+        .from('controller_services')
+        .select('*, controller_service_options(*)')
         .eq('id', serviceId)
         .single()
 
@@ -220,15 +251,19 @@ export function ServicesPage() {
   }
 
   const handleAddOption = async (option: any) => {
-    const { error } = await supabase.from('service_options').insert(option)
+    const newOption = {
+      ...option,
+      controller_service_id: selectedService?.id,
+    }
+    const { error } = await supabase.from('controller_service_options').insert(newOption)
 
     if (error) throw error
     await loadServices()
-    await refreshSelectedService(option.service_id)
+    await refreshSelectedService(selectedService?.id || '')
   }
 
   const handleUpdateOption = async (id: string, data: any) => {
-    const { error } = await supabase.from('service_options').update(data).eq('id', id)
+    const { error } = await supabase.from('controller_service_options').update(data).eq('id', id)
 
     if (error) throw error
     await loadServices()
@@ -238,7 +273,7 @@ export function ServicesPage() {
   }
 
   const handleDeleteOption = async (id: string) => {
-    const { error } = await supabase.from('service_options').delete().eq('id', id)
+    const { error } = await supabase.from('controller_service_options').delete().eq('id', id)
 
     if (error) throw error
     await loadServices()
@@ -267,7 +302,6 @@ export function ServicesPage() {
     const newServices = arrayMove(services, oldIndex, newIndex)
     setServices(newServices)
 
-    // Update display_order in database
     try {
       const updates = newServices.map((service, index) => ({
         id: service.id,
@@ -276,7 +310,7 @@ export function ServicesPage() {
 
       for (const update of updates) {
         await supabase
-          .from('services')
+          .from('controller_services')
           .update({ display_order: update.display_order })
           .eq('id', update.id)
       }
@@ -302,7 +336,8 @@ export function ServicesPage() {
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">서비스 관리</h1>
         <button
-          className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
+          disabled={!selectedController || loading}
+          className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
           onClick={() => setIsAddModalOpen(true)}
         >
           <Plus className="w-5 h-5" />
@@ -313,10 +348,8 @@ export function ServicesPage() {
       <AddServiceModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onAdd={async (service) => {
-          await handleAddService(service)
-          toast.success('서비스가 추가되었습니다.')
-        }}
+        controllerModelId={selectedController}
+        onAdd={handleAddService}
       />
 
       <EditServiceModal
@@ -337,46 +370,92 @@ export function ServicesPage() {
           setSelectedService(null)
         }}
         service={selectedService}
-        options={selectedService?.service_options || []}
+        options={selectedService?.options || []}
         onAddOption={handleAddOption}
         onUpdateOption={handleUpdateOption}
         onDeleteOption={handleDeleteOption}
       />
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 w-12"></th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">서비스명</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">ID</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">기본 가격</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">옵션 수</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">상태</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">작업</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">옵션 관리</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              <SortableContext items={services.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-                {services.map((service: any) => (
-                  <SortableRow
-                    key={service.id}
-                    service={service}
-                    onToggleStatus={toggleServiceStatus}
-                    onEdit={openEditModal}
-                    onOpenOptions={openOptionsModal}
-                  />
-                ))}
-              </SortableContext>
-            </tbody>
-          </table>
+        {/* Controller Selector */}
+        <div className="p-6 pb-4">
+          <label className="block text-sm font-semibold text-gray-700 mb-3">
+            컨트롤러 모델 선택
+          </label>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            {controllers.map((controller) => (
+              <button
+                key={controller.id}
+                onClick={() => setSelectedController(controller.id)}
+                disabled={loading}
+                className={`px-4 py-2 rounded-lg whitespace-nowrap transition ${
+                  selectedController === controller.id
+                    ? 'bg-black text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {controller.model_name}
+              </button>
+            ))}
+          </div>
+        </div>
 
-          {services.length === 0 && (
-            <div className="text-center py-12 text-gray-600">등록된 서비스가 없습니다.</div>
-          )}
-        </DndContext>
+        {selectedController && (
+          <div className="px-6 py-3 text-2xl font-semibold text-gray-900">
+            {controllers.find((c) => c.id === selectedController)?.model_name || '선택된 모델'}
+          </div>
+        )}
+
+        <div className="p-6 pt-4">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 w-12"></th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    서비스명
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">ID</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    기본 가격
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    옵션 수
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">상태</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">작업</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    옵션 관리
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                <SortableContext
+                  items={services.map((s) => s.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {services.map((service: any) => (
+                    <SortableRow
+                      key={service.id}
+                      service={service}
+                      onToggleStatus={toggleServiceStatus}
+                      onEdit={openEditModal}
+                      onOpenOptions={openOptionsModal}
+                    />
+                  ))}
+                </SortableContext>
+              </tbody>
+            </table>
+
+            {services.length === 0 && (
+              <div className="text-center py-12 text-gray-600">등록된 서비스가 없습니다.</div>
+            )}
+          </DndContext>
+        </div>
       </div>
     </div>
   )

@@ -1,13 +1,5 @@
 import { ReactNode } from 'react'
-import {
-  LayoutDashboard,
-  Wrench,
-  Gamepad2,
-  DollarSign,
-  ClipboardList,
-  Star,
-  LogOut,
-} from 'lucide-react'
+import { LayoutDashboard, Wrench, Gamepad2, ClipboardList, Star, LogOut } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -19,7 +11,6 @@ const navItems = [
   { id: 'dashboard', label: '대시보드', icon: LayoutDashboard },
   { id: 'services', label: '서비스 관리', icon: Wrench },
   { id: 'controllers', label: '컨트롤러 모델', icon: Gamepad2 },
-  { id: 'pricing', label: '가격 설정', icon: DollarSign },
   { id: 'repairs', label: '수리 신청', icon: ClipboardList },
   { id: 'reviews', label: '리뷰 관리', icon: Star },
 ]

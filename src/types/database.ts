@@ -81,6 +81,76 @@ export interface Database {
           updated_at?: string
         }
       }
+      controller_services: {
+        Row: {
+          id: string
+          controller_model_id: string
+          service_id: string
+          name: string
+          description: string
+          base_price: number
+          is_active: boolean
+          display_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          controller_model_id: string
+          service_id: string
+          name: string
+          description: string
+          base_price: number
+          is_active?: boolean
+          display_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          controller_model_id?: string
+          service_id?: string
+          name?: string
+          description?: string
+          base_price?: number
+          is_active?: boolean
+          display_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      controller_service_options: {
+        Row: {
+          id: string
+          controller_service_id: string
+          option_name: string
+          option_description: string
+          additional_price: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          controller_service_id: string
+          option_name: string
+          option_description: string
+          additional_price?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          controller_service_id?: string
+          option_name?: string
+          option_description?: string
+          additional_price?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
       repair_requests: {
         Row: {
           id: string
@@ -401,9 +471,16 @@ export type ControllerServicePricing =
 export type ControllerOptionPricing =
   Database['public']['Tables']['controller_option_pricing']['Row']
 export type AdminUser = Database['public']['Tables']['admin_users']['Row']
+export type ControllerService = Database['public']['Tables']['controller_services']['Row']
+export type ControllerServiceOption =
+  Database['public']['Tables']['controller_service_options']['Row']
 
 export interface ServiceWithOptions extends Service {
   options?: ServiceOption[]
+}
+
+export interface ControllerServiceWithOptions extends ControllerService {
+  options?: ControllerServiceOption[]
 }
 
 export interface RepairRequestWithServices extends RepairRequest {

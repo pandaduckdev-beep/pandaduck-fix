@@ -15,22 +15,24 @@ import { toast } from 'sonner'
 interface AddServiceModalProps {
   isOpen: boolean
   onClose: () => void
+  controllerModelId: string
   onAdd: (service: {
     name: string
     service_id: string
     description: string
     base_price: number
-    duration: string
-    warranty: string
-    features: any[]
-    process: any[]
-    image_url: string | null
     is_active: boolean
     display_order: number
+    controller_model_id: string
   }) => Promise<void>
 }
 
-export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps) {
+export function AddServiceModal({
+  isOpen,
+  onClose,
+  controllerModelId,
+  onAdd,
+}: AddServiceModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     service_id: '',
@@ -40,6 +42,11 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!controllerModelId) {
+      toast.error('컨트롤러 모델을 먼저 선택해주세요.')
+      return
+    }
 
     if (!formData.name.trim()) {
       toast.error('서비스명을 입력해주세요.')
@@ -57,13 +64,9 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
         service_id: formData.service_id,
         description: formData.description,
         base_price: Number(formData.base_price) || 0,
-        duration: '1-2일',
-        warranty: '30일',
-        features: [],
-        process: [],
-        image_url: null,
         is_active: true,
         display_order: 0,
+        controller_model_id: controllerModelId,
       })
 
       setFormData({ name: '', service_id: '', description: '', base_price: 0 })
