@@ -1,6 +1,40 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { X, Pencil, Trash2, Check as CheckIcon } from 'lucide-react'
+import {
+  X,
+  Pencil,
+  Trash2,
+  Check as CheckIcon,
+  Zap,
+  CircuitBoard,
+  Plus,
+  Battery,
+  Wrench,
+  Palette,
+  Gamepad2,
+  Cpu,
+  Settings,
+  Cog,
+  Hammer,
+  Keyboard,
+  BatteryCharging,
+  Power,
+  Shield,
+  CheckCircle,
+  Award,
+  Trophy,
+  Medal,
+  Gauge,
+  Activity,
+  RefreshCw,
+  Package,
+  Truck,
+  Clock,
+  Paintbrush,
+  Brush,
+  Sparkles,
+  Star,
+} from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -58,6 +92,40 @@ export function EditServiceModal({
   const [uploading, setUploading] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [isIconSelectorOpen, setIsIconSelectorOpen] = useState(false)
+
+  const iconOptions = [
+    { name: 'controller', icon: Gamepad2, category: 'controller' },
+    { name: 'cpu', icon: Cpu, category: 'electronics' },
+    { name: 'sensor', icon: Zap, category: 'electronics' },
+    { name: 'circuit', icon: CircuitBoard, category: 'electronics' },
+    { name: 'button', icon: Keyboard, category: 'input' },
+    { name: 'plus', icon: Plus, category: 'input' },
+    { name: 'battery', icon: Battery, category: 'power' },
+    { name: 'charging', icon: BatteryCharging, category: 'power' },
+    { name: 'power', icon: Power, category: 'power' },
+    { name: 'voltage', icon: Zap, category: 'power' },
+    { name: 'repair', icon: Wrench, category: 'tools' },
+    { name: 'hammer', icon: Hammer, category: 'tools' },
+    { name: 'settings', icon: Cog, category: 'tools' },
+    { name: 'tool', icon: Settings, category: 'tools' },
+    { name: 'refresh', icon: RefreshCw, category: 'tools' },
+    { name: 'gauge', icon: Gauge, category: 'tools' },
+    { name: 'activity', icon: Activity, category: 'tools' },
+    { name: 'paint', icon: Palette, category: 'custom' },
+    { name: 'paintbrush', icon: Paintbrush, category: 'custom' },
+    { name: 'brush', icon: Brush, category: 'custom' },
+    { name: 'sparkle', icon: Sparkles, category: 'custom' },
+    { name: 'star', icon: Star, category: 'custom' },
+    { name: 'shield', icon: Shield, category: 'quality' },
+    { name: 'check', icon: CheckCircle, category: 'quality' },
+    { name: 'clock', icon: Clock, category: 'time' },
+    { name: 'package', icon: Package, category: 'delivery' },
+    { name: 'truck', icon: Truck, category: 'delivery' },
+    { name: 'award', icon: Award, category: 'achievement' },
+    { name: 'trophy', icon: Trophy, category: 'achievement' },
+    { name: 'medal', icon: Medal, category: 'achievement' },
+  ]
 
   useEffect(() => {
     if (service) {
@@ -250,13 +318,55 @@ export function EditServiceModal({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="service_id">서비스 ID *</Label>
-            <Input
-              id="service_id"
-              value={formData.service_id}
-              onChange={(e) => setFormData({ ...formData, service_id: e.target.value })}
-              placeholder="예: hall-effect"
-              required
-            />
+            <div className="flex gap-2">
+              <Input
+                id="service_id"
+                value={formData.service_id}
+                onChange={(e) => setFormData({ ...formData, service_id: e.target.value })}
+                placeholder="예: hall-effect"
+                required
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => setIsIconSelectorOpen(!isIconSelectorOpen)}
+              >
+                <Gamepad2 className="w-4 h-4" />
+              </Button>
+            </div>
+            {isIconSelectorOpen && (
+              <div className="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-xs text-gray-500 mb-3">원하는 아이콘을 클릭하여 선택하세요</p>
+                <div className="grid grid-cols-8 gap-2 max-h-64 overflow-y-auto">
+                  {iconOptions.map((option, index) => {
+                    const IconComponent = option.icon
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => {
+                          setFormData({
+                            ...formData,
+                            service_id: option.name,
+                          })
+                          setIsIconSelectorOpen(false)
+                        }}
+                        className={`p-3 rounded-lg hover:bg-blue-100 transition-colors ${
+                          formData.service_id === option.name
+                            ? 'bg-blue-100 ring-2 ring-blue-500'
+                            : 'bg-white'
+                        }`}
+                        title={option.name}
+                      >
+                        <IconComponent className="w-5 h-5" />
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
