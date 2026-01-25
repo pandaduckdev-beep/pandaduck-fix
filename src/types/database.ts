@@ -88,6 +88,13 @@ export interface Database {
           service_id: string
           name: string
           description: string
+          subtitle: string | null
+          detailed_description: string | null
+          duration: string
+          warranty: string
+          features: Json
+          process_steps: Json
+          image_url: string | null
           base_price: number
           is_active: boolean
           display_order: number
@@ -100,6 +107,13 @@ export interface Database {
           service_id: string
           name: string
           description: string
+          subtitle?: string | null
+          detailed_description?: string | null
+          duration?: string
+          warranty?: string
+          features?: Json
+          process_steps?: Json
+          image_url?: string | null
           base_price: number
           is_active?: boolean
           display_order?: number
@@ -112,6 +126,13 @@ export interface Database {
           service_id?: string
           name?: string
           description?: string
+          subtitle?: string | null
+          detailed_description?: string | null
+          duration?: string
+          warranty?: string
+          features?: Json
+          process_steps?: Json
+          image_url?: string | null
           base_price?: number
           is_active?: boolean
           display_order?: number

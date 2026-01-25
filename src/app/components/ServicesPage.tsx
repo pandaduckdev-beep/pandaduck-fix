@@ -1,68 +1,114 @@
-import { Menu, Zap, CircuitBoard, Plus, Battery, Wrench, Palette } from "lucide-react";
-import { Footer } from "@/app/components/Footer";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { MenuDrawer } from "@/app/components/MenuDrawer";
-import { ServiceDetailModal } from "@/app/components/ServiceDetailModal";
-import { useServices } from "@/hooks/useServices";
-import type { ServiceOption } from "@/types/database";
+import { Menu, Zap, CircuitBoard, Plus, Battery, Wrench, Palette } from 'lucide-react'
+import { Footer } from '@/app/components/Footer'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { MenuDrawer } from '@/app/components/MenuDrawer'
+import { ServiceDetailModal } from '@/app/components/ServiceDetailModal'
+import { fetchControllerModels, fetchControllerServices } from '@/lib/api'
+import type {
+  ControllerModel,
+  ControllerServiceOption,
+  ControllerServiceWithOptions,
+} from '@/types/database'
 
 // Icon mapping helper
 const iconMap: Record<string, React.ReactNode> = {
   'hall-effect': <Zap className="w-6 h-6" />,
   'clicky-buttons': <CircuitBoard className="w-6 h-6" />,
   'back-buttons': <Plus className="w-6 h-6" />,
-  'battery': <Battery className="w-6 h-6" />,
+  battery: <Battery className="w-6 h-6" />,
   'hair-trigger': <Wrench className="w-6 h-6" />,
   'custom-shell': <Palette className="w-6 h-6" />,
-};
+}
 
 interface ServiceDetail {
-  id: string;
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  description: string;
-  features: string[];
-  process: string[];
-  price: string;
-  duration: string;
-  warranty: string;
-  image?: string;
+  id: string
+  icon: React.ReactNode
+  title: string
+  subtitle: string
+  description: string
+  features: string[]
+  process: string[]
+  price: string
+  duration: string
+  warranty: string
+  image?: string
 }
 
 export function ServicesPage() {
-  const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<ServiceDetail | null>(null);
-  const { services, loading } = useServices();
+  const navigate = useNavigate()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [selectedService, setSelectedService] = useState<ServiceDetail | null>(null)
+  const [services, setServices] = useState<ControllerServiceWithOptions[]>([])
+  const [controllers, setControllers] = useState<ControllerModel[]>([])
+  const [selectedController, setSelectedController] = useState<string>('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadControllers()
+  }, [])
+
+  useEffect(() => {
+    loadServices()
+  }, [selectedController])
+
+  const loadControllers = async () => {
+    try {
+      const data = await fetchControllerModels()
+      setControllers(data)
+      if (data.length > 0 && !selectedController) {
+        setSelectedController(data[0].id)
+      }
+    } catch (error) {
+      console.error('Failed to load controllers:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadServices = async () => {
+    if (!selectedController) {
+      setServices([])
+      return
+    }
+
+    try {
+      setLoading(true)
+      const data = await fetchControllerServices(selectedController)
+      setServices(data)
+    } catch (error) {
+      console.error('Failed to load services:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleInfoClick = (serviceId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const service = services.find(s => s.service_id === serviceId);
+    e.stopPropagation()
+    const service = services.find((s) => s.service_id === serviceId)
     if (service) {
       // Transform database service to ServiceDetail format
-      const serviceDetail = {
+      const serviceDetail: ServiceDetail = {
         id: service.service_id,
         icon: iconMap[service.service_id] || <Zap className="w-6 h-6" />,
         title: service.name,
         subtitle: service.subtitle || '',
         description: service.detailed_description || service.description,
-        features: service.features || [],
-        process: service.process_steps || [],
+        features: (service.features as string[]) || [],
+        process: (service.process_steps as string[]) || [],
         price: `₩${service.base_price.toLocaleString()}`,
         duration: service.duration || '1일',
         warranty: service.warranty || '1년',
-        image: service.image_url,
-      };
-      setSelectedService(serviceDetail);
+        image: service.image_url || undefined,
+      }
+      setSelectedService(serviceDetail)
     }
-  };
+  }
 
   const handleBookService = () => {
-    setSelectedService(null);
-    navigate('/services');
-  };
+    setSelectedService(null)
+    navigate('/services')
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -76,7 +122,7 @@ export function ServicesPage() {
           >
             PandaDuck Fix
           </button>
-          <button 
+          <button
             onClick={() => setIsMenuOpen(true)}
             className="p-2 hover:bg-[#F5F5F7] rounded-full transition-colors"
           >
@@ -86,20 +132,37 @@ export function ServicesPage() {
       </nav>
 
       {/* Menu Drawer */}
-      <MenuDrawer
-        isOpen={isMenuOpen}
-        onClose={() => setIsMenuOpen(false)}
-      />
+      <MenuDrawer isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
       {/* Hero */}
-      <section className="max-w-md mx-auto px-6 pt-12 pb-8">
+      <section className="max-w-md mx-auto px-6 pt-12 pb-4">
         <h1 className="text-4xl mb-4" style={{ fontWeight: 700 }}>
           제공 서비스
         </h1>
         <p className="text-lg text-[#86868B]">
-          프로게이머와 열정적인 게이머를 위한<br />
+          프로게이머와 열정적인 게이머를 위한
+          <br />
           최고 품질의 커스터마이징 서비스
         </p>
+      </section>
+
+      <section className="max-w-md mx-auto px-6 pb-6">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          {controllers.map((controller) => (
+            <button
+              key={controller.id}
+              onClick={() => setSelectedController(controller.id)}
+              disabled={loading}
+              className={`px-4 py-2 rounded-lg whitespace-nowrap transition ${
+                selectedController === controller.id
+                  ? 'bg-black text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {controller.model_name}
+            </button>
+          ))}
+        </div>
       </section>
 
       {/* Services Grid */}
@@ -113,78 +176,62 @@ export function ServicesPage() {
 
         {!loading && (
           <div className="space-y-4">
-            {services.map((service, _index) => {
-              // Supabase 데이터인지 로컬 데이터인지 확인
-              const isSupabaseData = 'service_id' in service;
-
-              const serviceId = isSupabaseData ? service.service_id : service.id;
-              const serviceName = service.name;
-              const serviceDescription = service.description;
-              const servicePrice = isSupabaseData ? service.base_price.toLocaleString() + '원' : service.price;
-              const serviceOptions = isSupabaseData ? service.options : service.options;
-
-              return (
-                <div
-                  key={isSupabaseData ? service.id : service.id}
-                  className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                      {isSupabaseData ? (iconMap[service.service_id] || <Zap className="w-6 h-6" />) : service.icon}
+            {services.map((service) => (
+              <div key={service.id} className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+                    {iconMap[service.service_id] || <Zap className="w-6 h-6" />}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg mb-1" style={{ fontWeight: 600 }}>
+                      {service.name}
+                    </h3>
+                    <p className="text-sm text-[#86868B] mb-3">{service.description}</p>
+                    <div className="text-xl mb-3" style={{ fontWeight: 700 }}>
+                      ₩{service.base_price.toLocaleString()}원
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg mb-1" style={{ fontWeight: 600 }}>
-                        {serviceName}
-                      </h3>
-                      <p className="text-sm text-[#86868B] mb-3">
-                        {serviceDescription}
-                      </p>
-                      <div className="text-xl mb-3" style={{ fontWeight: 700 }}>
-                        {servicePrice}
-                      </div>
 
-                      {/* Options */}
-                      {serviceOptions && serviceOptions.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-[rgba(0,0,0,0.1)]">
-                          <p className="text-sm mb-3" style={{ fontWeight: 600 }}>
-                            선택 옵션
-                          </p>
-                          <div className="space-y-2">
-                            {serviceOptions.map((option: ServiceOption, i: number) => (
-                              <div
-                                key={isSupabaseData ? option.id : i}
-                                className="bg-white rounded-[16px] p-3 flex items-center justify-between"
-                              >
-                                <div>
-                                  <div className="text-sm" style={{ fontWeight: 600 }}>
-                                    {isSupabaseData ? option.option_name : option.name}
-                                  </div>
-                                  <div className="text-xs text-[#86868B]">
-                                    {isSupabaseData ? option.option_description : option.description}
-                                  </div>
+                    {/* Options */}
+                    {service.options && service.options.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-[rgba(0,0,0,0.1)]">
+                        <p className="text-sm mb-3" style={{ fontWeight: 600 }}>
+                          선택 옵션
+                        </p>
+                        <div className="space-y-2">
+                          {service.options.map((option: ControllerServiceOption) => (
+                            <div
+                              key={option.id}
+                              className="bg-white rounded-[16px] p-3 flex items-center justify-between"
+                            >
+                              <div>
+                                <div className="text-sm" style={{ fontWeight: 600 }}>
+                                  {option.option_name}
                                 </div>
-                                <div className="text-sm" style={{ fontWeight: 700 }}>
-                                  {isSupabaseData
-                                    ? (option.additional_price === 0 ? '기본' : `+${option.additional_price.toLocaleString()}원`)
-                                    : (option.price === 0 ? '기본' : `+${option.price.toLocaleString()}원`)}
+                                <div className="text-xs text-[#86868B]">
+                                  {option.option_description}
                                 </div>
                               </div>
-                            ))}
-                          </div>
+                              <div className="text-sm" style={{ fontWeight: 700 }}>
+                                {option.additional_price === 0
+                                  ? '기본'
+                                  : `+${option.additional_price.toLocaleString()}원`}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
-                  <button
-                    onClick={(e) => handleInfoClick(serviceId, e)}
-                    className="w-full bg-[#000000] text-white py-2 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-4"
-                    style={{ fontWeight: 600 }}
-                  >
-                    상세 정보
-                  </button>
                 </div>
-              );
-            })}
+                <button
+                  onClick={(e) => handleInfoClick(service.service_id, e)}
+                  className="w-full bg-[#000000] text-white py-2 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-4"
+                  style={{ fontWeight: 600 }}
+                >
+                  상세 정보
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </section>
@@ -196,7 +243,8 @@ export function ServicesPage() {
             지금 바로 시작하세요
           </h3>
           <p className="text-[#86868B]">
-            전문가의 손길로 완벽하게 커스터마이징된<br />
+            전문가의 손길로 완벽하게 커스터마이징된
+            <br />
             나만의 컨트롤러를 만나보세요
           </p>
           <button
@@ -219,5 +267,5 @@ export function ServicesPage() {
         onBookService={handleBookService}
       />
     </div>
-  );
+  )
 }

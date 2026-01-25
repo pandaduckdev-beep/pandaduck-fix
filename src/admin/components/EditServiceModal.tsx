@@ -30,6 +30,13 @@ export function EditServiceModal({
     service_id: '',
     name: '',
     description: '',
+    subtitle: '',
+    detailed_description: '',
+    duration: '1일',
+    warranty: '1년',
+    features: [] as string[],
+    process_steps: [] as string[],
+    image_url: '',
     base_price: 0,
   })
 
@@ -39,6 +46,13 @@ export function EditServiceModal({
         service_id: service.service_id || '',
         name: service.name || '',
         description: service.description || '',
+        subtitle: service.subtitle || '',
+        detailed_description: service.detailed_description || '',
+        duration: service.duration || '1일',
+        warranty: service.warranty || '1년',
+        features: (service.features as string[]) || [],
+        process_steps: (service.process_steps as string[]) || [],
+        image_url: service.image_url || '',
         base_price: service.base_price || 0,
       })
     }
@@ -128,6 +142,89 @@ export function EditServiceModal({
               placeholder="0"
               min="0"
               required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="subtitle">부제목</Label>
+            <Input
+              id="subtitle"
+              value={formData.subtitle}
+              onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+              placeholder="서비스 부제목 (선택사항)"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="detailed_description">상세 설명</Label>
+            <textarea
+              id="detailed_description"
+              value={formData.detailed_description}
+              onChange={(e) => setFormData({ ...formData, detailed_description: e.target.value })}
+              placeholder="서비스에 대한 상세 설명"
+              className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="duration">작업 소요 시간</Label>
+            <Input
+              id="duration"
+              value={formData.duration}
+              onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+              placeholder="예: 1일, 2~3일"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="warranty">보증 기간</Label>
+            <Input
+              id="warranty"
+              value={formData.warranty}
+              onChange={(e) => setFormData({ ...formData, warranty: e.target.value })}
+              placeholder="예: 1년, 6개월"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="features">주요 특징 (한 줄에 하나씩)</Label>
+            <textarea
+              id="features"
+              value={formData.features.join('\n')}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  features: e.target.value.split('\n').filter((line) => line.trim() !== ''),
+                })
+              }
+              placeholder="예:&#10;정밀한 센서 교체&#10;정품 호환 부품 사용&#10;전문 기사 작업"
+              className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="process_steps">작업 과정 (한 줄에 하나씩)</Label>
+            <textarea
+              id="process_steps"
+              value={formData.process_steps.join('\n')}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  process_steps: e.target.value.split('\n').filter((line) => line.trim() !== ''),
+                })
+              }
+              placeholder="예:&#10;1. 센서 분해&#10;2. 기존 센서 제거&#10;3. 새 센서 장착&#10;4. 테스트 검사"
+              className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="image_url">이미지 URL</Label>
+            <Input
+              id="image_url"
+              value={formData.image_url}
+              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+              placeholder="https://example.com/image.jpg"
             />
           </div>
 
