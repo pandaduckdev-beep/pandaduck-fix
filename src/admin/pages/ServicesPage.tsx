@@ -48,10 +48,6 @@ function SortableRow({ service, onToggleStatus, onEdit, onOpenOptions }: Sortabl
         <div
           {...attributes}
           {...listeners}
-          onPointerDownCapture={(e) => {
-            // Prevent event bubbling to avoid triggering browser shortcuts
-            e.preventDefault()
-          }}
           className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded inline-flex"
         >
           <GripVertical className="w-5 h-5 text-gray-400" />
@@ -227,6 +223,7 @@ export function ServicesPage() {
 
       if (error) throw error
 
+      // 옵션 목록을 설정하고 모달을 엽니다
       setSelectedService(data)
       setIsOptionsModalOpen(true)
     } catch (error) {
@@ -244,6 +241,7 @@ export function ServicesPage() {
         .single()
 
       if (error) throw error
+
       setSelectedService(data)
     } catch (error) {
       console.error('Failed to refresh service:', error)
@@ -370,7 +368,7 @@ export function ServicesPage() {
           setSelectedService(null)
         }}
         service={selectedService}
-        options={selectedService?.options || []}
+        options={selectedService?.controller_service_options || []}
         onAddOption={handleAddOption}
         onUpdateOption={handleUpdateOption}
         onDeleteOption={handleDeleteOption}

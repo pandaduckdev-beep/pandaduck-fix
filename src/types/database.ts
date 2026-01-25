@@ -502,6 +502,7 @@ export interface ServiceWithOptions extends Service {
 
 export interface ControllerServiceWithOptions extends ControllerService {
   options?: ControllerServiceOption[]
+  controller_service_options?: ControllerServiceOption[]
 }
 
 export interface RepairRequestWithServices extends RepairRequest {

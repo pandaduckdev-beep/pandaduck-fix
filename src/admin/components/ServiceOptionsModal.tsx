@@ -45,6 +45,8 @@ export function ServiceOptionsModal({
     additional_price?: number
   } | null>(null)
 
+  const currentOptions = options || []
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -107,13 +109,13 @@ export function ServiceOptionsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col">
         <DialogHeader>
           <DialogTitle>서비스 옵션 관리</DialogTitle>
         </DialogHeader>
 
-        {service && (
-          <div className="space-y-6">
+        {service ? (
+          <div className="flex-1 overflow-y-auto space-y-6 px-1 pb-1">
             {/* 서비스 정보 */}
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="font-semibold mb-2">{service.name}</h3>
@@ -178,14 +180,14 @@ export function ServiceOptionsModal({
 
             {/* 옵션 목록 */}
             <div className="space-y-2">
-              <h4 className="font-medium">등록된 옵션 ({options.length}개)</h4>
-              {options.length === 0 ? (
+              <h4 className="font-medium">등록된 옵션 ({currentOptions.length}개)</h4>
+              {currentOptions.length === 0 ? (
                 <div className="text-center py-8 text-gray-500 border border-dashed border-gray-300 rounded-lg">
                   등록된 옵션이 없습니다.
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {options.map((option: any) => (
+                  {currentOptions.map((option: any) => (
                     <div
                       key={option.id}
                       className="bg-white border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition"
@@ -290,6 +292,15 @@ export function ServiceOptionsModal({
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto flex items-center justify-center py-12">
+            <div className="text-center text-gray-500">
+              <p className="text-lg mb-2">서비스를 선택해주세요</p>
+              <p className="text-sm">
+                먼저 관리할 서비스를 선택한 후 옵션 관리를 진행할 수 있습니다.
+              </p>
             </div>
           </div>
         )}
