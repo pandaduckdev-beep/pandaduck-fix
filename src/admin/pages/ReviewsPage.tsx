@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { Search, Eye, CheckCircle, XCircle, Trash2, Star, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Review } from '@/types/database'
+import { getControllerModelById } from '@/services/pricingService'
 
 type ReviewStatus = 'all' | 'pending' | 'approved'
 
@@ -15,6 +16,8 @@ const STATUS_CONFIG: Record<ReviewStatus, { label: string; color: string }> = {
 interface ReviewWithRequest extends Review {
   customer_phone?: string
   controller_model?: string
+  controller_model_name?: string
+  services_list?: string
 }
 
 export function ReviewsPage() {
@@ -51,10 +54,48 @@ export function ReviewsPage() {
             .eq('id', review.repair_request_id)
             .single()
 
+          // Get controller model name
+          let controllerModelName = repairRequest?.controller_model
+          if (repairRequest?.controller_model) {
+            // controller_model is UUID, so query directly from controller_models table
+            const { data: modelData } = await supabase
+              .from('controller_models')
+              .select('model_name')
+              .eq('id', repairRequest.controller_model)
+              .single()
+
+            if (modelData) {
+              controllerModelName = modelData.model_name
+            }
+          }
+
+          // Get services list
+          let servicesList = review.service_name || ''
+          if (review.repair_request_id) {
+            const { data: requestServices } = await supabase
+              .from('repair_request_services')
+              .select('service_id')
+              .eq('repair_request_id', review.repair_request_id)
+
+            if (requestServices && requestServices.length > 0) {
+              const serviceIds = requestServices.map((s) => s.service_id)
+              const { data: services } = await supabase
+                .from('controller_services')
+                .select('name')
+                .in('id', serviceIds)
+
+              if (services && services.length > 0) {
+                servicesList = services.map((s) => s.name).join(', ')
+              }
+            }
+          }
+
           return {
             ...review,
             customer_phone: repairRequest?.customer_phone,
             controller_model: repairRequest?.controller_model,
+            controller_model_name: controllerModelName,
+            services_list: servicesList,
           }
         })
       )
@@ -198,29 +239,18 @@ export function ReviewsPage() {
             {filteredReviews.map((review) => (
               <tr key={review.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
-                  <div>
-                    <div className="font-semibold text-gray-900">{review.customer_name}</div>
-                    {review.customer_phone && (
-                      <div className="text-sm text-gray-600">{review.customer_phone}</div>
-                    )}
-                  </div>
+                  <div className="font-semibold text-gray-900">{review.customer_name}</div>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-700">{review.service_name}</td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                    <span className="ml-2 text-sm font-semibold">{review.rating}</span>
-                  </div>
+                <td className="px-6 py-4 text-sm text-gray-700">
+                  {review.services_list || review.service_name || '-'}
                 </td>
                 <td className="px-6 py-4">
-                  <div className="max-w-xs truncate text-sm text-gray-700">{review.content}</div>
+                  <span className="text-sm font-semibold">{review.rating}점</span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="max-w-[200px] truncate text-sm text-gray-700">
+                    {review.content}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <span
@@ -340,10 +370,10 @@ export function ReviewsPage() {
                       <span className="font-semibold">{selectedReview.customer_phone}</span>
                     </div>
                   )}
-                  {selectedReview.controller_model && (
+                  {selectedReview.controller_model_name && (
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">컨트롤러</span>
-                      <span className="font-semibold">{selectedReview.controller_model}</span>
+                      <span className="font-semibold">{selectedReview.controller_model_name}</span>
                     </div>
                   )}
                 </div>
@@ -355,7 +385,9 @@ export function ReviewsPage() {
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">서비스</span>
-                    <span className="font-semibold">{selectedReview.service_name}</span>
+                    <span className="font-semibold">
+                      {selectedReview.services_list || selectedReview.service_name || '-'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">평점</span>

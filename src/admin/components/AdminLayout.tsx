@@ -19,13 +19,17 @@ interface AdminLayoutProps {
 
 const navItems = [
   { id: 'dashboard', label: '대시보드', icon: LayoutDashboard },
+  { divider: true },
+  { id: 'repairs', label: '수리 신청', icon: ClipboardList },
+  { divider: true },
+  { id: 'reviews', label: '리뷰 관리', icon: Star },
+  { divider: true },
   { id: 'revenue', label: '매출 통계', icon: TrendingUp },
   { id: 'expenses', label: '지출 관리', icon: Receipt },
-  { id: 'services', label: '서비스 관리', icon: Wrench },
+  { divider: true },
   { id: 'controllers', label: '컨트롤러 모델', icon: Gamepad2 },
+  { id: 'services', label: '서비스 관리', icon: Wrench },
   { id: 'discounts', label: '할인 설정', icon: Tag },
-  { id: 'repairs', label: '수리 신청', icon: ClipboardList },
-  { id: 'reviews', label: '리뷰 관리', icon: Star },
 ]
 
 export function AdminLayout({ children }: AdminLayoutProps) {
@@ -44,7 +48,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         <nav className="p-4 space-y-1">
-          {navItems.map((item) => {
+          {navItems.map((item, index) => {
+            // Render divider
+            if ('divider' in item && item.divider) {
+              return <div key={`divider-${index}`} className="h-px bg-gray-200 my-2"></div>
+            }
+
+            // Render menu item
             const Icon = item.icon
             const isActive = currentPage === item.id
 

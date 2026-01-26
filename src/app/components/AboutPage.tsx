@@ -49,7 +49,7 @@ export function AboutPage() {
       {/* Brand Image */}
       <section className="max-w-md mx-auto px-6 pb-8">
         <img
-          src="https://images.unsplash.com/photo-1556607173-eca49c3c4f47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMG1pbmltYWwlMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc2ODkyNzE5NHww&ixlib=rb-4.1.0&q=80&w=1080"
+          src="https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
           alt="PandaDuck Fix Workshop"
           className="w-full h-64 object-cover rounded-[28px]"
         />
@@ -62,12 +62,15 @@ export function AboutPage() {
             우리의 이야기
           </h2>
           <p className="text-sm text-[#86868B] leading-relaxed">
-            PandaDuck Fix는 2021년, 게이밍을 사랑하는 엔지니어들이 모여 시작되었습니다. 
-            우리는 단순히 컨트롤러를 수리하는 것을 넘어, 게이머들에게 최상의 경험을 선사하고자 합니다.
+            PandaDuck Fix는 게이밍 컨트롤러 수리와 커스터마이징에 대한 열정으로 시작되었습니다.
+            비록 이제 막 첫걸음을 내딛었지만, 우리는 모든 작업에 최선을 다하고 있습니다.
           </p>
           <p className="text-sm text-[#86868B] leading-relaxed">
-            3년간 1만 개 이상의 컨트롤러를 커스터마이징하며 쌓은 노하우로, 
-            이제는 프로게이머와 스트리머들이 신뢰하는 브랜드로 성장했습니다.
+            단순한 수리를 넘어, 게이머 여러분께 최고의 게이밍 경험을 선사하는 것이 우리의 목표입니다.
+            한 대 한 대 정성을 다해 작업하며, 고객 만족을 최우선으로 생각합니다.
+          </p>
+          <p className="text-sm text-[#86868B] leading-relaxed">
+            함께 성장해나갈 여러분의 소중한 지지와 신뢰를 부탁드립니다.
           </p>
         </div>
       </section>
@@ -128,31 +131,27 @@ export function AboutPage() {
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Mission */}
       <section className="max-w-md mx-auto px-6 pb-8">
         <div className="bg-[#000000] text-white rounded-[28px] p-8">
           <h2 className="text-2xl mb-6 text-center" style={{ fontWeight: 700 }}>
-            숫자로 보는 PandaDuck Fix
+            우리의 약속
           </h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-6">
             <div className="text-center">
-              <div className="text-3xl mb-2" style={{ fontWeight: 700 }}>
-                10,000+
+              <div className="text-5xl mb-3" style={{ fontWeight: 700 }}>
+                100%
               </div>
-              <p className="text-sm text-[#86868B]">누적 작업</p>
+              <p className="text-sm text-[#86868B]">
+                모든 작업에<br />최선을 다하는 마음
+              </p>
             </div>
-            <div className="text-center">
-              <div className="text-3xl mb-2" style={{ fontWeight: 700 }}>
-                5.0
-              </div>
-              <p className="text-sm text-[#86868B]">평균 평점</p>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl mb-2" style={{ fontWeight: 700 }}>
-                99%
-              </div>
-              <p className="text-sm text-[#86868B]">재방문율</p>
-            </div>
+            <div className="h-px bg-[rgba(255,255,255,0.1)]"></div>
+            <p className="text-center text-sm text-[#86868B] leading-relaxed">
+              여러분의 소중한 컨트롤러를<br />
+              최고의 상태로 되돌려드리기 위해<br />
+              항상 노력하겠습니다
+            </p>
           </div>
         </div>
       </section>
@@ -164,11 +163,11 @@ export function AboutPage() {
             함께 시작해볼까요?
           </h3>
           <p className="text-[#86868B]">
-            프리미엄 커스터마이징 서비스를<br />
-            지금 바로 경험해보세요
+            정성스러운 수리와 커스터마이징으로<br />
+            새로운 게이밍 경험을 만나보세요
           </p>
           <button
-            onClick={() => onNavigate('service')}
+            onClick={() => navigate('/controllers')}
             className="w-full bg-[#000000] text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-6"
             style={{ fontWeight: 600 }}
           >

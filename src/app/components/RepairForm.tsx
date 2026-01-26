@@ -14,6 +14,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import type { ServiceSelectionData } from '@/app/App'
 import { createRepairRequest } from '@/lib/api'
 import { getControllerModelName } from '@/utils/controllerModels'
+import { getControllerModelById } from '@/services/pricingService'
 import { toast } from 'sonner'
 
 /**
@@ -80,12 +81,21 @@ export function RepairForm() {
     setShowConfirmModal(false)
 
     try {
+      // Convert model_id to UUID
+      let controllerModelUuid = controllerModel || 'DualSense'
+      if (controllerModel && !controllerModel.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+        const model = await getControllerModelById(controllerModel)
+        if (model) {
+          controllerModelUuid = model.id
+        }
+      }
+
       // Supabase에 수리 신청 데이터 저장
       await createRepairRequest({
         customerName: formData.name,
         customerPhone: formData.phone,
         customerEmail: undefined,
-        controllerModel: controllerModel || 'DualSense', // 선택한 기종 사용
+        controllerModel: controllerModelUuid, // UUID 사용
         issueDescription: `고객 주소: ${formData.address}`,
         services: selectionData.services.map((service) => ({
           serviceId: service.uuid, // UUID 사용
@@ -269,7 +279,7 @@ export function RepairForm() {
               <div className="flex-1">
                 <p className="text-sm text-[#86868B] mb-1">보내실 주소</p>
                 <p className="text-sm" style={{ fontWeight: 600 }}>
-                  서울특별시 강남구 테헤란로 123, 4층
+                  경기도 광주시 태전동
                   <br />
                   PandaDuck Fix (우편번호: 06234)
                 </p>
@@ -283,7 +293,7 @@ export function RepairForm() {
               <div className="flex-1">
                 <p className="text-sm text-[#86868B] mb-1">받는 사람</p>
                 <p className="text-sm" style={{ fontWeight: 600 }}>
-                  PandaDuck Fix 수리센터
+                  PandaDuck Fix
                 </p>
               </div>
             </div>
@@ -295,7 +305,7 @@ export function RepairForm() {
               <div className="flex-1">
                 <p className="text-sm text-[#86868B] mb-1">연락처</p>
                 <p className="text-sm" style={{ fontWeight: 600 }}>
-                  02-1234-5678
+                  010-3971-9794
                 </p>
               </div>
             </div>
@@ -382,7 +392,7 @@ export function RepairForm() {
             <p className="text-center text-[#86868B] mb-6 leading-relaxed">
               편의점 택배 예약 서비스는 현재 준비 중입니다.
               <br />
-              <span style={{ fontWeight: 600 }}>위 주소로 직접 보내주시기 바랍니다.</span>
+              <span style={{ fontWeight: 600 }}>아래 주소로 직접 보내주시기 바랍니다.</span>
             </p>
 
             {/* Company Info */}
@@ -394,7 +404,7 @@ export function RepairForm() {
                 </span>
               </div>
               <p className="text-sm leading-relaxed">
-                서울특별시 강남구 테헤란로 123, 4층
+                경기도 광주시 태전동
                 <br />
                 PandaDuck Fix (우편번호: 06234)
               </p>
@@ -624,7 +634,7 @@ export function RepairForm() {
                 <div>
                   <p className="text-[#86868B] text-xs mb-1">보내실 주소</p>
                   <p style={{ fontWeight: 600 }}>
-                    서울특별시 강남구 테헤란로 123, 4층
+                    경기도 광주시 태전동
                     <br />
                     PandaDuck Fix (우편번호: 06234)
                   </p>
@@ -633,11 +643,11 @@ export function RepairForm() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[#86868B] text-xs mb-1">받는 사람</p>
-                    <p style={{ fontWeight: 600 }}>PandaDuck Fix 수리센터</p>
+                    <p style={{ fontWeight: 600 }}>PandaDuck Fix</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[#86868B] text-xs mb-1">연락처</p>
-                    <p style={{ fontWeight: 600 }}>02-1234-5678</p>
+                    <p style={{ fontWeight: 600 }}>010-3971-9794</p>
                   </div>
                 </div>
               </div>

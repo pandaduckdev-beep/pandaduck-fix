@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface MenuDrawerProps {
@@ -73,13 +73,49 @@ export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
           </nav>
 
           {/* Footer in Menu */}
-          <div className="px-6 py-6 border-t border-[rgba(0,0,0,0.05)]">
-            <p className="text-xs text-[#86868B]">
-              고객센터: 1588-0000
-            </p>
-            <p className="text-xs text-[#86868B] mt-1">
-              평일 10:00 - 18:00
-            </p>
+          <div className="border-t border-[rgba(0,0,0,0.05)]">
+            <div className="px-6 py-5">
+              <h4 className="text-xs tracking-wider mb-4" style={{ fontWeight: 700, color: '#1D1D1F' }}>
+                고객지원
+              </h4>
+
+              <div className="space-y-3">
+                {/* Phone */}
+                <a
+                  href="tel:010-3971-9794"
+                  className="flex items-center justify-between p-3 bg-[#F5F5F7] hover:bg-[#E8E8ED] rounded-[16px] transition-colors group"
+                >
+                  <div className="flex-1">
+                    <p className="text-xs text-[#86868B] mb-0.5">전화 문의</p>
+                    <p className="text-base" style={{ fontWeight: 600, color: '#1D1D1F' }}>
+                      010-3971-9794
+                    </p>
+                  </div>
+                  <div className="text-xs text-[#86868B] group-hover:text-[#1D1D1F] transition-colors">
+                    전화하기 →
+                  </div>
+                </a>
+
+                {/* KakaoTalk */}
+                <a
+                  href="https://pf.kakao.com/_your_kakao_id"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full p-3 bg-[#FEE500] hover:bg-[#FDD835] rounded-[16px] transition-all hover:scale-[0.98] active:scale-[0.96]"
+                  style={{ fontWeight: 600 }}
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span className="text-sm">카카오톡 상담</span>
+                </a>
+              </div>
+
+              {/* Business Hours */}
+              <div className="mt-4 pt-4 border-t border-[rgba(0,0,0,0.08)]">
+                <p className="text-xs text-[#86868B] text-center">
+                  평일 10:00 - 18:00
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -167,10 +167,20 @@ export function ServiceSelection() {
 
   const applicableCombos = combos.filter((combo) => {
     const selectedServiceIds = Array.from(selectedServices)
-    if (combo.combo_name.includes('3개 이상') && selectedServiceIds.length >= 3) {
-      return true
+
+    // Check count-based discount (min_service_count > 0)
+    if (combo.min_service_count > 0) {
+      return selectedServiceIds.length >= combo.min_service_count
     }
-    return combo.required_service_ids.every((requiredId) => selectedServiceIds.includes(requiredId))
+
+    // Check specific service combination discount
+    if (combo.required_service_ids && combo.required_service_ids.length > 0) {
+      return combo.required_service_ids.every((requiredId) =>
+        selectedServiceIds.includes(requiredId)
+      )
+    }
+
+    return false
   })
 
   const bestCombo = applicableCombos.reduce<ServiceCombo | null>((best, current) => {
