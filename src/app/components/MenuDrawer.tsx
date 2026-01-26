@@ -98,7 +98,7 @@ export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
 
                 {/* KakaoTalk */}
                 <a
-                  href="https://pf.kakao.com/_your_kakao_id"
+                  href="https://pf.kakao.com/_hwPhX/chat"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full p-3 bg-[#FEE500] hover:bg-[#FDD835] rounded-[16px] transition-all hover:scale-[0.98] active:scale-[0.96]"
