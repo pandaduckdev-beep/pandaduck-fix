@@ -7,6 +7,9 @@ import { ServicesPage } from './pages/ServicesPage'
 import { RepairsPage } from './pages/RepairsPage'
 import { ControllersPage } from './pages/ControllersPage'
 import { ReviewsPage } from './pages/ReviewsPage'
+import { RevenuePage } from './pages/RevenuePage'
+import { ExpensesPage } from './pages/ExpensesPage'
+import { DiscountsPage } from './pages/DiscountsPage'
 
 function AdminContent() {
   const { isAuthenticated, user } = useAuth()
@@ -19,8 +22,11 @@ function AdminContent() {
     <AdminLayout user={user}>
       <Routes>
         <Route index element={<Dashboard />} />
+        <Route path="revenue" element={<RevenuePage />} />
+        <Route path="expenses" element={<ExpensesPage />} />
         <Route path="services" element={<ServicesPage />} />
         <Route path="controllers" element={<ControllersPage />} />
+        <Route path="discounts" element={<DiscountsPage />} />
         <Route path="repairs" element={<RepairsPage />} />
         <Route path="reviews" element={<ReviewsPage />} />
       </Routes>

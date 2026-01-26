@@ -1,6 +1,36 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Plus, Settings, GripVertical } from 'lucide-react'
+import {
+  Plus,
+  Settings,
+  GripVertical,
+  Gamepad2,
+  Cpu,
+  Zap,
+  CircuitBoard,
+  Keyboard,
+  BatteryCharging,
+  Power,
+  Wrench,
+  Hammer,
+  Cog,
+  RefreshCw,
+  Gauge,
+  Activity,
+  Palette,
+  Paintbrush,
+  Brush,
+  Sparkles,
+  Star,
+  Shield,
+  CheckCircle,
+  Clock,
+  Package,
+  Truck,
+  Award,
+  Trophy,
+  Medal,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { AddServiceModal } from '../components/AddServiceModal'
 import { ServiceOptionsModal } from '../components/ServiceOptionsModal'
@@ -23,6 +53,38 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+
+const iconMap: Record<string, any> = {
+  controller: Gamepad2,
+  cpu: Cpu,
+  sensor: Zap,
+  circuit: CircuitBoard,
+  button: Keyboard,
+  battery: BatteryCharging,
+  charging: BatteryCharging,
+  power: Power,
+  voltage: Zap,
+  repair: Wrench,
+  hammer: Hammer,
+  settings: Cog,
+  tool: Cog,
+  refresh: RefreshCw,
+  gauge: Gauge,
+  activity: Activity,
+  paint: Palette,
+  paintbrush: Paintbrush,
+  brush: Brush,
+  sparkle: Sparkles,
+  star: Star,
+  shield: Shield,
+  check: CheckCircle,
+  clock: Clock,
+  package: Package,
+  truck: Truck,
+  award: Award,
+  trophy: Trophy,
+  medal: Medal,
+}
 
 interface SortableRowProps {
   service: ControllerServiceWithOptions
@@ -54,12 +116,19 @@ function SortableRow({ service, onToggleStatus, onEdit, onOpenOptions }: Sortabl
         </div>
       </td>
       <td className="px-6 py-4">
-        <div>
-          <div className="font-semibold text-gray-900">{service.name}</div>
-          <div className="text-sm text-gray-600">{service.description}</div>
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gray-100 rounded-lg">
+            {(() => {
+              const IconComponent = iconMap[service.service_id] || Gamepad2
+              return <IconComponent className="w-5 h-5 text-gray-700" />
+            })()}
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">{service.name}</div>
+            <div className="text-sm text-gray-600">{service.description}</div>
+          </div>
         </div>
       </td>
-      <td className="px-6 py-4 text-sm text-gray-600 font-mono">{service.service_id}</td>
       <td className="px-6 py-4 text-sm font-semibold">₩{service.base_price.toLocaleString()}</td>
       <td className="px-6 py-4 text-sm text-gray-600">{service.options?.length || 0}개</td>
       <td className="px-6 py-4">
@@ -128,6 +197,10 @@ export function ServicesPage() {
 
       if (error) throw error
       setControllers(data || [])
+
+      if (!selectedController && data && data.length > 0) {
+        setSelectedController(data[0].id)
+      }
     } catch (error) {
       console.error('Failed to load controllers:', error)
     }
@@ -145,10 +218,17 @@ export function ServicesPage() {
         .from('controller_services')
         .select('*, controller_service_options(*)')
         .eq('controller_model_id', selectedController)
+        .eq('is_active', true) // 활성화된 서비스만 표시
         .order('display_order', { ascending: true })
 
       if (error) throw error
-      setServices(data || [])
+
+      const servicesWithOptions = (data || []).map((service) => ({
+        ...service,
+        options: service.controller_service_options || [],
+      }))
+
+      setServices(servicesWithOptions)
     } catch (error) {
       console.error('Failed to load services:', error)
       toast.error('서비스 로드에 실패했습니다.')
@@ -187,12 +267,18 @@ export function ServicesPage() {
 
   const handleDeleteService = async (serviceId: string) => {
     try {
-      const { error } = await supabase.from('controller_services').delete().eq('id', serviceId)
+      // 소프트 삭제: is_active를 false로 변경
+      // 실제 삭제하면 repair_request_services와 외래 키 충돌 발생
+      const { error } = await supabase
+        .from('controller_services')
+        .update({ is_active: false })
+        .eq('id', serviceId)
 
       if (error) throw error
       await loadServices()
+      toast.success('서비스가 비활성화되었습니다.')
     } catch (error) {
-      console.error('Failed to delete service:', error)
+      console.error('Failed to soft delete service:', error)
       throw error
     }
   }
@@ -232,51 +318,44 @@ export function ServicesPage() {
     }
   }
 
-  const refreshSelectedService = async (serviceId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('controller_services')
-        .select('*, controller_service_options(*)')
-        .eq('id', serviceId)
-        .single()
-
-      if (error) throw error
-
-      setSelectedService(data)
-    } catch (error) {
-      console.error('Failed to refresh service:', error)
-    }
-  }
-
   const handleAddOption = async (option: any) => {
     const newOption = {
       ...option,
       controller_service_id: selectedService?.id,
     }
-    const { error } = await supabase.from('controller_service_options').insert(newOption)
+    const { data, error } = await supabase
+      .from('controller_service_options')
+      .insert(newOption)
+      .select()
+      .single()
 
     if (error) throw error
-    await loadServices()
-    await refreshSelectedService(selectedService?.id || '')
+    return data
   }
 
   const handleUpdateOption = async (id: string, data: any) => {
     const { error } = await supabase.from('controller_service_options').update(data).eq('id', id)
 
     if (error) throw error
-    await loadServices()
-    if (selectedService) {
-      await refreshSelectedService(selectedService.id)
-    }
   }
 
   const handleDeleteOption = async (id: string) => {
     const { error } = await supabase.from('controller_service_options').delete().eq('id', id)
 
     if (error) throw error
-    await loadServices()
-    if (selectedService) {
-      await refreshSelectedService(selectedService.id)
+  }
+
+  const handleReorderOptions = async (newOptions: any[]) => {
+    const updates = newOptions.map((option, index) => ({
+      id: option.id,
+      display_order: index + 1,
+    }))
+
+    for (const update of updates) {
+      await supabase
+        .from('controller_service_options')
+        .update({ display_order: update.display_order })
+        .eq('id', update.id)
     }
   }
 
@@ -372,6 +451,7 @@ export function ServicesPage() {
         onAddOption={handleAddOption}
         onUpdateOption={handleUpdateOption}
         onDeleteOption={handleDeleteOption}
+        onReorderOption={handleReorderOptions}
       />
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -417,7 +497,6 @@ export function ServicesPage() {
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                     서비스명
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">ID</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                     기본 가격
                   </th>

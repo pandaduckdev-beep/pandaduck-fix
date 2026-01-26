@@ -5,82 +5,6 @@ export type RepairStatus = 'pending' | 'confirmed' | 'in_progress' | 'completed'
 export interface Database {
   public: {
     Tables: {
-      services: {
-        Row: {
-          id: string
-          service_id: string
-          name: string
-          description: string
-          base_price: number
-          duration: string
-          warranty: string
-          features: Json
-          process: Json
-          image_url: string | null
-          is_active: boolean
-          display_order: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          service_id: string
-          name: string
-          description: string
-          base_price: number
-          duration: string
-          warranty: string
-          features: Json
-          process: Json
-          image_url?: string | null
-          is_active?: boolean
-          display_order?: number
-        }
-        Update: {
-          service_id?: string
-          name?: string
-          description?: string
-          base_price?: number
-          duration?: string
-          warranty?: string
-          features?: Json
-          process?: Json
-          image_url?: string | null
-          is_active?: boolean
-          display_order?: number
-        }
-      }
-      service_options: {
-        Row: {
-          id: string
-          service_id: string
-          option_name: string
-          option_description: string
-          additional_price: number
-          is_active: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          service_id: string
-          option_name: string
-          option_description: string
-          additional_price?: number
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          service_id?: string
-          option_name?: string
-          option_description?: string
-          additional_price?: number
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-      }
       controller_services: {
         Row: {
           id: string
@@ -475,13 +399,58 @@ export interface Database {
           is_active?: boolean
         }
       }
+      service_combos: {
+        Row: {
+          id: string
+          combo_name: string
+          description: string | null
+          discount_type: 'percentage' | 'fixed'
+          discount_value: number
+          controller_model_id: string | null
+          required_service_ids: string[]
+          min_service_count: number
+          is_active: boolean
+          priority: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          combo_name: string
+          description?: string | null
+          discount_type: 'percentage' | 'fixed'
+          discount_value: number
+          controller_model_id?: string | null
+          required_service_ids: string[]
+          min_service_count?: number
+          is_active?: boolean
+          priority?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          combo_name?: string
+          description?: string | null
+          discount_type?: 'percentage' | 'fixed'
+          discount_value?: number
+          controller_model_id?: string | null
+          required_service_ids?: string[]
+          min_service_count?: number
+          is_active?: boolean
+          priority?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
 
 // Convenience types for application use
-export type Service = Database['public']['Tables']['services']['Row']
-export type ServiceOption = Database['public']['Tables']['service_options']['Row']
+export type ControllerService = Database['public']['Tables']['controller_services']['Row']
+export type ControllerServiceOption =
+  Database['public']['Tables']['controller_service_options']['Row']
 export type RepairRequest = Database['public']['Tables']['repair_requests']['Row']
 export type RepairRequestService = Database['public']['Tables']['repair_request_services']['Row']
 export type Review = Database['public']['Tables']['reviews']['Row']
@@ -492,13 +461,6 @@ export type ControllerServicePricing =
 export type ControllerOptionPricing =
   Database['public']['Tables']['controller_option_pricing']['Row']
 export type AdminUser = Database['public']['Tables']['admin_users']['Row']
-export type ControllerService = Database['public']['Tables']['controller_services']['Row']
-export type ControllerServiceOption =
-  Database['public']['Tables']['controller_service_options']['Row']
-
-export interface ServiceWithOptions extends Service {
-  options?: ServiceOption[]
-}
 
 export interface ControllerServiceWithOptions extends ControllerService {
   options?: ControllerServiceOption[]
@@ -508,16 +470,16 @@ export interface ControllerServiceWithOptions extends ControllerService {
 export interface RepairRequestWithServices extends RepairRequest {
   services?: Array<
     RepairRequestService & {
-      service?: Service
-      option?: ServiceOption
+      service?: ControllerService
+      option?: ControllerServiceOption
     }
   >
 }
 
-export interface ServiceWithPricing extends Service {
+export interface ControllerServiceWithPricing extends ControllerService {
   pricing?: ControllerServicePricing
   options?: Array<
-    ServiceOption & {
+    ControllerServiceOption & {
       pricing?: ControllerOptionPricing
     }
   >

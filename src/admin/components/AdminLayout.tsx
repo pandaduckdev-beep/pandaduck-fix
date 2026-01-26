@@ -1,5 +1,15 @@
 import { ReactNode } from 'react'
-import { LayoutDashboard, Wrench, Gamepad2, ClipboardList, Star, LogOut } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Wrench,
+  Gamepad2,
+  ClipboardList,
+  Star,
+  LogOut,
+  TrendingUp,
+  Receipt,
+  Tag,
+} from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -9,8 +19,11 @@ interface AdminLayoutProps {
 
 const navItems = [
   { id: 'dashboard', label: '대시보드', icon: LayoutDashboard },
+  { id: 'revenue', label: '매출 통계', icon: TrendingUp },
+  { id: 'expenses', label: '지출 관리', icon: Receipt },
   { id: 'services', label: '서비스 관리', icon: Wrench },
   { id: 'controllers', label: '컨트롤러 모델', icon: Gamepad2 },
+  { id: 'discounts', label: '할인 설정', icon: Tag },
   { id: 'repairs', label: '수리 신청', icon: ClipboardList },
   { id: 'reviews', label: '리뷰 관리', icon: Star },
 ]

@@ -5,35 +5,34 @@ import {
   Pencil,
   Trash2,
   Check as CheckIcon,
-  Zap,
-  CircuitBoard,
-  Plus,
-  Battery,
-  Wrench,
-  Palette,
   Gamepad2,
   Cpu,
+  Zap,
+  CircuitBoard,
+  Keyboard,
+  Battery,
+  BatteryCharging,
+  Power,
+  Wrench,
+  Palette,
   Settings,
   Cog,
   Hammer,
-  Keyboard,
-  BatteryCharging,
-  Power,
-  Shield,
-  CheckCircle,
-  Award,
-  Trophy,
-  Medal,
+  RefreshCw,
   Gauge,
   Activity,
-  RefreshCw,
-  Package,
-  Truck,
-  Clock,
   Paintbrush,
   Brush,
   Sparkles,
   Star,
+  Shield,
+  CheckCircle,
+  Clock,
+  Package,
+  Truck,
+  Award,
+  Trophy,
+  Medal,
 } from 'lucide-react'
 import {
   Dialog,
@@ -100,11 +99,9 @@ export function EditServiceModal({
     { name: 'sensor', icon: Zap, category: 'electronics' },
     { name: 'circuit', icon: CircuitBoard, category: 'electronics' },
     { name: 'button', icon: Keyboard, category: 'input' },
-    { name: 'plus', icon: Plus, category: 'input' },
     { name: 'battery', icon: Battery, category: 'power' },
     { name: 'charging', icon: BatteryCharging, category: 'power' },
     { name: 'power', icon: Power, category: 'power' },
-    { name: 'voltage', icon: Zap, category: 'power' },
     { name: 'repair', icon: Wrench, category: 'tools' },
     { name: 'hammer', icon: Hammer, category: 'tools' },
     { name: 'settings', icon: Cog, category: 'tools' },
@@ -243,15 +240,15 @@ export function EditServiceModal({
   }
 
   const handleDelete = async () => {
-    if (!confirm('정말 이 서비스를 삭제하시겠습니까?')) return
+    if (!confirm('정말 이 서비스를 비활성화하시겠습니까?')) return
 
     try {
       await onDelete(service.id)
-      toast.success('서비스가 삭제되었습니다.')
+      toast.success('서비스가 비활성화되었습니다.')
       onClose()
     } catch (error) {
       console.error('Failed to delete service:', error)
-      toast.error('서비스 삭제에 실패했습니다.')
+      toast.error('서비스 비활성화에 실패했습니다.')
     }
   }
 
@@ -317,56 +314,57 @@ export function EditServiceModal({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <Label htmlFor="service_id">서비스 ID *</Label>
-            <div className="flex gap-2">
-              <Input
-                id="service_id"
-                value={formData.service_id}
-                onChange={(e) => setFormData({ ...formData, service_id: e.target.value })}
-                placeholder="예: hall-effect"
-                required
-                className="flex-1"
-              />
+            <Label>서비스 아이콘</Label>
+            <div className="mt-2">
               <Button
                 type="button"
                 variant="outline"
-                size="icon"
                 onClick={() => setIsIconSelectorOpen(!isIconSelectorOpen)}
+                className="w-full justify-start"
               >
-                <Gamepad2 className="w-4 h-4" />
+                {(() => {
+                  const IconComponent =
+                    iconOptions.find((opt) => opt.name === formData.service_id)?.icon || Gamepad2
+                  return (
+                    <>
+                      <IconComponent className="w-4 h-4 mr-2" />
+                      {formData.service_id || '아이콘 선택'}
+                    </>
+                  )
+                })()}
               </Button>
-            </div>
-            {isIconSelectorOpen && (
-              <div className="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-500 mb-3">원하는 아이콘을 클릭하여 선택하세요</p>
-                <div className="grid grid-cols-8 gap-2 max-h-64 overflow-y-auto">
-                  {iconOptions.map((option, index) => {
-                    const IconComponent = option.icon
-                    return (
-                      <button
-                        key={index}
-                        type="button"
-                        onClick={() => {
-                          setFormData({
-                            ...formData,
-                            service_id: option.name,
-                          })
-                          setIsIconSelectorOpen(false)
-                        }}
-                        className={`p-3 rounded-lg hover:bg-blue-100 transition-colors ${
-                          formData.service_id === option.name
-                            ? 'bg-blue-100 ring-2 ring-blue-500'
-                            : 'bg-white'
-                        }`}
-                        title={option.name}
-                      >
-                        <IconComponent className="w-5 h-5" />
-                      </button>
-                    )
-                  })}
+              {isIconSelectorOpen && (
+                <div className="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="text-xs text-gray-500 mb-3">원하는 아이콘을 클릭하여 선택하세요</p>
+                  <div className="grid grid-cols-8 gap-2 max-h-64 overflow-y-auto">
+                    {iconOptions.map((option, index) => {
+                      const IconComponent = option.icon
+                      return (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              service_id: option.name,
+                            })
+                            setIsIconSelectorOpen(false)
+                          }}
+                          className={`p-3 rounded-lg hover:bg-blue-100 transition-colors ${
+                            formData.service_id === option.name
+                              ? 'bg-blue-100 ring-2 ring-blue-500'
+                              : 'bg-white'
+                          }`}
+                          title={option.name}
+                        >
+                          <IconComponent className="w-5 h-5" />
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           <div>
@@ -649,7 +647,7 @@ export function EditServiceModal({
             <Button type="button" variant="destructive" onClick={handleDelete} className="mr-auto">
               삭제
             </Button>
-            <Button type="submit" disabled={!formData.name || !formData.service_id}>
+            <Button type="submit" disabled={!formData.name}>
               저장
             </Button>
           </DialogFooter>

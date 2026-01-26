@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 
 export function ControllerSelection() {
   const navigate = useNavigate()
-  const [selectedModel, setSelectedModel] = useState<string | null>(null)
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(null)
   const [controllerModels, setControllerModels] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -28,13 +28,20 @@ export function ControllerSelection() {
       }
     }
 
+    // 페이지 진입 시 스크롤 위치를 최상단으로 이동
+    window.scrollTo(0, 0)
+
     loadControllerModels()
   }, [])
 
   const handleContinue = () => {
+    if (!selectedModelId) return
+
+    // Find the selected model and use model_id instead of UUID
+    const selectedModel = controllerModels.find((model) => model.id === selectedModelId)
     if (!selectedModel) return
 
-    navigate('/services', { state: { controllerModel: selectedModel } })
+    navigate('/services', { state: { controllerModel: selectedModel.model_id } })
   }
 
   if (loading) {
@@ -119,9 +126,9 @@ export function ControllerSelection() {
         {controllerModels.map((model) => (
           <button
             key={model.id}
-            onClick={() => setSelectedModel(model.model_id)}
+            onClick={() => setSelectedModelId(model.id)}
             className={`w-full p-6 rounded-[28px] border-2 transition-all text-left ${
-              selectedModel === model.model_id
+              selectedModelId === model.id
                 ? 'border-[#000000] bg-[#F5F5F7]'
                 : 'border-[rgba(0,0,0,0.1)] bg-white'
             }`}
@@ -129,10 +136,10 @@ export function ControllerSelection() {
             <div className="flex items-center gap-4">
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  selectedModel === model.model_id ? 'bg-[#000000] text-white' : 'bg-[#F5F5F7]'
+                  selectedModelId === model.model_id ? 'bg-[#000000] text-white' : 'bg-[#F5F5F7]'
                 }`}
               >
-                {selectedModel === model.model_id ? (
+                {selectedModelId === model.model_id ? (
                   <Check className="w-6 h-6" />
                 ) : (
                   <Gamepad2 className="w-6 h-6" />
@@ -154,9 +161,9 @@ export function ControllerSelection() {
         <div className="max-w-md mx-auto px-6 py-6">
           <button
             onClick={handleContinue}
-            disabled={!selectedModel}
+            disabled={!selectedModelId}
             className={`w-full py-4 rounded-full transition-all ${
-              selectedModel
+              selectedModelId
                 ? 'bg-[#000000] text-white hover:scale-[0.98] active:scale-[0.96]'
                 : 'bg-[#F5F5F7] text-[#86868B] cursor-not-allowed'
             }`}

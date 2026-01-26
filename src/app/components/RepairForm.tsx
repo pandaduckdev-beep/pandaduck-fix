@@ -1,45 +1,83 @@
-import { ChevronLeft, Check, Tag, CheckCircle2, Package, Gamepad2, MapPin, Phone, User } from "lucide-react";
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import type { ServiceSelectionData } from "@/app/App";
-import { createRepairRequest } from "@/lib/api";
-import { getControllerModelName } from "@/utils/controllerModels";
-import { toast } from "sonner";
+import {
+  ChevronLeft,
+  Check,
+  Tag,
+  CheckCircle2,
+  Package,
+  Gamepad2,
+  MapPin,
+  Phone,
+  User,
+} from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import type { ServiceSelectionData } from '@/app/App'
+import { createRepairRequest } from '@/lib/api'
+import { getControllerModelName } from '@/utils/controllerModels'
+import { toast } from 'sonner'
+
+/**
+ * 한국 전화번호 포맷 함수 (010-0000-0000)
+ */
+const formatPhoneNumber = (value: string): string => {
+  // 숫자만 추출
+  const numbers = value.replace(/\D/g, '')
+
+  // 최대 11자리로 제한 (국내 휴대폰 번호)
+  const maxLength = 11
+  const trimmedNumbers = numbers.slice(0, maxLength)
+
+  // 길이에 따라 포맷팅
+  if (trimmedNumbers.length === 0) {
+    return ''
+  } else if (trimmedNumbers.length <= 3) {
+    return trimmedNumbers
+  } else if (trimmedNumbers.length <= 7) {
+    return `${trimmedNumbers.slice(0, 3)}-${trimmedNumbers.slice(3)}`
+  } else {
+    return `${trimmedNumbers.slice(0, 3)}-${trimmedNumbers.slice(3, 7)}-${trimmedNumbers.slice(7, 11)}`
+  }
+}
 
 export function RepairForm() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const controllerModel = location.state?.controllerModel as string | null;
-  const selectionData = location.state?.selectionData as ServiceSelectionData | null;
+  const navigate = useNavigate()
+  const location = useLocation()
+  const controllerModel = location.state?.controllerModel as string | null
+  const selectionData = location.state?.selectionData as ServiceSelectionData | null
   const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    address: "",
-    pickupMethod: "express" as "express" | "dropoff",
-  });
+    name: '',
+    phone: '',
+    address: '',
+    pickupMethod: 'express' as 'express' | 'dropoff',
+  })
 
-  const [submitted, setSubmitted] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showConvenienceModal, setShowConvenienceModal] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showConvenienceModal, setShowConvenienceModal] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // 페이지 진입 시 스크롤 위치를 최상단으로 이동
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!selectionData || selectionData.services.length === 0) {
-      setError("선택된 서비스가 없습니다.");
-      return;
+      setError('선택된 서비스가 없습니다.')
+      return
     }
 
     // 폼 제출 시 확인 모달 표시
-    setShowConfirmModal(true);
-  };
+    setShowConfirmModal(true)
+  }
 
   const confirmSubmit = async () => {
-    setSubmitted(true);
-    setError(null);
-    setShowConfirmModal(false);
+    setSubmitted(true)
+    setError(null)
+    setShowConfirmModal(false)
 
     try {
       // Supabase에 수리 신청 데이터 저장
@@ -47,35 +85,35 @@ export function RepairForm() {
         customerName: formData.name,
         customerPhone: formData.phone,
         customerEmail: undefined,
-        controllerModel: controllerModel || "DualSense", // 선택한 기종 사용
+        controllerModel: controllerModel || 'DualSense', // 선택한 기종 사용
         issueDescription: `고객 주소: ${formData.address}`,
-        services: selectionData.services.map(service => ({
+        services: selectionData.services.map((service) => ({
           serviceId: service.uuid, // UUID 사용
           optionId: service.selectedOption?.id,
           servicePrice: service.price,
-          optionPrice: service.selectedOption?.price || 0
+          optionPrice: service.selectedOption?.price || 0,
         })),
-        totalAmount: selectionData.total
-      });
+        totalAmount: selectionData.total,
+      })
 
       // 성공 시 모달 표시
       setTimeout(() => {
-        setSubmitted(false);
-        setShowSuccessModal(true);
-      }, 500);
+        setSubmitted(false)
+        setShowSuccessModal(true)
+      }, 500)
     } catch (err) {
-      setSubmitted(false);
-      setError(err instanceof Error ? err.message : '신청 중 오류가 발생했습니다.');
-      console.error('Failed to submit repair request:', err);
+      setSubmitted(false)
+      setError(err instanceof Error ? err.message : '신청 중 오류가 발생했습니다.')
+      console.error('Failed to submit repair request:', err)
     }
-  };
+  }
 
   const handleCloseModal = () => {
-    setShowSuccessModal(false);
-    navigate('/');
-  };
+    setShowSuccessModal(false)
+    navigate('/')
+  }
 
-  const isFormValid = formData.name && formData.phone && formData.address;
+  const isFormValid = formData.name && formData.phone && formData.address
 
   return (
     <div className="min-h-screen bg-white pb-8">
@@ -83,13 +121,13 @@ export function RepairForm() {
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
           <button
-            onClick={() => navigate('/services')}
+            onClick={() => navigate(-1)}
             className="p-2 hover:bg-[#F5F5F7] rounded-full transition-colors -ml-2"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
           <div className="text-lg tracking-tight" style={{ fontWeight: 600 }}>
-            수리 신청
+            배송지 입력
           </div>
           <div className="w-10"></div>
         </div>
@@ -109,7 +147,9 @@ export function RepairForm() {
                 <div className="flex items-center gap-2 pb-3 border-b border-[rgba(0,0,0,0.1)]">
                   <Gamepad2 className="w-4 h-4 text-[#86868B]" />
                   <span className="text-sm text-[#86868B]">컨트롤러:</span>
-                  <span className="text-sm font-semibold">{getControllerModelName(controllerModel)}</span>
+                  <span className="text-sm font-semibold">
+                    {getControllerModelName(controllerModel)}
+                  </span>
                 </div>
               )}
 
@@ -122,7 +162,9 @@ export function RepairForm() {
                   </div>
                   {service.selectedOption && (
                     <div className="flex items-center justify-between mt-1 pl-4">
-                      <span className="text-xs text-[#86868B]">ㄴ {service.selectedOption.name}</span>
+                      <span className="text-xs text-[#86868B]">
+                        ㄴ {service.selectedOption.name}
+                      </span>
                       <span className="text-xs" style={{ fontWeight: 600 }}>
                         {service.selectedOption.price === 0
                           ? '기본'
@@ -147,7 +189,9 @@ export function RepairForm() {
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-[#86868B]">서비스 금액</span>
-                    <span style={{ fontWeight: 600 }}>₩{selectionData.subtotal.toLocaleString()}</span>
+                    <span style={{ fontWeight: 600 }}>
+                      ₩{selectionData.subtotal.toLocaleString()}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-[#FF3B30]">할인 금액</span>
@@ -167,9 +211,7 @@ export function RepairForm() {
               </div>
             </div>
           ) : (
-            <div className="text-center text-[#86868B] py-4">
-              선택된 서비스가 없습니다
-            </div>
+            <div className="text-center text-[#86868B] py-4">선택된 서비스가 없습니다</div>
           )}
         </div>
 
@@ -192,7 +234,9 @@ export function RepairForm() {
             <input
               type="tel"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: formatPhoneNumber(e.target.value) })
+              }
               placeholder="010-1234-5678"
               className="w-full px-6 py-4 bg-[#F5F5F7] rounded-[28px] border-2 border-transparent focus:border-[#000000] focus:outline-none transition-colors"
               style={{ fontWeight: 500 }}
@@ -225,7 +269,8 @@ export function RepairForm() {
               <div className="flex-1">
                 <p className="text-sm text-[#86868B] mb-1">보내실 주소</p>
                 <p className="text-sm" style={{ fontWeight: 600 }}>
-                  서울특별시 강남구 테헤란로 123, 4층<br />
+                  서울특별시 강남구 테헤란로 123, 4층
+                  <br />
                   PandaDuck Fix (우편번호: 06234)
                 </p>
               </div>
@@ -270,7 +315,8 @@ export function RepairForm() {
           </button>
 
           <p className="text-xs text-center text-[#86868B] px-4">
-            편의점 택배 또는 직접 방문하여 컨트롤러를 보내주세요.<br />
+            편의점 택배 또는 직접 방문하여 컨트롤러를 보내주세요.
+            <br />
             접수 후 영업일 기준 1-3일 내 수리가 완료됩니다.
           </p>
         </div>
@@ -278,9 +324,7 @@ export function RepairForm() {
         {/* Error Message */}
         {error && (
           <div className="bg-[#FF3B30]/10 border border-[#FF3B30]/20 rounded-[20px] p-4">
-            <p className="text-sm text-[#FF3B30] text-center">
-              {error}
-            </p>
+            <p className="text-sm text-[#FF3B30] text-center">{error}</p>
           </div>
         )}
 
@@ -336,7 +380,8 @@ export function RepairForm() {
 
             {/* Description */}
             <p className="text-center text-[#86868B] mb-6 leading-relaxed">
-              편의점 택배 예약 서비스는 현재 준비 중입니다.<br />
+              편의점 택배 예약 서비스는 현재 준비 중입니다.
+              <br />
               <span style={{ fontWeight: 600 }}>위 주소로 직접 보내주시기 바랍니다.</span>
             </p>
 
@@ -344,10 +389,13 @@ export function RepairForm() {
             <div className="bg-[#F5F5F7] rounded-[20px] p-4 mb-6 space-y-2">
               <div className="flex items-center gap-2 mb-3">
                 <MapPin className="w-4 h-4 text-[#86868B]" />
-                <span className="text-sm" style={{ fontWeight: 600 }}>보내실 주소</span>
+                <span className="text-sm" style={{ fontWeight: 600 }}>
+                  보내실 주소
+                </span>
               </div>
               <p className="text-sm leading-relaxed">
-                서울특별시 강남구 테헤란로 123, 4층<br />
+                서울특별시 강남구 테헤란로 123, 4층
+                <br />
                 PandaDuck Fix (우편번호: 06234)
               </p>
             </div>
@@ -381,9 +429,7 @@ export function RepairForm() {
             </h2>
 
             {/* Description */}
-            <p className="text-center text-[#86868B] mb-6">
-              입력하신 정보가 맞는지 확인해주세요
-            </p>
+            <p className="text-center text-[#86868B] mb-6">입력하신 정보가 맞는지 확인해주세요</p>
 
             {/* Order Details */}
             <div className="space-y-4 mb-6">
@@ -392,7 +438,9 @@ export function RepairForm() {
                 <div className="bg-[#F5F5F7] rounded-[20px] p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Gamepad2 className="w-4 h-4 text-[#86868B]" />
-                    <span className="text-sm" style={{ fontWeight: 600 }}>컨트롤러 모델</span>
+                    <span className="text-sm" style={{ fontWeight: 600 }}>
+                      컨트롤러 모델
+                    </span>
                   </div>
                   <p className="text-sm pl-6">{getControllerModelName(controllerModel)}</p>
                 </div>
@@ -403,7 +451,9 @@ export function RepairForm() {
                 <div className="bg-[#F5F5F7] rounded-[20px] p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Package className="w-4 h-4 text-[#86868B]" />
-                    <span className="text-sm" style={{ fontWeight: 600 }}>선택한 서비스</span>
+                    <span className="text-sm" style={{ fontWeight: 600 }}>
+                      선택한 서비스
+                    </span>
                   </div>
                   <div className="space-y-2 pl-6">
                     {selectionData.services.map((service) => (
@@ -450,7 +500,9 @@ export function RepairForm() {
               <div className="bg-[#F5F5F7] rounded-[20px] p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <User className="w-4 h-4 text-[#86868B]" />
-                  <span className="text-sm" style={{ fontWeight: 600 }}>고객 정보</span>
+                  <span className="text-sm" style={{ fontWeight: 600 }}>
+                    고객 정보
+                  </span>
                 </div>
                 <div className="space-y-2 pl-6 text-sm">
                   <div className="flex items-center justify-between">
@@ -463,7 +515,9 @@ export function RepairForm() {
                   </div>
                   <div className="flex items-start justify-between">
                     <span className="text-[#86868B]">주소</span>
-                    <span className="text-right" style={{ fontWeight: 600 }}>{formData.address}</span>
+                    <span className="text-right" style={{ fontWeight: 600 }}>
+                      {formData.address}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -524,7 +578,8 @@ export function RepairForm() {
 
             {/* Description */}
             <p className="text-center text-[#86868B] mb-6 leading-relaxed">
-              수리 신청이 정상적으로 접수되었습니다.<br />
+              수리 신청이 정상적으로 접수되었습니다.
+              <br />
               빠른 시일 내에 연락드리겠습니다.
             </p>
 
@@ -532,7 +587,9 @@ export function RepairForm() {
             <div className="bg-[#F5F5F7] rounded-[20px] p-4 mb-4 space-y-2">
               <div className="flex items-center gap-2 mb-3">
                 <Package className="w-4 h-4 text-[#86868B]" />
-                <span className="text-sm" style={{ fontWeight: 600 }}>신청 정보</span>
+                <span className="text-sm" style={{ fontWeight: 600 }}>
+                  신청 정보
+                </span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#86868B]">고객명</span>
@@ -556,7 +613,9 @@ export function RepairForm() {
             <div className="bg-[#F5F5F7] rounded-[20px] p-4 mb-6 space-y-3">
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="w-4 h-4 text-[#86868B]" />
-                <span className="text-sm" style={{ fontWeight: 600 }}>발송 안내</span>
+                <span className="text-sm" style={{ fontWeight: 600 }}>
+                  발송 안내
+                </span>
               </div>
               <div className="text-xs text-[#86868B] leading-relaxed">
                 아래 주소로 컨트롤러를 보내주세요
@@ -565,7 +624,8 @@ export function RepairForm() {
                 <div>
                   <p className="text-[#86868B] text-xs mb-1">보내실 주소</p>
                   <p style={{ fontWeight: 600 }}>
-                    서울특별시 강남구 테헤란로 123, 4층<br />
+                    서울특별시 강남구 테헤란로 123, 4층
+                    <br />
                     PandaDuck Fix (우편번호: 06234)
                   </p>
                 </div>
@@ -595,5 +655,5 @@ export function RepairForm() {
         </div>
       )}
     </div>
-  );
+  )
 }

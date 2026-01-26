@@ -1,9 +1,40 @@
-import { ChevronLeft, Zap, CircuitBoard, Plus, Battery, Wrench, Palette, Tag } from 'lucide-react'
+import {
+  ChevronLeft,
+  Gamepad2,
+  Cpu,
+  Zap,
+  CircuitBoard,
+  Keyboard,
+  Battery,
+  BatteryCharging,
+  Power,
+  Wrench,
+  Palette,
+  Cog,
+  Hammer,
+  RefreshCw,
+  Gauge,
+  Activity,
+  Paintbrush,
+  Brush,
+  Sparkles,
+  Star,
+  Shield,
+  CheckCircle,
+  Clock,
+  Package,
+  Truck,
+  Award,
+  Trophy,
+  Medal,
+  Tag,
+} from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useServicesWithPricing } from '@/hooks/useServicesWithPricing'
 import { useServiceCombos } from '@/hooks/useServiceCombos'
 import type { ServiceCombo } from '@/types/database'
+import type { ControllerServiceWithPricing } from '@/types/database'
 import type { ServiceSelectionData } from '@/app/App'
 
 interface ServiceOption {
@@ -22,14 +53,36 @@ interface Service {
   options?: ServiceOption[]
 }
 
-// Icon mapping helper
 const iconMap: Record<string, React.ReactNode> = {
-  'hall-effect': <Zap className="w-6 h-6" />,
-  'clicky-buttons': <CircuitBoard className="w-6 h-6" />,
-  'back-buttons': <Plus className="w-6 h-6" />,
+  controller: <Gamepad2 className="w-6 h-6" />,
+  cpu: <Cpu className="w-6 h-6" />,
+  sensor: <Zap className="w-6 h-6" />,
+  circuit: <CircuitBoard className="w-6 h-6" />,
+  button: <Keyboard className="w-6 h-6" />,
   battery: <Battery className="w-6 h-6" />,
-  'hair-trigger': <Wrench className="w-6 h-6" />,
-  'custom-shell': <Palette className="w-6 h-6" />,
+  charging: <BatteryCharging className="w-6 h-6" />,
+  power: <Power className="w-6 h-6" />,
+  voltage: <Zap className="w-6 h-6" />,
+  repair: <Wrench className="w-6 h-6" />,
+  hammer: <Hammer className="w-6 h-6" />,
+  settings: <Cog className="w-6 h-6" />,
+  tool: <Cog className="w-6 h-6" />,
+  refresh: <RefreshCw className="w-6 h-6" />,
+  gauge: <Gauge className="w-6 h-6" />,
+  activity: <Activity className="w-6 h-6" />,
+  paint: <Palette className="w-6 h-6" />,
+  paintbrush: <Paintbrush className="w-6 h-6" />,
+  brush: <Brush className="w-6 h-6" />,
+  sparkle: <Sparkles className="w-6 h-6" />,
+  star: <Star className="w-6 h-6" />,
+  shield: <Shield className="w-6 h-6" />,
+  check: <CheckCircle className="w-6 h-6" />,
+  clock: <Clock className="w-6 h-6" />,
+  package: <Package className="w-6 h-6" />,
+  truck: <Truck className="w-6 h-6" />,
+  award: <Award className="w-6 h-6" />,
+  trophy: <Trophy className="w-6 h-6" />,
+  medal: <Medal className="w-6 h-6" />,
 }
 
 export function ServiceSelection() {
@@ -42,24 +95,31 @@ export function ServiceSelection() {
   const { services: supabaseServices, loading } = useServicesWithPricing(controllerModel)
   const { combos } = useServiceCombos()
 
-  // 컨트롤러가 선택되지 않은 경우 컨트롤러 선택 화면으로 이동
   useEffect(() => {
     if (!controllerModel) {
       navigate('/controllers')
     }
+
+    // 페이지 진입 시 스크롤 위치를 최상단으로 이동
+    window.scrollTo(0, 0)
+
+    return () => {
+      // 페이지 나갈 때 state 초기화 (캐싱 문제 해결)
+      setSelectedServices(new Set())
+      setSelectedOptions({})
+    }
   }, [controllerModel, navigate])
 
-  // Transform Supabase data to match the expected format
-  const services: Service[] = supabaseServices.map((service) => ({
+  const services: Service[] = supabaseServices.map((service: ControllerServiceWithPricing) => ({
     id: service.service_id,
     name: service.name,
     description: service.description,
-    price: service.pricing?.price || service.base_price, // 모델별 가격 우선 사용
-    icon: iconMap[service.service_id] || <Zap className="w-6 h-6" />,
+    price: service.pricing?.price || service.base_price,
+    icon: iconMap[service.service_id] || <Gamepad2 className="w-6 h-6" />,
     options: service.options?.map((option) => ({
       id: option.id,
       name: option.option_name,
-      price: option.pricing?.additional_price || option.additional_price, // 모델별 옵션 가격 우선 사용
+      price: option.pricing?.additional_price || option.additional_price,
       description: option.option_description,
     })),
   }))
@@ -68,13 +128,11 @@ export function ServiceSelection() {
     const newSelected = new Set(selectedServices)
     if (newSelected.has(serviceId)) {
       newSelected.delete(serviceId)
-      // Remove selected option when deselecting service
       const newOptions = { ...selectedOptions }
       delete newOptions[serviceId]
       setSelectedOptions(newOptions)
     } else {
       newSelected.add(serviceId)
-      // Set default option (first one) if service has options
       const service = services.find((s) => s.id === serviceId)
       if (service?.options && service.options.length > 0) {
         setSelectedOptions({
@@ -94,12 +152,10 @@ export function ServiceSelection() {
     })
   }
 
-  // 할인 적용 전 가격 계산
   const subtotalPrice = services
     .filter((service) => selectedServices.has(service.id))
     .reduce((sum, service) => {
       let price = service.price
-      // Add option price if selected
       if (service.options && selectedOptions[service.id]) {
         const option = service.options.find((opt) => opt.id === selectedOptions[service.id])
         if (option) {
@@ -109,47 +165,35 @@ export function ServiceSelection() {
       return sum + price
     }, 0)
 
-  // 적용 가능한 콤보 찾기
   const applicableCombos = combos.filter((combo) => {
     const selectedServiceIds = Array.from(selectedServices)
-
-    // 특별 케이스: "3개 이상 서비스 할인"은 정확히 매칭하지 않고 개수만 확인
     if (combo.combo_name.includes('3개 이상') && selectedServiceIds.length >= 3) {
       return true
     }
-
-    // 필요한 모든 서비스가 선택되었는지 확인
     return combo.required_service_ids.every((requiredId) => selectedServiceIds.includes(requiredId))
   })
 
-  // 가장 큰 할인 적용 (중복 할인 방지)
   const bestCombo = applicableCombos.reduce<ServiceCombo | null>((best, current) => {
     if (!best) return current
-
     const currentDiscount =
       current.discount_type === 'percentage'
         ? subtotalPrice * (current.discount_value / 100)
         : current.discount_value
-
     const bestDiscount =
       best.discount_type === 'percentage'
         ? subtotalPrice * (best.discount_value / 100)
         : best.discount_value
-
     return currentDiscount > bestDiscount ? current : best
   }, null)
 
-  // 할인 금액 계산
   const discountAmount = bestCombo
     ? bestCombo.discount_type === 'percentage'
       ? Math.floor(subtotalPrice * (bestCombo.discount_value / 100))
       : bestCombo.discount_value
     : 0
 
-  // 최종 가격
   const totalPrice = subtotalPrice - discountAmount
 
-  // 계속하기 버튼 클릭 핸들러
   const handleContinue = () => {
     if (selectedServices.size === 0) return
 
@@ -159,12 +203,11 @@ export function ServiceSelection() {
         const selectedOptionId = selectedOptions[service.id]
         const selectedOption = service.options?.find((opt) => opt.id === selectedOptionId)
 
-        // supabaseServices에서 UUID 찾기
-        const supabaseService = supabaseServices.find((s) => s.service_id === service.id)
+        const supabaseService = supabaseServices.find((s: any) => s.service_id === service.id)
 
         return {
-          id: service.id, // service_id (TEXT)
-          uuid: supabaseService?.id || '', // services.id (UUID)
+          id: service.id,
+          uuid: supabaseService?.id || '',
           name: service.name,
           price: service.price,
           selectedOption: selectedOption
@@ -190,7 +233,6 @@ export function ServiceSelection() {
 
   return (
     <div className="min-h-screen bg-white pb-60">
-      {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
           <button
@@ -206,7 +248,6 @@ export function ServiceSelection() {
         </div>
       </nav>
 
-      {/* Progress Indicator */}
       <div className="max-w-md mx-auto px-6 pt-8 pb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -247,7 +288,6 @@ export function ServiceSelection() {
         </div>
       </div>
 
-      {/* Loading State */}
       {loading && (
         <div className="max-w-md mx-auto px-6 py-12 text-center">
           <div className="inline-block w-8 h-8 border-4 border-[#86868B] border-t-black rounded-full animate-spin"></div>
@@ -255,7 +295,6 @@ export function ServiceSelection() {
         </div>
       )}
 
-      {/* Service Cards */}
       {!loading && (
         <div className="max-w-md mx-auto px-6 space-y-3">
           {services.map((service) => (
@@ -288,7 +327,6 @@ export function ServiceSelection() {
                 </div>
               </button>
 
-              {/* Options - Only show if service is selected and has options */}
               {selectedServices.has(service.id) &&
                 service.options &&
                 service.options.length > 0 && (
@@ -332,30 +370,20 @@ export function ServiceSelection() {
         </div>
       )}
 
-      {/* Sticky Bottom Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 py-6 space-y-3">
-          {/* 할인 정보 표시 */}
-          {bestCombo && (
-            <div className="bg-[#F5F5F7] rounded-[20px] p-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm" style={{ fontWeight: 600 }}>
-                <Tag className="w-4 h-4 text-[#FF3B30]" />
-                <span className="text-[#FF3B30]">{bestCombo.combo_name}</span>
-              </div>
-              <p className="text-xs text-[#86868B] leading-relaxed">{bestCombo.description}</p>
-            </div>
-          )}
-
-          {/* 가격 상세 */}
           <div className="space-y-2">
-            {bestCombo && (
+            {bestCombo && discountAmount > 0 && (
               <>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[#86868B]">서비스 금액</span>
                   <span style={{ fontWeight: 600 }}>₩{subtotalPrice.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-[#FF3B30]">할인 금액</span>
+                  <div className="flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-[#FF3B30]" />
+                    <span className="text-[#FF3B30]">{bestCombo.combo_name}</span>
+                  </div>
                   <span className="text-[#FF3B30]" style={{ fontWeight: 600 }}>
                     -₩{discountAmount.toLocaleString()}
                   </span>

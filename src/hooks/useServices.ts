@@ -1,65 +1,58 @@
-import { useState, useEffect } from 'react';
-import { fetchServices, fetchService } from '../lib/api';
-import type { ServiceWithOptions } from '../types/database';
+import { useState, useEffect } from 'react'
+import { fetchControllerServices } from '../lib/api'
+import type { ControllerServiceWithOptions } from '../types/database'
 
-/**
- * 모든 활성 서비스 조회 훅
- */
 export function useServices() {
-  const [services, setServices] = useState<ServiceWithOptions[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [services, setServices] = useState<ControllerServiceWithOptions[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const [controllerModelId, setControllerModelId] = useState<string | null>(null)
 
-  const loadServices = async () => {
+  const loadServices = async (modelId: string) => {
     try {
-      setLoading(true);
-      setError(null);
-      const data = await fetchServices();
-      setServices(data);
+      setLoading(true)
+      setError(null)
+      setControllerModelId(modelId)
+      const data = await fetchControllerServices(modelId)
+      setServices(data)
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error'));
+      setError(err instanceof Error ? err : new Error('Unknown error'))
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  useEffect(() => {
-    loadServices();
-  }, []);
-
-  return { services, loading, error, refetch: loadServices };
+  return { services, loading, error, refetch: loadServices, controllerModelId }
 }
 
-/**
- * 특정 서비스 조회 훅
- */
-export function useService(serviceId: string | null) {
-  const [service, setService] = useState<ServiceWithOptions | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+export function useService(serviceId: string | null, controllerModelId: string | null) {
+  const [service, setService] = useState<ControllerServiceWithOptions | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    if (!serviceId) {
-      setService(null);
-      setLoading(false);
-      return;
+    if (!serviceId || !controllerModelId) {
+      setService(null)
+      setLoading(false)
+      return
     }
 
     async function loadService() {
       try {
-        setLoading(true);
-        setError(null);
-        const data = await fetchService(serviceId);
-        setService(data);
+        setLoading(true)
+        setError(null)
+        const data = await fetchControllerServices(controllerModelId!)
+        const foundService = data.find((s) => s.service_id === serviceId)
+        setService(foundService || null)
       } catch (err) {
-        setError(err instanceof Error ? err : new Error('Unknown error'));
+        setError(err instanceof Error ? err : new Error('Unknown error'))
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    loadService();
-  }, [serviceId]);
+    loadService()
+  }, [serviceId, controllerModelId])
 
-  return { service, loading, error };
+  return { service, loading, error }
 }

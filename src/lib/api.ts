@@ -1,7 +1,5 @@
 import { supabase } from './supabase'
 import type {
-  ServiceOption,
-  ServiceWithOptions,
   RepairRequest,
   Review,
   ServiceCombo,
@@ -37,7 +35,7 @@ export async function fetchControllerServices(
         .select('*')
         .eq('controller_service_id', service.id)
         .eq('is_active', true)
-        .order('additional_price', { ascending: true })
+        .order('display_order', { ascending: true })
 
       return {
         ...service,
@@ -61,90 +59,6 @@ export async function fetchControllerModels() {
 
   if (error) {
     throw new Error(`Failed to fetch controller models: ${error.message}`)
-  }
-
-  return data || []
-}
-
-/**
- * 활성화된 모든 서비스 조회 (display_order 순으로 정렬)
- */
-export async function fetchServices(): Promise<ServiceWithOptions[]> {
-  const { data: services, error: servicesError } = await supabase
-    .from('services')
-    .select('*')
-    .eq('is_active', true)
-    .order('display_order', { ascending: true })
-
-  if (servicesError) {
-    throw new Error(`Failed to fetch services: ${servicesError.message}`)
-  }
-
-  // 각 서비스에 대한 옵션 조회
-  const servicesWithOptions = await Promise.all(
-    (services || []).map(async (service) => {
-      const { data: options } = await supabase
-        .from('service_options')
-        .select('*')
-        .eq('service_id', service.id) // UUID를 사용
-        .eq('is_active', true)
-        .order('additional_price', { ascending: true })
-
-      return {
-        ...service,
-        options: options || [],
-      }
-    })
-  )
-
-  return servicesWithOptions
-}
-
-/**
- * 특정 서비스 조회
- */
-export async function fetchService(serviceId: string): Promise<ServiceWithOptions | null> {
-  const { data: service, error: serviceError } = await supabase
-    .from('services')
-    .select('*')
-    .eq('service_id', serviceId)
-    .eq('is_active', true)
-    .single()
-
-  if (serviceError) {
-    if (serviceError.code === 'PGRST116') {
-      return null // Not found
-    }
-    throw new Error(`Failed to fetch service: ${serviceError.message}`)
-  }
-
-  // 해당 서비스의 옵션들 조회
-  const { data: options } = await supabase
-    .from('service_options')
-    .select('*')
-    .eq('service_id', service.id) // UUID를 사용
-    .eq('is_active', true)
-    .order('additional_price', { ascending: true })
-
-  return {
-    ...service,
-    options: options || [],
-  }
-}
-
-/**
- * 특정 서비스의 옵션들 조회
- */
-export async function fetchServiceOptions(serviceId: string): Promise<ServiceOption[]> {
-  const { data, error } = await supabase
-    .from('service_options')
-    .select('*')
-    .eq('service_id', serviceId)
-    .eq('is_active', true)
-    .order('additional_price', { ascending: true })
-
-  if (error) {
-    throw new Error(`Failed to fetch service options: ${error.message}`)
   }
 
   return data || []

@@ -1,4 +1,34 @@
-import { Menu, Zap, CircuitBoard, Plus, Battery, Wrench, Palette } from 'lucide-react'
+import { Menu } from 'lucide-react'
+import {
+  Gamepad2,
+  Cpu,
+  Zap,
+  CircuitBoard,
+  Keyboard,
+  Battery,
+  BatteryCharging,
+  Power,
+  Wrench,
+  Palette,
+  Settings,
+  Cog,
+  Hammer,
+  RefreshCw,
+  Gauge,
+  Activity,
+  Paintbrush,
+  Brush,
+  Sparkles,
+  Star,
+  Shield,
+  CheckCircle,
+  Clock,
+  Package,
+  Truck,
+  Award,
+  Trophy,
+  Medal,
+} from 'lucide-react'
 import { Footer } from '@/app/components/Footer'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -11,14 +41,37 @@ import type {
   ControllerServiceWithOptions,
 } from '@/types/database'
 
-// Icon mapping helper
+// Icon mapping helper - matches admin page iconMap
 const iconMap: Record<string, React.ReactNode> = {
-  'hall-effect': <Zap className="w-6 h-6" />,
-  'clicky-buttons': <CircuitBoard className="w-6 h-6" />,
-  'back-buttons': <Plus className="w-6 h-6" />,
+  controller: <Gamepad2 className="w-6 h-6" />,
+  cpu: <Cpu className="w-6 h-6" />,
+  sensor: <Zap className="w-6 h-6" />,
+  circuit: <CircuitBoard className="w-6 h-6" />,
+  button: <Keyboard className="w-6 h-6" />,
   battery: <Battery className="w-6 h-6" />,
-  'hair-trigger': <Wrench className="w-6 h-6" />,
-  'custom-shell': <Palette className="w-6 h-6" />,
+  charging: <BatteryCharging className="w-6 h-6" />,
+  power: <Power className="w-6 h-6" />,
+  voltage: <Zap className="w-6 h-6" />,
+  repair: <Wrench className="w-6 h-6" />,
+  hammer: <Hammer className="w-6 h-6" />,
+  settings: <Cog className="w-6 h-6" />,
+  tool: <Settings className="w-6 h-6" />,
+  refresh: <RefreshCw className="w-6 h-6" />,
+  gauge: <Gauge className="w-6 h-6" />,
+  activity: <Activity className="w-6 h-6" />,
+  paint: <Palette className="w-6 h-6" />,
+  paintbrush: <Paintbrush className="w-6 h-6" />,
+  brush: <Brush className="w-6 h-6" />,
+  sparkle: <Sparkles className="w-6 h-6" />,
+  star: <Star className="w-6 h-6" />,
+  shield: <Shield className="w-6 h-6" />,
+  check: <CheckCircle className="w-6 h-6" />,
+  clock: <Clock className="w-6 h-6" />,
+  package: <Package className="w-6 h-6" />,
+  truck: <Truck className="w-6 h-6" />,
+  award: <Award className="w-6 h-6" />,
+  trophy: <Trophy className="w-6 h-6" />,
+  medal: <Medal className="w-6 h-6" />,
 }
 
 interface ServiceDetail {
@@ -90,7 +143,7 @@ export function ServicesPage() {
       // Transform database service to ServiceDetail format
       const serviceDetail: ServiceDetail = {
         id: service.service_id,
-        icon: iconMap[service.service_id] || <Zap className="w-6 h-6" />,
+        icon: iconMap[service.service_id] || <Gamepad2 className="w-6 h-6" />,
         title: service.name,
         subtitle: service.subtitle || '',
         description: service.detailed_description || service.description,
@@ -180,7 +233,7 @@ export function ServicesPage() {
               <div key={service.id} className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                    {iconMap[service.service_id] || <Zap className="w-6 h-6" />}
+                    {iconMap[service.service_id] || <Gamepad2 className="w-6 h-6" />}
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg mb-1" style={{ fontWeight: 600 }}>
