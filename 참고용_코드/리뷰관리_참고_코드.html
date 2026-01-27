@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PandaDuck Fix - 리뷰 관리</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#000000",
+              "background-light": "#F9FAFB",
+              "background-dark": "#111827",
+            },
+            fontFamily: {
+              display: ["Inter", "Noto Sans KR", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "12px",
+            },
+          },
+        },
+      };
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-toggle:checked ~ .ios-toggle-dot {
+            transform: translateX(100%);
+            background-color: white;
+        }
+        .ios-toggle:checked ~ .ios-toggle-bg {
+            background-color: #10B981;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<nav class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button class="p-2 -ml-2 text-gray-600 dark:text-gray-400">
+<span class="material-icons-round">chevron_left</span>
+</button>
+<h1 class="text-xl font-bold tracking-tight">리뷰 관리</h1>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm font-medium text-gray-500 dark:text-gray-400">총 4건</span>
+</div>
+</nav>
+<div class="p-4 space-y-3">
+<div class="relative">
+<span class="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="고객명, 서비스명, 리뷰 내용 검색..." type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-2 px-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium flex items-center justify-center gap-2">
+                전체 상태
+                <span class="material-icons-round text-lg">expand_more</span>
+</button>
+<button class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium flex items-center justify-center">
+<span class="material-icons-round text-lg">tune</span>
+</button>
+</div>
+</div>
+<main class="px-4 pb-24 space-y-4">
+<div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700/50">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400">
+<span class="material-icons-round">person</span>
+</div>
+<div>
+<h3 class="font-bold text-base">김패드</h3>
+<div class="flex items-center gap-1 text-yellow-400">
+<span class="material-icons-round text-sm">star</span>
+<span class="material-icons-round text-sm">star</span>
+<span class="material-icons-round text-sm">star</span>
+<span class="material-icons-round text-sm text-gray-300 dark:text-gray-600">star</span>
+<span class="material-icons-round text-sm text-gray-300 dark:text-gray-600">star</span>
+<span class="text-xs text-gray-500 dark:text-gray-400 ml-1 font-medium">3점</span>
+</div>
+</div>
+</div>
+<span class="text-[10px] text-gray-400 font-medium">2026. 1. 27.</span>
+</div>
+<div class="mb-3">
+<span class="inline-block px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-[10px] font-medium mb-1">
+                    클릭키 버튼 모듈, 홀 이펙트 센서 업그레이드
+                </span>
+<p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                    잘 고쳐주셨어요 근데 고양이가 물어뜯어서 다시 보내야할 것 같아요 ㅠㅠ 수고하세요!
+                </p>
+</div>
+<div class="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-gray-700">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-gray-500 dark:text-gray-400">공개 여부</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-toggle" type="checkbox"/>
+<div class="ios-toggle-bg w-9 h-5 bg-gray-200 dark:bg-gray-600 rounded-full transition-colors"></div>
+<div class="ios-toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform duration-200 shadow-sm"></div>
+</label>
+</div>
+<span class="flex items-center gap-1 px-2 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg text-[11px] font-bold">
+<span class="material-icons-round text-xs">check_circle</span>
+                        승인됨
+                    </span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 text-gray-400 hover:text-primary transition-colors">
+<span class="material-icons-round text-xl">visibility</span>
+</button>
+<button class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors">
+<span class="material-icons-round text-xl">delete_outline</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700/50">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 font-bold">
+                        E
+                    </div>
+<div>
+<h3 class="font-bold text-base">일론머스크</h3>
+<div class="flex items-center gap-1 text-yellow-400">
+<span class="material-icons-round text-sm">star</span>
+<span class="material-icons-round text-sm">star</span>
+<span class="material-icons-round text-sm">star</span>
+<span class="material-icons-round text-sm">star</span>
+<span class="material-icons-round text-sm">star</span>
+<span class="text-xs text-gray-500 dark:text-gray-400 ml-1 font-medium">5점</span>
+</div>
+</div>
+</div>
+<span class="text-[10px] text-gray-400 font-medium">2026. 1. 27.</span>
+</div>
+<div class="mb-3">
+<span class="inline-block px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-[10px] font-medium mb-1">
+                    고용량 배터리
+                </span>
+<p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                    요청한 옵션 전부 무시되고 배터리만 왔네요... 그래도 만족합니다. 화성 갈때까지는 버티겠죠?
+                </p>
+</div>
+<div class="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-gray-700">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-gray-500 dark:text-gray-400">공개 여부</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-toggle" type="checkbox"/>
+<div class="ios-toggle-bg w-9 h-5 bg-gray-200 dark:bg-gray-600 rounded-full transition-colors"></div>
+<div class="ios-toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform duration-200 shadow-sm"></div>
+</label>
+</div>
+<span class="flex items-center gap-1 px-2 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg text-[11px] font-bold">
+<span class="material-icons-round text-xs">check_circle</span>
+                        승인됨
+                    </span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 text-gray-400">
+<span class="material-icons-round text-xl">visibility</span>
+</button>
+<button class="p-2 text-rose-500">
+<span class="material-icons-round text-xl">delete_outline</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700/50">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 font-bold">
+                        N
+                    </div>
+<div>
+<h3 class="font-bold text-base">남두현</h3>
+<div class="flex items-center gap-1 text-yellow-400">
+<span class="material-icons-round text-sm">star</span>
+<span class="material-icons-round text-sm">star</span>
+<span class="material-icons-round text-sm">star</span>
+<span class="material-icons-round text-sm">star</span>
+<span class="material-icons-round text-sm">star</span>
+<span class="text-xs text-gray-500 dark:text-gray-400 ml-1 font-medium">5점</span>
+</div>
+</div>
+</div>
+<span class="text-[10px] text-gray-400 font-medium">2026. 1. 27.</span>
+</div>
+<div class="mb-3">
+<span class="inline-block px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-[10px] font-medium mb-1">
+                    클릭키 버튼 모듈, 홀 이펙트 센서 업그레이드
+                </span>
+<p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                    텐션 조절 기능으로 취향 것 사용할 수 있어서 너무 좋습니다! 강력 추천해요.
+                </p>
+</div>
+<div class="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-gray-700">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-gray-500 dark:text-gray-400">공개 여부</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only ios-toggle" type="checkbox"/>
+<div class="ios-toggle-bg w-9 h-5 bg-gray-200 dark:bg-gray-600 rounded-full transition-colors"></div>
+<div class="ios-toggle-dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform duration-200 shadow-sm"></div>
+</label>
+</div>
+<span class="flex items-center gap-1 px-2 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg text-[11px] font-bold">
+<span class="material-icons-round text-xs">check_circle</span>
+                        승인됨
+                    </span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 text-gray-400">
+<span class="material-icons-round text-xl">visibility</span>
+</button>
+<button class="p-2 text-rose-500">
+<span class="material-icons-round text-xl">delete_outline</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 flex justify-around items-center px-4 pb-6 pt-2 z-50">
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-icons-round">dashboard</span>
+<span class="text-[10px] font-medium">대시보드</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-icons-round">build</span>
+<span class="text-[10px] font-medium">수리 신청</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary dark:text-white">
+<span class="material-icons-round">star</span>
+<span class="text-[10px] font-bold">리뷰 관리</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-icons-round">settings</span>
+<span class="text-[10px] font-medium">설정</span>
+</button>
+</nav>
+<button class="fixed right-6 bottom-28 w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center transition-transform active:scale-95 z-40">
+<span class="material-icons-round text-3xl">add</span>
+</button>
+
+</body></html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Model &amp; Service Management - PandaDuck Fix</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#000000",
+                        "background-light": "#F9FAFB",
+                        "background-dark": "#111827",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "Noto Sans KR", "sans-serif"],
+                        sans: ["Inter", "Noto Sans KR", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                    },
+                },
+            },
+        };
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+        function switchModel(modelId) {
+            const tabs = document.querySelectorAll('.model-tab');
+            const sections = document.querySelectorAll('.service-section');
+            tabs.forEach(tab => {
+                if(tab.dataset.model === modelId) {
+                    tab.classList.add('bg-primary', 'text-white');
+                    tab.classList.remove('bg-gray-100', 'text-gray-600', 'dark:bg-gray-800', 'dark:text-gray-400');
+                } else {
+                    tab.classList.remove('bg-primary', 'text-white');
+                    tab.classList.add('bg-gray-100', 'text-gray-600', 'dark:bg-gray-800', 'dark:text-gray-400');
+                }
+            });
+            sections.forEach(section => {
+                section.classList.add('hidden');
+                if(section.id === `services-${modelId}`) {
+                    section.classList.remove('hidden');
+                }
+            });
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }.glass-header {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-sans bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 min-h-screen">
+<header class="sticky top-0 z-50 glass-header bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary dark:text-white">settings_suggest</span>
+<h1 class="text-lg font-bold">모델 &amp; 서비스 관리</h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" onclick="toggleDarkMode()">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button class="bg-primary text-white p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</header>
+<main class="pb-24">
+<section class="p-4">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">컨트롤러 모델</h2>
+<span class="text-xs text-primary dark:text-blue-400 font-medium">순서 변경</span>
+</div>
+<div class="flex overflow-x-auto gap-2 no-scrollbar pb-2">
+<button class="model-tab whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-primary text-white transition-all shadow-sm" data-model="dualsense" onclick="switchModel('dualsense')">
+                    DualSense
+                </button>
+<button class="model-tab whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 transition-all" data-model="xbox" onclick="switchModel('xbox')">
+                    Xbox Elite
+                </button>
+<button class="model-tab whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 transition-all" data-model="joycon" onclick="switchModel('joycon')">
+                    Nintendo Switch
+                </button>
+<button class="model-tab whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 transition-all" data-model="dualshock" onclick="switchModel('dualshock')">
+                    DualShock 4
+                </button>
+</div>
+</section>
+<section class="px-4">
+<div class="flex items-center justify-between mb-4 mt-2">
+<h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">서비스 목록</h2>
+<button class="text-xs flex items-center gap-1 text-gray-500 dark:text-gray-400">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+                    필터
+                </button>
+</div>
+<div class="service-section space-y-3" id="services-dualsense">
+<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+<div class="flex justify-between items-start mb-2">
+<div class="flex gap-3">
+<div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined">bolt</span>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white">홀 이펙트 센서 업그레이드</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">스틱 드리프트를 영구적으로 해결합니다.</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-500"></div>
+</label>
+</div>
+<div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-50 dark:border-gray-700/50">
+<div class="flex items-center gap-4">
+<span class="text-sm font-bold text-gray-900 dark:text-white">₩20,000</span>
+<span class="text-xs text-gray-400 dark:text-gray-500">옵션 3개</span>
+</div>
+<div class="flex gap-2">
+<button class="p-2 text-gray-400 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+<button class="p-2 text-gray-400 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">tune</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+<div class="flex justify-between items-start mb-2">
+<div class="flex gap-3">
+<div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+<span class="material-symbols-outlined">ads_click</span>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white">클리키 버튼 모듈</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">eXtremeRate 프리미엄 촉감 스위치</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-500"></div>
+</label>
+</div>
+<div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-50 dark:border-gray-700/50">
+<div class="flex items-center gap-4">
+<span class="text-sm font-bold text-gray-900 dark:text-white">₩25,000</span>
+<span class="text-xs text-gray-400 dark:text-gray-500">옵션 2개</span>
+</div>
+<div class="flex gap-2">
+<button class="p-2 text-gray-400 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+<button class="p-2 text-gray-400 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">tune</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+<div class="flex justify-between items-start mb-2">
+<div class="flex gap-3">
+<div class="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined">add_circle</span>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white">백버튼 모드</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">프로게이머급 후면 패들을 추가합니다.</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-500"></div>
+</label>
+</div>
+<div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-50 dark:border-gray-700/50">
+<div class="flex items-center gap-4">
+<span class="text-sm font-bold text-gray-900 dark:text-white">₩40,000</span>
+<span class="text-xs text-gray-400 dark:text-gray-500">옵션 2개</span>
+</div>
+<div class="flex gap-2">
+<button class="p-2 text-gray-400 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+<button class="p-2 text-gray-400 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">tune</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 opacity-60">
+<div class="flex justify-between items-start mb-2">
+<div class="flex gap-3">
+<div class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-700/30 flex items-center justify-center text-gray-400">
+<span class="material-symbols-outlined">battery_full</span>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white">고용량 배터리</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">고용량 배터리로 더 긴 플레이타임을 제공합니다.</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-500"></div>
+</label>
+</div>
+<div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-50 dark:border-gray-700/50">
+<div class="flex items-center gap-4">
+<span class="text-sm font-bold text-gray-900 dark:text-white">₩15,000</span>
+<span class="text-xs text-gray-400 dark:text-gray-500">옵션 1개</span>
+</div>
+<div class="flex gap-2">
+<button class="p-2 text-gray-400 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+<button class="p-2 text-gray-400 hover:text-primary dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined text-xl">tune</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="service-section hidden py-10 text-center" id="services-xbox">
+<span class="material-symbols-outlined text-gray-300 text-6xl">videogame_asset_off</span>
+<p class="text-gray-500 mt-2">Xbox Elite 서비스를 준비 중입니다.</p>
+</div>
+<div class="service-section hidden py-10 text-center" id="services-joycon">
+<span class="material-symbols-outlined text-gray-300 text-6xl">videogame_asset_off</span>
+<p class="text-gray-500 mt-2">Nintendo Joy-Con 서비스를 준비 중입니다.</p>
+</div>
+<div class="service-section hidden py-10 text-center" id="services-dualshock">
+<span class="material-symbols-outlined text-gray-300 text-6xl">videogame_asset_off</span>
+<p class="text-gray-500 mt-2">DualShock 4 서비스를 준비 중입니다.</p>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 glass-header bg-white/90 dark:bg-gray-900/90 border-t border-gray-200 dark:border-gray-800 px-6 py-2 pb-6 flex justify-between items-center z-50">
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-medium">대시보드</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">assignment</span>
+<span class="text-[10px] font-medium">수리 신청</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary dark:text-white">
+<span class="material-symbols-outlined font-bold">handyman</span>
+<span class="text-[10px] font-bold">모델 &amp; 서비스</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">reviews</span>
+<span class="text-[10px] font-medium">리뷰</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500">
+<span class="material-symbols-outlined">more_horiz</span>
+<span class="text-[10px] font-medium">더보기</span>
+</button>
+</nav>
+<div class="fixed bottom-24 right-4">
+<button class="bg-primary dark:bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+
+</body></html>

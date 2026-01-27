@@ -10,6 +10,7 @@ import { ReviewsPage } from './app/components/ReviewsPage'
 import { AboutPage } from './app/components/AboutPage'
 import { ReviewPage } from './pages/ReviewPage'
 import { AdminApp } from './admin/AdminApp.tsx'
+import AdminMobileApp from './admin-mobile/AdminMobileApp'
 import './styles/index.css'
 import './test-supabase'
 
@@ -27,6 +28,7 @@ createRoot(document.getElementById('root')!).render(
       </Route>
       <Route path="/review/:token" element={<ReviewPage />} />
       <Route path="/admin/*" element={<AdminApp />} />
+      <Route path="/admin-mobile/*" element={<AdminMobileApp />} />
     </Routes>
   </BrowserRouter>
 )

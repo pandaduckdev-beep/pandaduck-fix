@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PandaDuck Fix - Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#3B82F6",
+              secondary: "#F59E0B",
+              "background-light": "#F9FAFB",
+              "background-dark": "#111827",
+            },
+            fontFamily: {
+              display: ["Pretendard", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "12px",
+            },
+          },
+        },
+      };
+    </script>
+<style>
+        body { font-family: 'Pretendard', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 transition-colors duration-200">
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-5 py-4 flex items-center justify-between">
+<div class="flex flex-col">
+<h1 class="text-xl font-bold tracking-tight">대시보드</h1>
+<span class="text-xs text-slate-500 dark:text-slate-400">전체 55건</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300">
+<span class="material-icons-outlined text-xl">notifications</span>
+</button>
+<button class="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300">
+<span class="material-icons-outlined text-xl">menu</span>
+</button>
+</div>
+</header>
+<main class="p-5 pb-24 space-y-6">
+<div class="space-y-4">
+<div class="relative overflow-hidden bg-primary p-6 rounded-3xl shadow-lg shadow-blue-500/20 text-white">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-sm font-medium opacity-80 mb-1">1월 예상 매출</p>
+<h2 class="text-3xl font-bold">₩560,500</h2>
+</div>
+<div class="bg-white/20 p-2 rounded-xl">
+<span class="material-icons-outlined">payments</span>
+</div>
+</div>
+<p class="mt-4 text-xs opacity-70">이번 달 완료된 13건의 수리 금액</p>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-icons-outlined text-8xl">trending_up</span>
+</div>
+</div>
+<div class="bg-secondary p-6 rounded-3xl shadow-lg shadow-orange-500/20 text-white">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-sm font-medium opacity-80 mb-1">고객 만족도</p>
+<div class="flex items-baseline gap-1">
+<h2 class="text-3xl font-bold">4.5</h2>
+<span class="text-sm opacity-70">/ 5.0</span>
+</div>
+</div>
+<div class="bg-white/20 p-2 rounded-xl">
+<span class="material-icons-outlined text-white">star</span>
+</div>
+</div>
+<p class="mt-4 text-xs opacity-70">총 4개의 승인된 리뷰</p>
+</div>
+</div>
+<section>
+<h3 class="text-lg font-bold mb-4 px-1">수리 진행 현황</h3>
+<div class="flex overflow-x-auto gap-3 no-scrollbar pb-2">
+<div class="min-w-[120px] bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800/50 p-4 rounded-2xl">
+<p class="text-xs font-semibold text-yellow-600 dark:text-yellow-400 mb-1">대기중</p>
+<p class="text-2xl font-bold text-yellow-700 dark:text-yellow-300">8</p>
+</div>
+<div class="min-w-[120px] bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 p-4 rounded-2xl">
+<p class="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">확인됨</p>
+<p class="text-2xl font-bold text-blue-700 dark:text-blue-300">13</p>
+</div>
+<div class="min-w-[120px] bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800/50 p-4 rounded-2xl">
+<p class="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-1">진행중</p>
+<p class="text-2xl font-bold text-purple-700 dark:text-purple-300">8</p>
+</div>
+<div class="min-w-[120px] bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/50 p-4 rounded-2xl">
+<p class="text-xs font-semibold text-green-600 dark:text-green-400 mb-1">완료</p>
+<p class="text-2xl font-bold text-green-700 dark:text-green-300">14</p>
+</div>
+<div class="min-w-[120px] bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/50 p-4 rounded-2xl">
+<p class="text-xs font-semibold text-red-600 dark:text-red-400 mb-1">취소</p>
+<p class="text-2xl font-bold text-red-700 dark:text-red-300">12</p>
+</div>
+</div>
+</section>
+<section>
+<div class="flex justify-between items-end mb-4 px-1">
+<h3 class="text-lg font-bold">최근 수리 신청</h3>
+<button class="text-xs font-medium text-primary flex items-center">
+                    전체 보기 <span class="material-icons-outlined text-sm ml-0.5">chevron_right</span>
+</button>
+</div>
+<div class="space-y-3">
+<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-primary">
+<span class="material-icons-outlined text-xl">person</span>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-bold text-sm">일론머스크</span>
+<span class="text-[10px] px-1.5 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-full font-semibold">완료</span>
+</div>
+<p class="text-[10px] text-slate-400 dark:text-slate-500 truncate w-32">8d9f632e-0c3e-4d98...</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-sm">₩15,000</p>
+<p class="text-[10px] text-slate-400">6시간 전</p>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-primary">
+<span class="material-icons-outlined text-xl">person</span>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-bold text-sm">김패드</span>
+<span class="text-[10px] px-1.5 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-full font-semibold">완료</span>
+</div>
+<p class="text-[10px] text-slate-400 dark:text-slate-500 truncate w-32">4f5e712a-0b2d-1c39...</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-sm">₩55,000</p>
+<p class="text-[10px] text-slate-400">8시간 전</p>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-primary">
+<span class="material-icons-outlined text-xl">person</span>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-bold text-sm">홍길동</span>
+<span class="text-[10px] px-1.5 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-full font-semibold">완료</span>
+</div>
+<p class="text-[10px] text-slate-400 dark:text-slate-500 truncate w-32">7a2c134d-1f4e-9c22...</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-sm">₩85,500</p>
+<p class="text-[10px] text-slate-400">16시간 전</p>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-primary">
+<span class="material-icons-outlined text-xl">person</span>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-0.5">
+<span class="font-bold text-sm">남두현</span>
+<span class="text-[10px] px-1.5 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-full font-semibold">완료</span>
+</div>
+<p class="text-[10px] text-slate-400 dark:text-slate-500 truncate w-32">1b2v3n4m-5f6g-7h8j...</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-sm">₩40,000</p>
+<p class="text-[10px] text-slate-400">17시간 전</p>
+</div>
+</div>
+</div>
+</section>
+<div class="h-8"></div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 px-6 py-3 flex justify-between items-center z-50">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-icons-outlined">dashboard</span>
+<span class="text-[10px] font-bold">홈</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+<span class="material-icons-outlined">build</span>
+<span class="text-[10px] font-medium">수리신청</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+<span class="material-icons-outlined">rate_review</span>
+<span class="text-[10px] font-medium">리뷰</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+<span class="material-icons-outlined">settings</span>
+<span class="text-[10px] font-medium">설정</span>
+</button>
+</nav>
+<button class="fixed right-5 bottom-24 w-10 h-10 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center transition-all active:scale-90 z-40" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-icons-outlined text-slate-600 dark:text-yellow-400 text-xl">dark_mode</span>
+</button>
+
+</body></html>
