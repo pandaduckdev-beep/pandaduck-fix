@@ -55,7 +55,7 @@ export async function copyToClipboard(text: string): Promise<void> {
 
 export function openKakaoTalk(url: string, customerName: string) {
   // 카카오톡 공유하기 기능 (실제 구현 시 카카오 SDK 필요)
-  const message = `안녕하세요 ${customerName}님,\n\n수리가 완료되었습니다. 서비스에 대한 리뷰를 남겨주시면 감사하겠습니다.\n\n${url}`
+  const message = `안녕하세요 ${customerName}님 👋\n\n서비스 어떠셨는지, 편하게 리뷰 남겨주시면\n앞으로 더 좋은 서비스 제공하도록 노력할게요! 💪✨\n\n감사합니다! 🙏\n\n${url}`
 
   // 임시로 클립보드에 복사
   copyToClipboard(message)
