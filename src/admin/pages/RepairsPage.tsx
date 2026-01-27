@@ -33,6 +33,7 @@ interface ServiceWithDetails {
 
 interface RepairRequestWithServices extends RepairRequest {
   services?: ServiceWithDetails[]
+  has_review?: boolean
 }
 
 type RepairStatus = 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
@@ -126,10 +127,18 @@ export function RepairsPage() {
             })
           )
 
+          // Check if review exists
+          const { data: review } = await supabase
+            .from('reviews')
+            .select('id')
+            .eq('repair_request_id', repair.id)
+            .single()
+
           return {
             ...repair,
             services: servicesWithDetails,
             controller_models: controllerModels?.find((cm) => cm.id === repair.controller_model),
+            has_review: !!review,
           }
         })
       )
@@ -470,14 +479,21 @@ export function RepairsPage() {
                   </td>
                   <td className="px-6 py-4">
                     {repair.status === 'completed' && (
-                      <button
-                        onClick={() => handleRequestReview(repair)}
-                        className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                        title="리뷰 요청"
-                      >
-                        <MessageSquare className="w-4 h-4" />
-                        리뷰 요청
-                      </button>
+                      repair.has_review ? (
+                        <span className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-green-100 text-green-800 rounded-lg font-medium">
+                          <CheckCircle className="w-4 h-4" />
+                          리뷰완료
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleRequestReview(repair)}
+                          className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                          title="리뷰 요청"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                          리뷰 요청
+                        </button>
+                      )
                     )}
                   </td>
                 </tr>
