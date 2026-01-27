@@ -66,6 +66,20 @@ export function ReviewPage() {
         return
       }
 
+      // Get controller model name
+      let controllerModelName = repair.controller_model
+      if (repair.controller_model) {
+        const { data: modelData } = await supabase
+          .from('controller_models')
+          .select('model_name')
+          .eq('id', repair.controller_model)
+          .single()
+
+        if (modelData) {
+          controllerModelName = modelData.model_name
+        }
+      }
+
       // 서비스 정보 조회
       const { data: services } = await supabase
         .from('repair_request_services')
@@ -78,7 +92,7 @@ export function ReviewPage() {
       const servicesWithDetails = await Promise.all(
         (services || []).map(async (svc) => {
           const { data: service } = await supabase
-            .from('services')
+            .from('controller_services')
             .select('name')
             .eq('id', svc.service_id)
             .single()
@@ -102,6 +116,7 @@ export function ReviewPage() {
 
       setRepairInfo({
         ...repair,
+        controller_model: controllerModelName,
         services: servicesWithDetails,
       })
     } catch (error) {
