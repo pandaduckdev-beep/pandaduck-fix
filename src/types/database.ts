@@ -10,6 +10,7 @@ export interface Database {
           id: string
           controller_model_id: string
           service_id: string
+          icon_name: string | null
           name: string
           description: string
           subtitle: string | null
@@ -29,6 +30,7 @@ export interface Database {
           id?: string
           controller_model_id: string
           service_id: string
+          icon_name?: string | null
           name: string
           description: string
           subtitle?: string | null
@@ -48,6 +50,7 @@ export interface Database {
           id?: string
           controller_model_id?: string
           service_id?: string
+          icon_name?: string | null
           name?: string
           description?: string
           subtitle?: string | null

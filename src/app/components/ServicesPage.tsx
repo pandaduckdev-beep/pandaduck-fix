@@ -143,7 +143,7 @@ export function ServicesPage() {
       // Transform database service to ServiceDetail format
       const serviceDetail: ServiceDetail = {
         id: service.service_id,
-        icon: iconMap[service.service_id] || <Gamepad2 className="w-6 h-6" />,
+        icon: iconMap[service.icon_name || service.service_id] || <Gamepad2 className="w-6 h-6" />,
         title: service.name,
         subtitle: service.subtitle || '',
         description: service.detailed_description || service.description,
@@ -233,7 +233,7 @@ export function ServicesPage() {
               <div key={service.id} className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                    {iconMap[service.service_id] || <Gamepad2 className="w-6 h-6" />}
+                    {iconMap[service.icon_name || service.service_id] || <Gamepad2 className="w-6 h-6" />}
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg mb-1" style={{ fontWeight: 600 }}>

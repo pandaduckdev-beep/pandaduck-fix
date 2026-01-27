@@ -75,6 +75,7 @@ export function EditServiceModal({
 }: EditServiceModalProps) {
   const [formData, setFormData] = useState({
     service_id: '',
+    icon_name: '',
     name: '',
     description: '',
     subtitle: '',
@@ -128,6 +129,7 @@ export function EditServiceModal({
     if (service) {
       setFormData({
         service_id: service.service_id || '',
+        icon_name: service.icon_name || service.service_id || '',
         name: service.name || '',
         description: service.description || '',
         subtitle: service.subtitle || '',
@@ -324,11 +326,11 @@ export function EditServiceModal({
               >
                 {(() => {
                   const IconComponent =
-                    iconOptions.find((opt) => opt.name === formData.service_id)?.icon || Gamepad2
+                    iconOptions.find((opt) => opt.name === formData.icon_name)?.icon || Gamepad2
                   return (
                     <>
                       <IconComponent className="w-4 h-4 mr-2" />
-                      {formData.service_id || '아이콘 선택'}
+                      {formData.icon_name || '아이콘 선택'}
                     </>
                   )
                 })()}
@@ -346,12 +348,12 @@ export function EditServiceModal({
                           onClick={() => {
                             setFormData({
                               ...formData,
-                              service_id: option.name,
+                              icon_name: option.name,
                             })
                             setIsIconSelectorOpen(false)
                           }}
                           className={`p-3 rounded-lg hover:bg-blue-100 transition-colors ${
-                            formData.service_id === option.name
+                            formData.icon_name === option.name
                               ? 'bg-blue-100 ring-2 ring-blue-500'
                               : 'bg-white'
                           }`}

@@ -115,7 +115,7 @@ export function ServiceSelection() {
     name: service.name,
     description: service.description,
     price: service.pricing?.price || service.base_price,
-    icon: iconMap[service.service_id] || <Gamepad2 className="w-6 h-6" />,
+    icon: iconMap[service.icon_name || service.service_id] || <Gamepad2 className="w-6 h-6" />,
     options: service.options?.map((option) => ({
       id: option.id,
       name: option.option_name,

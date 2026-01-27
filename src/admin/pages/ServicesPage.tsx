@@ -119,7 +119,7 @@ function SortableRow({ service, onToggleStatus, onEdit, onOpenOptions }: Sortabl
         <div className="flex items-center gap-3">
           <div className="p-2 bg-gray-100 rounded-lg">
             {(() => {
-              const IconComponent = iconMap[service.service_id] || Gamepad2
+              const IconComponent = iconMap[service.icon_name || service.service_id] || Gamepad2
               return <IconComponent className="w-5 h-5 text-gray-700" />
             })()}
           </div>
