@@ -69,10 +69,41 @@ export function ReviewsPage() {
       if (error) throw error
 
       if (data) {
+        // Get services list for each review
+        const reviewsWithServices = await Promise.all(
+          data.map(async (review) => {
+            let servicesList = review.service_name || ''
+
+            if (review.repair_request_id) {
+              const { data: requestServices } = await supabase
+                .from('repair_request_services')
+                .select('service_id')
+                .eq('repair_request_id', review.repair_request_id)
+
+              if (requestServices && requestServices.length > 0) {
+                const serviceIds = requestServices.map((s) => s.service_id)
+                const { data: services } = await supabase
+                  .from('controller_services')
+                  .select('name')
+                  .in('id', serviceIds)
+
+                if (services && services.length > 0) {
+                  servicesList = services.map((s) => s.name).join(', ')
+                }
+              }
+            }
+
+            return {
+              ...review,
+              service_name: servicesList
+            }
+          })
+        )
+
         if (pageNum === 0) {
-          setReviews(data)
+          setReviews(reviewsWithServices)
         } else {
-          setReviews(prev => [...prev, ...data])
+          setReviews(prev => [...prev, ...reviewsWithServices])
         }
 
         // 더 이상 데이터가 없으면 hasMore를 false로
@@ -147,21 +178,23 @@ export function ReviewsPage() {
         </p>
 
         {/* Stats */}
-        <div className="flex items-center gap-8 mt-8 p-6 bg-[#F5F5F7] rounded-[28px]">
-          <div>
-            <div className="flex items-center gap-1 mb-1">
-              <Star className="w-6 h-6 fill-current" />
-              <span className="text-3xl" style={{ fontWeight: 700 }}>
-                {averageRating}
-              </span>
+        <div className="bg-[#F5F5F7] rounded-[28px] p-6 mt-8">
+          <div className="grid grid-cols-2 divide-x divide-[rgba(0,0,0,0.1)]">
+            <div className="text-center pr-4">
+              <div className="flex items-center justify-center gap-1 mb-2">
+                <Star className="w-6 h-6 fill-current" />
+                <span className="text-3xl" style={{ fontWeight: 700 }}>
+                  {averageRating}
+                </span>
+              </div>
+              <p className="text-sm text-[#86868B]">평균 평점</p>
             </div>
-            <p className="text-sm text-[#86868B]">평균 평점</p>
-          </div>
-          <div>
-            <div className="text-3xl mb-1" style={{ fontWeight: 700 }}>
-              {totalReviews}
+            <div className="text-center pl-4">
+              <div className="text-3xl mb-2" style={{ fontWeight: 700 }}>
+                {totalReviews}
+              </div>
+              <p className="text-sm text-[#86868B]">누적 후기</p>
             </div>
-            <p className="text-sm text-[#86868B]">누적 후기</p>
           </div>
         </div>
       </section>
