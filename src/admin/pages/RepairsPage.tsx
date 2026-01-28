@@ -640,17 +640,69 @@ export function RepairsPage() {
                   </div>
                 </div>
 
-                {/* Issue Description */}
-                {selectedRepair.issue_description && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 mb-3">추가 정보</h3>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {selectedRepair.issue_description}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                {/* Controller Condition & Notes */}
+                {selectedRepair.issue_description && (() => {
+                  const desc = selectedRepair.issue_description
+                  const addressMatch = desc.match(/고객 주소:\s*(.+)/)
+                  const conditionsMatch = desc.match(/상태:\s*\[(.+?)\]/)
+                  const notesMatch = desc.match(/요청사항:\s*(.+?)(?:\n|$)/)
+                  const address = addressMatch ? addressMatch[1].trim() : null
+                  const conditions = conditionsMatch ? conditionsMatch[1].split(',').map((s) => s.trim()) : null
+                  const notes = notesMatch ? notesMatch[1].trim() : null
+                  const hasParsed = address || conditions || notes
+
+                  if (!hasParsed) {
+                    return (
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-500 mb-3">추가 정보</h3>
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap">{desc}</p>
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <>
+                      {conditions && (
+                        <div>
+                          <h3 className="text-sm font-semibold text-gray-500 mb-3">컨트롤러 상태</h3>
+                          <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                            <div className="flex flex-wrap gap-2">
+                              {conditions.map((c) => (
+                                <span key={c} className="inline-block bg-white border border-gray-300 rounded-full px-3 py-1 text-sm font-medium">
+                                  {c}
+                                </span>
+                              ))}
+                            </div>
+                            {notes && (
+                              <div className="pt-3 border-t border-gray-200">
+                                <p className="text-xs font-medium text-gray-500 mb-1">추가 요청사항</p>
+                                <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {!conditions && notes && (
+                        <div>
+                          <h3 className="text-sm font-semibold text-gray-500 mb-3">추가 요청사항</h3>
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
+                          </div>
+                        </div>
+                      )}
+                      {address && (
+                        <div>
+                          <h3 className="text-sm font-semibold text-gray-500 mb-3">배송 주소</h3>
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <p className="text-sm text-gray-700">{address}</p>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )
+                })()}
 
                 {/* Total & Status */}
                 <div className="border-t border-gray-200 pt-4">
@@ -752,6 +804,73 @@ export function RepairsPage() {
                 </div>
               </div>
 
+              {/* Services */}
+              {selectedRepairForManage.services && selectedRepairForManage.services.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 mb-3">선택한 서비스</h3>
+                  <div className="space-y-2">
+                    {selectedRepairForManage.services.map((svc, index) => (
+                      <div key={index} className="bg-gray-50 rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold">{svc.service?.name || '서비스'}</span>
+                          <span className="text-sm font-semibold">₩{svc.service_price.toLocaleString()}</span>
+                        </div>
+                        {svc.option && (
+                          <div className="flex items-center justify-between text-xs text-gray-500 mt-0.5 pl-3">
+                            <span>ㄴ {svc.option.option_name}</span>
+                            <span>{svc.option_price === 0 ? '기본' : `+₩${svc.option_price.toLocaleString()}`}</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                      <span className="text-sm font-semibold">총 금액</span>
+                      <span className="font-bold">₩{selectedRepairForManage.total_amount.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Controller Condition */}
+              {selectedRepairForManage.issue_description && (() => {
+                const desc = selectedRepairForManage.issue_description
+                const conditionsMatch = desc.match(/상태:\s*\[(.+?)\]/)
+                const notesMatch = desc.match(/요청사항:\s*(.+?)(?:\n|$)/)
+                const addressMatch = desc.match(/고객 주소:\s*(.+)/)
+                const conditions = conditionsMatch ? conditionsMatch[1].split(',').map((s) => s.trim()) : null
+                const notes = notesMatch ? notesMatch[1].trim() : null
+                const address = addressMatch ? addressMatch[1].trim() : null
+                if (!conditions && !notes && !address) return null
+                return (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-500 mb-3">컨트롤러 상태</h3>
+                    <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                      {conditions && (
+                        <div className="flex flex-wrap gap-2">
+                          {conditions.map((c) => (
+                            <span key={c} className="inline-block bg-white border border-gray-300 rounded-full px-3 py-1 text-sm font-medium">
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {notes && (
+                        <div className={conditions ? 'pt-2 border-t border-gray-200' : ''}>
+                          <p className="text-xs font-medium text-gray-500 mb-1">추가 요청사항</p>
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
+                        </div>
+                      )}
+                      {address && (
+                        <div className={(conditions || notes) ? 'pt-2 border-t border-gray-200' : ''}>
+                          <p className="text-xs font-medium text-gray-500 mb-1">배송 주소</p>
+                          <p className="text-sm text-gray-700">{address}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })()}
+
               <div>
                 <h3 className="text-sm font-semibold text-gray-500 mb-3">상태</h3>
                 <div className="flex flex-wrap gap-2">
@@ -821,24 +940,12 @@ export function RepairsPage() {
                 />
               </div>
 
-              <div className="flex gap-2 pt-4">
+              <div className="pt-4">
                 <button
                   onClick={() => handleSaveAdminNotes(selectedRepairForManage.id)}
-                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                  className="w-full px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition font-medium"
                 >
                   저장
-                </button>
-                <button
-                  onClick={() => {
-                    setShowManageModal(false)
-                    setSelectedRepairForManage(null)
-                    setAdminNotes('')
-                    setPreRepairNotes('')
-                    setPostRepairNotes('')
-                  }}
-                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-900 rounded-lg hover:bg-gray-200 transition font-medium"
-                >
-                  취소
                 </button>
               </div>
             </div>

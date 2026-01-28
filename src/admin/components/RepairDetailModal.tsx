@@ -37,14 +37,20 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
     window.print()
   }
 
-  // 주소 추출 (issue_description에서 "고객 주소: " 이후 텍스트)
-  const extractAddress = (description: string | null) => {
-    if (!description) return null
-    const match = description.match(/고객 주소:\s*(.+)/)
-    return match ? match[1].trim() : null
+  // issue_description 파싱
+  const parseIssueDescription = (description: string | null) => {
+    if (!description) return { address: null, conditions: null, notes: null }
+    const addressMatch = description.match(/고객 주소:\s*(.+)/)
+    const conditionsMatch = description.match(/상태:\s*\[(.+?)\]/)
+    const notesMatch = description.match(/요청사항:\s*(.+?)(?:\n|$)/)
+    return {
+      address: addressMatch ? addressMatch[1].trim() : null,
+      conditions: conditionsMatch ? conditionsMatch[1].split(',').map((s) => s.trim()) : null,
+      notes: notesMatch ? notesMatch[1].trim() : null,
+    }
   }
 
-  const customerAddress = extractAddress(repair.issue_description)
+  const { address: customerAddress, conditions: customerConditions, notes: customerNotes } = parseIssueDescription(repair.issue_description)
 
   // 서비스 가격 합계 계산
   const servicesTotal = repair.services?.reduce(
@@ -214,6 +220,36 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
               </table>
             </div>
           </div>
+
+          {/* Controller Condition */}
+          {(customerConditions || customerNotes) && (
+            <div className="mb-8">
+              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <span className="w-2 h-6 bg-black rounded"></span>
+                컨트롤러 상태
+              </h2>
+              <div className="bg-gray-50 rounded-lg p-5 space-y-3">
+                {customerConditions && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-2">현재 상태</p>
+                    <div className="flex flex-wrap gap-2">
+                      {customerConditions.map((c) => (
+                        <span key={c} className="inline-block bg-white border border-gray-300 rounded-full px-3 py-1 text-sm font-medium">
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {customerNotes && (
+                  <div className={customerConditions ? 'pt-3 border-t border-gray-200' : ''}>
+                    <p className="text-sm font-medium text-gray-600 mb-1">추가 요청사항</p>
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{customerNotes}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Notes Section */}
           {(repair.admin_notes || repair.pre_repair_notes || repair.post_repair_notes) && (

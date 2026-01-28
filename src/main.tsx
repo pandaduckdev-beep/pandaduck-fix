@@ -5,6 +5,7 @@ import { HomeScreen } from './app/components/HomeScreen'
 import { ControllerSelection } from './app/components/ControllerSelection'
 import { ServiceSelection } from './app/components/ServiceSelection'
 import { RepairForm } from './app/components/RepairForm'
+import { ControllerCondition } from './app/components/ControllerCondition'
 import { ServicesPage } from './app/components/ServicesPage'
 import { ReviewsPage } from './app/components/ReviewsPage'
 import { AboutPage } from './app/components/AboutPage'
@@ -21,6 +22,7 @@ createRoot(document.getElementById('root')!).render(
         <Route index element={<HomeScreen />} />
         <Route path="controllers" element={<ControllerSelection />} />
         <Route path="services" element={<ServiceSelection />} />
+        <Route path="repair/condition" element={<ControllerCondition />} />
         <Route path="repair/form" element={<RepairForm />} />
         <Route path="services/list" element={<ServicesPage />} />
         <Route path="reviews" element={<ReviewsPage />} />

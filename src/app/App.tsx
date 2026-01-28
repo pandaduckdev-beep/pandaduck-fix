@@ -20,6 +20,11 @@ export interface ServiceSelectionData {
   discountName?: string
 }
 
+export interface ConditionData {
+  conditions: string[]
+  notes: string
+}
+
 export default function App() {
   return <Outlet />
 }

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import type { ServiceSelectionData } from '@/app/App'
+import type { ServiceSelectionData, ConditionData } from '@/app/App'
 import { createRepairRequest } from '@/lib/api'
 import { getControllerModelName } from '@/utils/controllerModels'
 import { getControllerModelById } from '@/services/pricingService'
@@ -45,6 +45,7 @@ export function RepairForm() {
   const location = useLocation()
   const controllerModel = location.state?.controllerModel as string | null
   const selectionData = location.state?.selectionData as ServiceSelectionData | null
+  const conditionData = location.state?.conditionData as ConditionData | null
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -96,7 +97,15 @@ export function RepairForm() {
         customerPhone: formData.phone,
         customerEmail: undefined,
         controllerModel: controllerModelUuid, // UUID 사용
-        issueDescription: `고객 주소: ${formData.address}`,
+        issueDescription: [
+          conditionData?.conditions.length
+            ? `상태: [${conditionData.conditions.join(', ')}]`
+            : '',
+          conditionData?.notes ? `요청사항: ${conditionData.notes}` : '',
+          `고객 주소: ${formData.address}`,
+        ]
+          .filter(Boolean)
+          .join('\n'),
         services: selectionData.services.map((service) => ({
           serviceId: service.uuid, // UUID 사용
           optionId: service.selectedOption?.id,
@@ -143,7 +152,60 @@ export function RepairForm() {
         </div>
       </nav>
 
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto px-6 pt-8 space-y-8">
+      {/* Progress Indicator */}
+      <div className="max-w-md mx-auto px-6 pt-8 pb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <div
+              className="w-7 h-7 rounded-full bg-[#000000] text-white flex items-center justify-center text-xs"
+              style={{ fontWeight: 600 }}
+            >
+              1
+            </div>
+            <span className="text-xs" style={{ fontWeight: 600 }}>
+              모델
+            </span>
+          </div>
+          <div className="flex-1 h-0.5 bg-[#000000] mx-2"></div>
+          <div className="flex items-center gap-1.5">
+            <div
+              className="w-7 h-7 rounded-full bg-[#000000] text-white flex items-center justify-center text-xs"
+              style={{ fontWeight: 600 }}
+            >
+              2
+            </div>
+            <span className="text-xs" style={{ fontWeight: 600 }}>
+              서비스
+            </span>
+          </div>
+          <div className="flex-1 h-0.5 bg-[#000000] mx-2"></div>
+          <div className="flex items-center gap-1.5">
+            <div
+              className="w-7 h-7 rounded-full bg-[#000000] text-white flex items-center justify-center text-xs"
+              style={{ fontWeight: 600 }}
+            >
+              3
+            </div>
+            <span className="text-xs" style={{ fontWeight: 600 }}>
+              상태
+            </span>
+          </div>
+          <div className="flex-1 h-0.5 bg-[#000000] mx-2"></div>
+          <div className="flex items-center gap-1.5">
+            <div
+              className="w-7 h-7 rounded-full bg-[#000000] text-white flex items-center justify-center text-xs"
+              style={{ fontWeight: 600 }}
+            >
+              4
+            </div>
+            <span className="text-xs" style={{ fontWeight: 600 }}>
+              배송
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="max-w-md mx-auto px-6 space-y-8">
         {/* Service Summary Box */}
         <div className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
           <h3 className="text-lg" style={{ fontWeight: 600 }}>
@@ -502,6 +564,37 @@ export function RepairForm() {
                         ₩{selectionData.total.toLocaleString()}
                       </span>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Condition Info */}
+              {conditionData && (
+                <div className="bg-[#F5F5F7] rounded-[20px] p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Gamepad2 className="w-4 h-4 text-[#86868B]" />
+                    <span className="text-sm" style={{ fontWeight: 600 }}>
+                      컨트롤러 상태
+                    </span>
+                  </div>
+                  <div className="space-y-2 pl-6 text-sm">
+                    <div className="flex flex-wrap gap-1.5">
+                      {conditionData.conditions.map((c) => (
+                        <span
+                          key={c}
+                          className="bg-white px-3 py-1 rounded-full border border-[rgba(0,0,0,0.1)]"
+                          style={{ fontWeight: 500 }}
+                        >
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                    {conditionData.notes && (
+                      <div className="pt-2 border-t border-[rgba(0,0,0,0.1)]">
+                        <span className="text-[#86868B]">요청사항</span>
+                        <p className="mt-1 text-[#1D1D1F]">{conditionData.notes}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

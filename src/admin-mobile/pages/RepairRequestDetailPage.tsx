@@ -286,17 +286,62 @@ export default function RepairRequestDetailPage() {
               </div>
             )}
 
-            {repair.issue_description && (
-              <div className="flex items-start gap-3">
-                <MessageSquare className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-xs text-[#86868B] mb-0.5">문제 설명</p>
-                  <p className="text-sm text-[#1D1D1F] whitespace-pre-wrap">
-                    {repair.issue_description}
-                  </p>
-                </div>
-              </div>
-            )}
+            {repair.issue_description && (() => {
+              const addressMatch = repair.issue_description.match(/고객 주소:\s*(.+)/)
+              const conditionsMatch = repair.issue_description.match(/상태:\s*\[(.+?)\]/)
+              const notesMatch = repair.issue_description.match(/요청사항:\s*(.+?)(?:\n|$)/)
+              const address = addressMatch ? addressMatch[1].trim() : null
+              const conditions = conditionsMatch ? conditionsMatch[1].split(',').map((s: string) => s.trim()) : null
+              const notes = notesMatch ? notesMatch[1].trim() : null
+              return (
+                <>
+                  {address && (
+                    <div className="flex items-start gap-3">
+                      <MapPin className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-xs text-[#86868B] mb-0.5">주소</p>
+                        <p className="text-sm text-[#1D1D1F]">{address}</p>
+                      </div>
+                    </div>
+                  )}
+                  {conditions && (
+                    <div className="flex items-start gap-3">
+                      <MessageSquare className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-xs text-[#86868B] mb-1.5">컨트롤러 상태</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {conditions.map((c: string) => (
+                            <span key={c} className="bg-[#F5F5F7] px-3 py-1 rounded-full text-xs text-[#1D1D1F]" style={{ fontWeight: 500 }}>
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {notes && (
+                    <div className="flex items-start gap-3">
+                      <MessageSquare className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-xs text-[#86868B] mb-0.5">추가 요청사항</p>
+                        <p className="text-sm text-[#1D1D1F] whitespace-pre-wrap">{notes}</p>
+                      </div>
+                    </div>
+                  )}
+                  {!address && !conditions && !notes && (
+                    <div className="flex items-start gap-3">
+                      <MessageSquare className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-xs text-[#86868B] mb-0.5">문제 설명</p>
+                        <p className="text-sm text-[#1D1D1F] whitespace-pre-wrap">
+                          {repair.issue_description}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )
+            })()}
           </div>
         </div>
 

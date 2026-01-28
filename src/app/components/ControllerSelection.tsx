@@ -73,38 +73,50 @@ export function ControllerSelection() {
       {/* Progress Indicator */}
       <div className="max-w-md mx-auto px-6 pt-8 pb-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <div
-              className="w-8 h-8 rounded-full bg-[#000000] text-white flex items-center justify-center text-sm"
+              className="w-7 h-7 rounded-full bg-[#000000] text-white flex items-center justify-center text-xs"
               style={{ fontWeight: 600 }}
             >
               1
             </div>
-            <span className="text-sm" style={{ fontWeight: 600 }}>
-              기종
+            <span className="text-xs" style={{ fontWeight: 600 }}>
+              모델
             </span>
           </div>
-          <div className="flex-1 h-0.5 bg-[#F5F5F7] mx-3"></div>
-          <div className="flex items-center gap-2">
+          <div className="flex-1 h-0.5 bg-[#F5F5F7] mx-2"></div>
+          <div className="flex items-center gap-1.5">
             <div
-              className="w-8 h-8 rounded-full bg-[#F5F5F7] text-[#86868B] flex items-center justify-center text-sm"
+              className="w-7 h-7 rounded-full bg-[#F5F5F7] text-[#86868B] flex items-center justify-center text-xs"
               style={{ fontWeight: 600 }}
             >
               2
             </div>
-            <span className="text-sm text-[#86868B]" style={{ fontWeight: 600 }}>
+            <span className="text-xs text-[#86868B]" style={{ fontWeight: 600 }}>
               서비스
             </span>
           </div>
-          <div className="flex-1 h-0.5 bg-[#F5F5F7] mx-3"></div>
-          <div className="flex items-center gap-2">
+          <div className="flex-1 h-0.5 bg-[#F5F5F7] mx-2"></div>
+          <div className="flex items-center gap-1.5">
             <div
-              className="w-8 h-8 rounded-full bg-[#F5F5F7] text-[#86868B] flex items-center justify-center text-sm"
+              className="w-7 h-7 rounded-full bg-[#F5F5F7] text-[#86868B] flex items-center justify-center text-xs"
               style={{ fontWeight: 600 }}
             >
               3
             </div>
-            <span className="text-sm text-[#86868B]" style={{ fontWeight: 600 }}>
+            <span className="text-xs text-[#86868B]" style={{ fontWeight: 600 }}>
+              상태
+            </span>
+          </div>
+          <div className="flex-1 h-0.5 bg-[#F5F5F7] mx-2"></div>
+          <div className="flex items-center gap-1.5">
+            <div
+              className="w-7 h-7 rounded-full bg-[#F5F5F7] text-[#86868B] flex items-center justify-center text-xs"
+              style={{ fontWeight: 600 }}
+            >
+              4
+            </div>
+            <span className="text-xs text-[#86868B]" style={{ fontWeight: 600 }}>
               배송
             </span>
           </div>
