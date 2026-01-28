@@ -2,12 +2,14 @@ import { ChevronLeft, Gamepad2, Check, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { useSlideUp } from '@/hooks/useSlideUp'
 
 export function ControllerSelection() {
   const navigate = useNavigate()
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null)
   const [controllerModels, setControllerModels] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const { setRef } = useSlideUp(controllerModels.length + 1)
 
   // 컨트롤러 모델 데이터 로드
   useEffect(() => {
@@ -125,25 +127,29 @@ export function ControllerSelection() {
 
       {/* Header */}
       <div className="max-w-md mx-auto px-6 pb-6">
-        <h1 className="text-2xl mb-2" style={{ fontWeight: 700 }}>
-          어떤 컨트롤러를
-          <br />
-          수리하시나요?
-        </h1>
-        <p className="text-[#86868B]">수리할 컨트롤러 기종을 선택해주세요</p>
+        <div ref={setRef(0)} className="slide-up" style={{ transitionDelay: '0s' }}>
+          <h1 className="text-2xl mb-2" style={{ fontWeight: 700 }}>
+            어떤 컨트롤러를
+            <br />
+            수리하시나요?
+          </h1>
+          <p className="text-[#86868B]">수리할 컨트롤러 기종을 선택해주세요</p>
+        </div>
       </div>
 
       {/* Controller Cards */}
       <div className="max-w-md mx-auto px-6 space-y-3">
-        {controllerModels.map((model) => (
+        {controllerModels.map((model, index) => (
           <button
+            ref={setRef(index + 1)}
             key={model.id}
             onClick={() => setSelectedModelId(model.id)}
-            className={`w-full p-6 rounded-[28px] border-2 transition-all text-left ${
+            className={`slide-up w-full p-6 rounded-[28px] border-2 transition-all text-left ${
               selectedModelId === model.id
                 ? 'border-[#000000] bg-[#F5F5F7]'
                 : 'border-[rgba(0,0,0,0.1)] bg-white'
             }`}
+            style={{ transitionDelay: `${index * 0.1}s` }}
           >
             <div className="flex items-center gap-4">
               <div

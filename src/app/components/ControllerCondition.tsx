@@ -2,6 +2,7 @@ import { ChevronLeft } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import type { ServiceSelectionData, ConditionData } from '@/app/App'
+import { useSlideUp } from '@/hooks/useSlideUp'
 
 const CONDITIONS = [
   '조이스틱 오작동',
@@ -20,6 +21,7 @@ export function ControllerCondition() {
 
   const [selectedConditions, setSelectedConditions] = useState<string[]>([])
   const [notes, setNotes] = useState('')
+  const { setRef } = useSlideUp(3)
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -119,7 +121,7 @@ export function ControllerCondition() {
 
       <div className="max-w-md mx-auto px-6 space-y-6">
         {/* Controller Status */}
-        <div className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
+        <div ref={setRef(0)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4" style={{ transitionDelay: '0s' }}>
           <h3 className="text-lg" style={{ fontWeight: 600 }}>
             현재 상태
           </h3>
@@ -161,7 +163,7 @@ export function ControllerCondition() {
         </div>
 
         {/* Additional Notes */}
-        <div className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
+        <div ref={setRef(1)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4" style={{ transitionDelay: '0.1s' }}>
           <h3 className="text-lg" style={{ fontWeight: 600 }}>
             추가 요청사항
           </h3>
@@ -177,14 +179,16 @@ export function ControllerCondition() {
         </div>
 
         {/* Next Button */}
-        <button
-          onClick={handleNext}
-          disabled={selectedConditions.length === 0}
-          className="w-full py-4 bg-[#000000] text-white rounded-full transition-all disabled:opacity-40 hover:scale-[0.98] active:scale-[0.96]"
-          style={{ fontWeight: 600 }}
-        >
-          다음
-        </button>
+        <div ref={setRef(2)} className="slide-up" style={{ transitionDelay: '0.2s' }}>
+          <button
+            onClick={handleNext}
+            disabled={selectedConditions.length === 0}
+            className="w-full py-4 bg-[#000000] text-white rounded-full transition-all disabled:opacity-40 hover:scale-[0.98] active:scale-[0.96]"
+            style={{ fontWeight: 600 }}
+          >
+            다음
+          </button>
+        </div>
       </div>
     </div>
   )

@@ -16,6 +16,7 @@ import { createRepairRequest } from '@/lib/api'
 import { getControllerModelName } from '@/utils/controllerModels'
 import { getControllerModelById } from '@/services/pricingService'
 import { toast } from 'sonner'
+import { useSlideUp } from '@/hooks/useSlideUp'
 
 /**
  * 한국 전화번호 포맷 함수 (010-0000-0000)
@@ -54,6 +55,7 @@ export function RepairForm() {
   })
 
   const [submitted, setSubmitted] = useState(false)
+  const { setRef } = useSlideUp(3)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showConvenienceModal, setShowConvenienceModal] = useState(false)
@@ -207,7 +209,7 @@ export function RepairForm() {
 
       <form onSubmit={handleSubmit} className="max-w-md mx-auto px-6 space-y-8">
         {/* Service Summary Box */}
-        <div className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
+        <div ref={setRef(0)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4" style={{ transitionDelay: '0s' }}>
           <h3 className="text-lg" style={{ fontWeight: 600 }}>
             서비스 요약
           </h3>
@@ -288,7 +290,7 @@ export function RepairForm() {
         </div>
 
         {/* Form Fields */}
-        <div className="space-y-6">
+        <div ref={setRef(1)} className="slide-up space-y-6" style={{ transitionDelay: '0.1s' }}>
           <div className="space-y-2">
             <label className="text-sm text-[#86868B] pl-4">이름</label>
             <input
@@ -329,7 +331,7 @@ export function RepairForm() {
         </div>
 
         {/* Shipping Method Section */}
-        <div className="space-y-4">
+        <div ref={setRef(2)} className="slide-up space-y-4" style={{ transitionDelay: '0.2s' }}>
           <h3 className="text-lg pl-4" style={{ fontWeight: 600 }}>
             발송 방법
           </h3>

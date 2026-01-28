@@ -3,10 +3,12 @@ import { Footer } from "@/app/components/Footer";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MenuDrawer } from "@/app/components/MenuDrawer";
+import { useSlideUp } from "@/hooks/useSlideUp";
 
 export function AboutPage() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { setRef } = useSlideUp(10);
 
   return (
     <div className="min-h-screen bg-white">
@@ -37,27 +39,31 @@ export function AboutPage() {
 
       {/* Hero */}
       <section className="max-w-md mx-auto px-6 pt-12 pb-8">
-        <h1 className="text-4xl mb-4" style={{ fontWeight: 700 }}>
-          회사소개
-        </h1>
-        <p className="text-lg text-[#86868B]">
-          게이머의 꿈을 현실로 만드는<br />
-          프리미엄 커스터마이징 전문가
-        </p>
+        <div ref={setRef(0)} className="slide-up" style={{ transitionDelay: '0s' }}>
+          <h1 className="text-4xl mb-4" style={{ fontWeight: 700 }}>
+            회사소개
+          </h1>
+          <p className="text-lg text-[#86868B]">
+            게이머의 꿈을 현실로 만드는<br />
+            프리미엄 커스터마이징 전문가
+          </p>
+        </div>
       </section>
 
       {/* Brand Image */}
       <section className="max-w-md mx-auto px-6 pb-8">
-        <img
-          src="https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-          alt="PandaDuck Fix Workshop"
-          className="w-full h-64 object-cover rounded-[28px]"
-        />
+        <div ref={setRef(1)} className="slide-up" style={{ transitionDelay: '0.1s' }}>
+          <img
+            src="https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+            alt="PandaDuck Fix Workshop"
+            className="w-full h-64 object-cover rounded-[28px]"
+          />
+        </div>
       </section>
 
       {/* Story */}
       <section className="max-w-md mx-auto px-6 pb-8">
-        <div className="bg-[#F5F5F7] rounded-[28px] p-8 space-y-4">
+        <div ref={setRef(2)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-8 space-y-4" style={{ transitionDelay: '0.2s' }}>
           <h2 className="text-2xl" style={{ fontWeight: 700 }}>
             우리의 이야기
           </h2>
@@ -81,7 +87,7 @@ export function AboutPage() {
           우리의 가치
         </h2>
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-3">
+          <div ref={setRef(3)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-3" style={{ transitionDelay: '0s' }}>
             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
               <Target className="w-6 h-6" />
             </div>
@@ -93,7 +99,7 @@ export function AboutPage() {
             </p>
           </div>
 
-          <div className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-3">
+          <div ref={setRef(4)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-3" style={{ transitionDelay: '0.1s' }}>
             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
               <Award className="w-6 h-6" />
             </div>
@@ -105,7 +111,7 @@ export function AboutPage() {
             </p>
           </div>
 
-          <div className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-3">
+          <div ref={setRef(5)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-3" style={{ transitionDelay: '0.2s' }}>
             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
               <Users className="w-6 h-6" />
             </div>
@@ -117,7 +123,7 @@ export function AboutPage() {
             </p>
           </div>
 
-          <div className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-3">
+          <div ref={setRef(6)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-3" style={{ transitionDelay: '0.3s' }}>
             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
               <Heart className="w-6 h-6" />
             </div>
@@ -133,7 +139,7 @@ export function AboutPage() {
 
       {/* Mission */}
       <section className="max-w-md mx-auto px-6 pb-8">
-        <div className="bg-[#000000] text-white rounded-[28px] p-8">
+        <div ref={setRef(7)} className="slide-up bg-[#000000] text-white rounded-[28px] p-8" style={{ transitionDelay: '0s' }}>
           <h2 className="text-2xl mb-6 text-center" style={{ fontWeight: 700 }}>
             우리의 약속
           </h2>
@@ -158,25 +164,29 @@ export function AboutPage() {
 
       {/* CTA Section */}
       <section className="max-w-md mx-auto px-6 pb-12">
-        <div className="bg-[#F5F5F7] rounded-[28px] p-8 text-center space-y-4">
-          <h3 className="text-2xl" style={{ fontWeight: 700 }}>
-            함께 시작해볼까요?
-          </h3>
-          <p className="text-[#86868B]">
-            정성스러운 수리와 커스터마이징으로<br />
-            새로운 게이밍 경험을 만나보세요
-          </p>
-          <button
-            onClick={() => navigate('/controllers')}
-            className="w-full bg-[#000000] text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-6"
-            style={{ fontWeight: 600 }}
-          >
-            수리 신청하기
-          </button>
+        <div ref={setRef(8)} className="slide-up" style={{ transitionDelay: '0s' }}>
+          <div className="bg-[#F5F5F7] rounded-[28px] p-8 text-center space-y-4">
+            <h3 className="text-2xl" style={{ fontWeight: 700 }}>
+              함께 시작해볼까요?
+            </h3>
+            <p className="text-[#86868B]">
+              정성스러운 수리와 커스터마이징으로<br />
+              새로운 게이밍 경험을 만나보세요
+            </p>
+            <button
+              onClick={() => navigate('/controllers')}
+              className="w-full bg-[#000000] text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-6"
+              style={{ fontWeight: 600 }}
+            >
+              수리 신청하기
+            </button>
+          </div>
         </div>
       </section>
 
-      <Footer />
+      <div ref={setRef(9)} className="slide-up" style={{ transitionDelay: '0s' }}>
+        <Footer />
+      </div>
     </div>
   );
 }

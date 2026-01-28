@@ -33,6 +33,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useServicesWithPricing } from '@/hooks/useServicesWithPricing'
 import { useServiceCombos } from '@/hooks/useServiceCombos'
+import { useSlideUp } from '@/hooks/useSlideUp'
 import type { ServiceCombo } from '@/types/database'
 import type { ControllerServiceWithPricing } from '@/types/database'
 import type { ServiceSelectionData } from '@/app/App'
@@ -94,6 +95,7 @@ export function ServiceSelection() {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
   const { services: supabaseServices, loading } = useServicesWithPricing(controllerModel)
   const { combos } = useServiceCombos()
+  const { setRef } = useSlideUp(supabaseServices.length + 1)
 
   useEffect(() => {
     if (!controllerModel) {
@@ -319,14 +321,16 @@ export function ServiceSelection() {
 
       {!loading && (
         <div className="max-w-md mx-auto px-6 space-y-3">
-          {services.map((service) => (
+          {services.map((service, index) => (
             <div
               key={service.id}
-              className={`w-full p-6 rounded-[28px] border-2 transition-all ${
+              ref={setRef(index)}
+              className={`slide-up w-full p-6 rounded-[28px] border-2 transition-all ${
                 selectedServices.has(service.id)
                   ? 'border-[#000000] bg-[#F5F5F7]'
                   : 'border-[rgba(0,0,0,0.1)] bg-white'
               }`}
+              style={{ transitionDelay: `${index * 0.1}s` }}
             >
               <button onClick={() => toggleService(service.id)} className="w-full text-left">
                 <div className="flex items-start gap-4">

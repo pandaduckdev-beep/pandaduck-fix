@@ -35,6 +35,7 @@ import { useNavigate } from 'react-router-dom'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
 import { ServiceDetailModal } from '@/app/components/ServiceDetailModal'
 import { fetchControllerModels, fetchControllerServices } from '@/lib/api'
+import { useSlideUp } from '@/hooks/useSlideUp'
 import type {
   ControllerModel,
   ControllerServiceOption,
@@ -96,6 +97,7 @@ export function ServicesPage() {
   const [controllers, setControllers] = useState<ControllerModel[]>([])
   const [selectedController, setSelectedController] = useState<string>('')
   const [loading, setLoading] = useState(true)
+  const { setRef } = useSlideUp(services.length + 4)
 
   useEffect(() => {
     loadControllers()
@@ -189,14 +191,16 @@ export function ServicesPage() {
 
       {/* Hero */}
       <section className="max-w-md mx-auto px-6 pt-12 pb-4">
-        <h1 className="text-4xl mb-4" style={{ fontWeight: 700 }}>
-          제공 서비스
-        </h1>
-        <p className="text-lg text-[#86868B]">
-          프로게이머와 열정적인 게이머를 위한
-          <br />
-          최고 품질의 커스터마이징 서비스
-        </p>
+        <div ref={setRef(0)} className="slide-up" style={{ transitionDelay: '0s' }}>
+          <h1 className="text-4xl mb-4" style={{ fontWeight: 700 }}>
+            제공 서비스
+          </h1>
+          <p className="text-lg text-[#86868B]">
+            프로게이머와 열정적인 게이머를 위한
+            <br />
+            최고 품질의 커스터마이징 서비스
+          </p>
+        </div>
       </section>
 
       <section className="max-w-md mx-auto px-6 pb-6">
@@ -229,8 +233,13 @@ export function ServicesPage() {
 
         {!loading && (
           <div className="space-y-4">
-            {services.map((service) => (
-              <div key={service.id} className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
+            {services.map((service, index) => (
+              <div
+                key={service.id}
+                ref={setRef(index + 1)}
+                className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4"
+                style={{ transitionDelay: `${index * 0.1}s` }}
+              >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
                     {iconMap[service.icon_name || service.service_id] || <Gamepad2 className="w-6 h-6" />}
@@ -291,26 +300,30 @@ export function ServicesPage() {
 
       {/* CTA Section */}
       <section className="max-w-md mx-auto px-6 pb-12">
-        <div className="bg-[#000000] text-white rounded-[28px] p-8 text-center space-y-4">
-          <h3 className="text-2xl" style={{ fontWeight: 700 }}>
-            지금 바로 시작하세요
-          </h3>
-          <p className="text-[#86868B]">
-            전문가의 손길로 완벽하게 커스터마이징된
-            <br />
-            나만의 컨트롤러를 만나보세요
-          </p>
-          <button
-            onClick={() => navigate('/services')}
-            className="w-full bg-white text-black py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-6"
-            style={{ fontWeight: 600 }}
-          >
-            수리 신청하기
-          </button>
+        <div ref={setRef(services.length + 1)} className="slide-up" style={{ transitionDelay: '0s' }}>
+          <div className="bg-[#000000] text-white rounded-[28px] p-8 text-center space-y-4">
+            <h3 className="text-2xl" style={{ fontWeight: 700 }}>
+              지금 바로 시작하세요
+            </h3>
+            <p className="text-[#86868B]">
+              전문가의 손길로 완벽하게 커스터마이징된
+              <br />
+              나만의 컨트롤러를 만나보세요
+            </p>
+            <button
+              onClick={() => navigate('/services')}
+              className="w-full bg-white text-black py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-6"
+              style={{ fontWeight: 600 }}
+            >
+              수리 신청하기
+            </button>
+          </div>
         </div>
       </section>
 
-      <Footer />
+      <div ref={setRef(services.length + 2)} className="slide-up" style={{ transitionDelay: '0s' }}>
+        <Footer />
+      </div>
 
       {/* Service Detail Modal */}
       <ServiceDetailModal

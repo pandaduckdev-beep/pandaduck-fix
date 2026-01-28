@@ -1,9 +1,10 @@
 import { Menu, Zap, CircuitBoard, Plus, Battery } from "lucide-react";
 import { Footer } from "@/app/components/Footer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MenuDrawer } from "@/app/components/MenuDrawer";
 import { ServiceDetailModal } from "@/app/components/ServiceDetailModal";
+import { useSlideUp } from "@/hooks/useSlideUp";
 
 const serviceDetails = [
   {
@@ -112,6 +113,11 @@ export function HomeScreen() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<typeof serviceDetails[0] | null>(null);
+  const { setRef } = useSlideUp(9);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleFeatureClick = (serviceId: string) => {
     const service = serviceDetails.find(s => s.id === serviceId);
@@ -151,32 +157,38 @@ export function HomeScreen() {
       {/* Hero Section */}
       <section className="max-w-md mx-auto px-6 pt-12 pb-16">
         <div className="text-center space-y-6">
-          <h1
-            className="text-5xl tracking-tight leading-[1.1]"
-            style={{ fontWeight: 700 }}
-          >
-            완벽함,<br />그 이상으로
-          </h1>
-          <p
-            className="text-lg text-[#86868B] max-w-xs mx-auto"
-            style={{ fontWeight: 400 }}
-          >
-            프로 게이머를 위한 전문 컨트롤러 수리 및 커스터마이징
-          </p>
-          <div className="pt-4">
+          <div ref={setRef(0)} className="slide-up" style={{ transitionDelay: '0s' }}>
+            <h1
+              className="text-5xl tracking-tight leading-[1.1]"
+              style={{ fontWeight: 700 }}
+            >
+              완벽함,<br />그 이상으로
+            </h1>
+          </div>
+          <div ref={setRef(1)} className="slide-up" style={{ transitionDelay: '0.1s' }}>
+            <p
+              className="text-lg text-[#86868B] max-w-xs mx-auto"
+              style={{ fontWeight: 400 }}
+            >
+              프로 게이머를 위한 전문 컨트롤러 수리 및 커스터마이징
+            </p>
+          </div>
+          <div ref={setRef(2)} className="slide-up pt-4" style={{ transitionDelay: '0.2s' }}>
             <img
               src="/images/dualsense-closeup.jpg"
               alt="DualSense Controller"
               className="w-full h-64 object-cover rounded-[28px]"
             />
           </div>
-          <button
-            onClick={() => navigate('/controllers')}
-            className="w-full bg-[#000000] text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
-            style={{ fontWeight: 600 }}
-          >
-            수리 시작하기
-          </button>
+          <div ref={setRef(3)} className="slide-up" style={{ transitionDelay: '0.3s' }}>
+            <button
+              onClick={() => navigate('/controllers')}
+              className="w-full bg-[#000000] text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
+              style={{ fontWeight: 600 }}
+            >
+              수리 시작하기
+            </button>
+          </div>
         </div>
       </section>
 
@@ -185,8 +197,10 @@ export function HomeScreen() {
         <div className="grid grid-cols-2 gap-3">
           {/* Stick Drift Fix */}
           <div
+            ref={setRef(4)}
             onClick={() => handleFeatureClick('hall-effect')}
-            className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4 cursor-pointer transition-transform hover:scale-[0.98] active:scale-[0.96]"
+            className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4 cursor-pointer transition-transform hover:scale-[0.98] active:scale-[0.96]"
+            style={{ transitionDelay: '0s' }}
           >
             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
               <Zap className="w-6 h-6" />
@@ -203,8 +217,10 @@ export function HomeScreen() {
 
           {/* Clicky Buttons */}
           <div
+            ref={setRef(5)}
             onClick={() => handleFeatureClick('clicky-buttons')}
-            className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4 cursor-pointer transition-transform hover:scale-[0.98] active:scale-[0.96]"
+            className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4 cursor-pointer transition-transform hover:scale-[0.98] active:scale-[0.96]"
+            style={{ transitionDelay: '0.1s' }}
           >
             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
               <CircuitBoard className="w-6 h-6" />
@@ -221,8 +237,10 @@ export function HomeScreen() {
 
           {/* Back Button Mod */}
           <div
+            ref={setRef(6)}
             onClick={() => handleFeatureClick('back-buttons')}
-            className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4 cursor-pointer transition-transform hover:scale-[0.98] active:scale-[0.96]"
+            className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4 cursor-pointer transition-transform hover:scale-[0.98] active:scale-[0.96]"
+            style={{ transitionDelay: '0.2s' }}
           >
             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
               <Plus className="w-6 h-6" />
@@ -239,8 +257,10 @@ export function HomeScreen() {
 
           {/* High-Capacity Battery */}
           <div
+            ref={setRef(7)}
             onClick={() => handleFeatureClick('battery')}
-            className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4 cursor-pointer transition-transform hover:scale-[0.98] active:scale-[0.96]"
+            className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4 cursor-pointer transition-transform hover:scale-[0.98] active:scale-[0.96]"
+            style={{ transitionDelay: '0.3s' }}
           >
             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
               <Battery className="w-6 h-6" />
@@ -258,7 +278,9 @@ export function HomeScreen() {
       </section>
 
       {/* Footer */}
-      <Footer />
+      <div ref={setRef(8)} className="slide-up" style={{ transitionDelay: '0s' }}>
+        <Footer />
+      </div>
 
       {/* Service Detail Modal */}
       <ServiceDetailModal

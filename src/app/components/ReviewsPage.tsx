@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
 import { supabase } from '@/lib/supabase'
 import { maskName } from '@/lib/reviewUtils'
+import { useSlideUp } from '@/hooks/useSlideUp'
 
 export function ReviewsPage() {
   const navigate = useNavigate()
@@ -17,6 +18,7 @@ export function ReviewsPage() {
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
   const PAGE_SIZE = 20
+  const { setRef } = useSlideUp(reviews.length + 4)
 
   // 통계 데이터 로드 (평균 평점, 총 리뷰 수)
   useEffect(() => {
@@ -168,17 +170,19 @@ export function ReviewsPage() {
 
       {/* Hero */}
       <section className="max-w-md mx-auto px-6 pt-12 pb-8">
-        <h1 className="text-4xl mb-4" style={{ fontWeight: 700 }}>
-          고객 후기
-        </h1>
-        <p className="text-lg text-[#86868B]">
-          PandaDuck Fix를 경험한 고객님들의
-          <br />
-          솔직한 후기를 확인해보세요
-        </p>
+        <div ref={setRef(0)} className="slide-up" style={{ transitionDelay: '0s' }}>
+          <h1 className="text-4xl mb-4" style={{ fontWeight: 700 }}>
+            고객 후기
+          </h1>
+          <p className="text-lg text-[#86868B]">
+            PandaDuck Fix를 경험한 고객님들의
+            <br />
+            솔직한 후기를 확인해보세요
+          </p>
+        </div>
 
         {/* Stats */}
-        <div className="bg-[#F5F5F7] rounded-[28px] p-6 mt-8">
+        <div ref={setRef(1)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 mt-8" style={{ transitionDelay: '0.1s' }}>
           <div className="grid grid-cols-2 divide-x divide-[rgba(0,0,0,0.1)]">
             <div className="text-center pr-4">
               <div className="flex items-center justify-center gap-1 mb-2">
@@ -208,8 +212,13 @@ export function ReviewsPage() {
         ) : (
           <>
             <div className="space-y-4">
-              {reviews.map((review) => (
-                <div key={review.id} className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
+              {reviews.map((review, index) => (
+                <div
+                  key={review.id}
+                  ref={setRef(index + 2)}
+                  className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4"
+                  style={{ transitionDelay: `${Math.min(index * 0.1, 0.5)}s` }}
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -270,26 +279,30 @@ export function ReviewsPage() {
 
       {/* CTA Section */}
       <section className="max-w-md mx-auto px-6 pb-12">
-        <div className="bg-[#000000] text-white rounded-[28px] p-8 text-center space-y-4">
-          <h3 className="text-2xl" style={{ fontWeight: 700 }}>
-            당신의 후기를 기다립니다
-          </h3>
-          <p className="text-[#86868B]">
-            PandaDuck Fix와 함께
-            <br />
-            최고의 게이밍 경험을 만들어보세요
-          </p>
-          <button
-            onClick={() => navigate('/controllers')}
-            className="w-full bg-white text-black py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-6"
-            style={{ fontWeight: 600 }}
-          >
-            수리 신청하기
-          </button>
+        <div ref={setRef(reviews.length + 2)} className="slide-up" style={{ transitionDelay: '0s' }}>
+          <div className="bg-[#000000] text-white rounded-[28px] p-8 text-center space-y-4">
+            <h3 className="text-2xl" style={{ fontWeight: 700 }}>
+              당신의 후기를 기다립니다
+            </h3>
+            <p className="text-[#86868B]">
+              PandaDuck Fix와 함께
+              <br />
+              최고의 게이밍 경험을 만들어보세요
+            </p>
+            <button
+              onClick={() => navigate('/controllers')}
+              className="w-full bg-white text-black py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-6"
+              style={{ fontWeight: 600 }}
+            >
+              수리 신청하기
+            </button>
+          </div>
         </div>
       </section>
 
-      <Footer />
+      <div ref={setRef(reviews.length + 3)} className="slide-up" style={{ transitionDelay: '0s' }}>
+        <Footer />
+      </div>
     </div>
   )
 }

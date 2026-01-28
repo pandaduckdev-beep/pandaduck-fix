@@ -1,4 +1,4 @@
-import { X, Printer, Download } from 'lucide-react'
+import { X, Printer } from 'lucide-react'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import type { RepairRequest, ControllerService, ControllerServiceOption } from '@/types/database'
@@ -28,15 +28,6 @@ interface RepairDetailModalProps {
 export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModalProps) {
   if (!isOpen) return null
 
-  const handlePrint = () => {
-    window.print()
-  }
-
-  const handleDownloadPDF = () => {
-    // 브라우저의 프린트 다이얼로그를 열고 PDF로 저장 옵션 제공
-    window.print()
-  }
-
   // issue_description 파싱
   const parseIssueDescription = (description: string | null) => {
     if (!description) return { address: null, conditions: null, notes: null }
@@ -61,31 +52,15 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
   // 할인액 계산 (서비스 합계 - 총 금액)
   const discount = servicesTotal - repair.total_amount
 
+  const handlePrint = () => {
+    window.print()
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <style>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          #receipt-content, #receipt-content * {
-            visibility: visible;
-          }
-          #receipt-content {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
-
       <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        {/* Header - No Print */}
-        <div className="no-print sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-xl font-bold">수리 요청 내역서</h2>
           <div className="flex items-center gap-2">
             <button
@@ -96,15 +71,7 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
               <Printer className="w-5 h-5" />
               <span className="text-sm font-medium">프린트</span>
             </button>
-            <button
-              onClick={handleDownloadPDF}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
-              title="PDF로 저장"
-            >
-              <Download className="w-5 h-5" />
-              <span className="text-sm font-medium">PDF</span>
-            </button>
-            <button
+<button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition"
             >
@@ -114,7 +81,7 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
         </div>
 
         {/* Receipt Content */}
-        <div id="receipt-content" className="p-8">
+        <div className="p-8">
           {/* Header */}
           <div className="text-center mb-8 border-b-2 border-black pb-6">
             <h1 className="text-3xl font-bold mb-2">PandaDuck Fix</h1>
