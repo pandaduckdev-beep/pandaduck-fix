@@ -12,7 +12,7 @@ import { ExpensesPage } from './pages/ExpensesPage'
 import { DiscountsPage } from './pages/DiscountsPage'
 
 function AdminContent() {
-  const { isAuthenticated, loading, user } = useAuth()
+  const { isAuthenticated, loading } = useAuth()
 
   if (loading) {
     return (
@@ -30,7 +30,7 @@ function AdminContent() {
   }
 
   return (
-    <AdminLayout user={user}>
+    <AdminLayout>
       <Routes>
         <Route index element={<Dashboard />} />
         <Route path="revenue" element={<RevenuePage />} />

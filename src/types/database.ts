@@ -402,6 +402,41 @@ export interface Database {
           is_active?: boolean
         }
       }
+      admin_login_logs: {
+        Row: {
+          id: string
+          email: string
+          success: boolean
+          user_id: string | null
+          ip_address: string | null
+          user_agent: string | null
+          error_message: string | null
+          timestamp: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          success: boolean
+          user_id?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          error_message?: string | null
+          timestamp?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          success?: boolean
+          user_id?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          error_message?: string | null
+          timestamp?: string
+          created_at?: string
+        }
+      }
       service_combos: {
         Row: {
           id: string
@@ -464,6 +499,7 @@ export type ControllerServicePricing =
 export type ControllerOptionPricing =
   Database['public']['Tables']['controller_option_pricing']['Row']
 export type AdminUser = Database['public']['Tables']['admin_users']['Row']
+export type AdminLoginLog = Database['public']['Tables']['admin_login_logs']['Row']
 
 export interface ControllerServiceWithOptions extends ControllerService {
   options?: ControllerServiceOption[]
