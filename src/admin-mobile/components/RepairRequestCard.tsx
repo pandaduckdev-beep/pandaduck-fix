@@ -1,5 +1,5 @@
 import { RepairStatus } from '@/types/database'
-import { Person } from '@mui/icons-material'
+import { User, MessageSquare, CheckCircle } from 'lucide-react'
 
 interface RepairRequestCardProps {
   customerName: string
@@ -7,34 +7,35 @@ interface RepairRequestCardProps {
   status: RepairStatus
   amount: number
   date: string
+  hasReview?: boolean
   onClick?: () => void
 }
 
 const statusConfig = {
   pending: {
     label: '대기중',
-    bg: 'bg-amber-100 dark:bg-amber-900/30',
-    text: 'text-amber-700 dark:text-amber-400',
+    bg: 'bg-[#FFF9E6]',
+    text: 'text-[#FF9500]',
   },
   confirmed: {
     label: '확인됨',
-    bg: 'bg-blue-100 dark:bg-blue-900/30',
-    text: 'text-blue-700 dark:text-blue-400',
+    bg: 'bg-[#E6F2FF]',
+    text: 'text-[#007AFF]',
   },
   in_progress: {
     label: '진행중',
-    bg: 'bg-purple-100 dark:bg-purple-900/30',
-    text: 'text-purple-700 dark:text-purple-400',
+    bg: 'bg-[#F3E6FF]',
+    text: 'text-[#AF52DE]',
   },
   completed: {
     label: '완료',
-    bg: 'bg-green-100 dark:bg-green-900/30',
-    text: 'text-green-700 dark:text-green-400',
+    bg: 'bg-[#E6F9F0]',
+    text: 'text-[#34C759]',
   },
   cancelled: {
     label: '취소',
-    bg: 'bg-slate-200 dark:bg-slate-700',
-    text: 'text-slate-600 dark:text-slate-400',
+    bg: 'bg-[#F5F5F7]',
+    text: 'text-[#86868B]',
   },
 }
 
@@ -44,40 +45,51 @@ export function RepairRequestCard({
   status,
   amount,
   date,
+  hasReview,
   onClick,
 }: RepairRequestCardProps) {
   const config = statusConfig[status]
+  const showReviewStatus = status === 'completed'
 
   return (
     <div
       onClick={onClick}
-      className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex items-center justify-between active:scale-[0.98] transition-transform cursor-pointer"
+      className="bg-white py-4 border-b border-[rgba(0,0,0,0.06)] flex items-center justify-between transition-all active:bg-[#F5F5F7] cursor-pointer"
     >
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-500 dark:text-blue-400">
-          <Person fontSize="small" />
-        </div>
-        <div>
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="font-bold text-sm text-gray-900 dark:text-gray-100">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-sm text-[#1D1D1F] truncate" style={{ fontWeight: 600 }}>
               {customerName}
             </span>
             <span
-              className={`text-[10px] px-1.5 py-0.5 ${config.bg} ${config.text} rounded-full font-semibold`}
+              className={`text-[10px] px-2 py-0.5 ${config.bg} ${config.text} rounded-md flex-shrink-0`}
+              style={{ fontWeight: 600 }}
             >
               {config.label}
             </span>
+            {showReviewStatus && (
+              hasReview ? (
+                <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 bg-[#E6F9F0] text-[#34C759] rounded-md flex-shrink-0" style={{ fontWeight: 600 }}>
+                  <CheckCircle className="w-3 h-3" />
+                  리뷰완료
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 bg-[#E6F2FF] text-[#007AFF] rounded-md flex-shrink-0" style={{ fontWeight: 600 }}>
+                  <MessageSquare className="w-3 h-3" />
+                  리뷰요청
+                </span>
+              )
+            )}
           </div>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate w-32">
-            {controllerModel}
-          </p>
+          <p className="text-xs text-[#86868B] truncate">{controllerModel}</p>
         </div>
       </div>
-      <div className="text-right">
-        <p className="font-bold text-sm text-gray-900 dark:text-gray-100">
+      <div className="text-right ml-4 flex-shrink-0">
+        <p className="text-sm text-[#1D1D1F] whitespace-nowrap mb-0.5" style={{ fontWeight: 700 }}>
           ₩{amount.toLocaleString()}
         </p>
-        <p className="text-[10px] text-slate-400">{date}</p>
+        <p className="text-[10px] text-[#86868B]">{date}</p>
       </div>
     </div>
   )

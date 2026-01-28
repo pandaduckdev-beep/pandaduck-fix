@@ -1,4 +1,4 @@
-import { Payments, Star, TrendingUp } from '@mui/icons-material'
+import { DollarSign, Star } from 'lucide-react'
 
 interface DashboardCardProps {
   title: string
@@ -18,25 +18,26 @@ export function DashboardCard({
   const isRevenue = type === 'revenue'
 
   const cardClasses =
-    color === 'primary' ? 'bg-blue-500 shadow-blue-500/20' : 'bg-amber-500 shadow-orange-500/20'
+    color === 'primary'
+      ? 'bg-gradient-to-br from-[#007AFF] to-[#0051D5]'
+      : 'bg-gradient-to-br from-[#FF9500] to-[#FF6B00]'
 
   return (
-    <div className={`relative overflow-hidden ${cardClasses} p-6 rounded-3xl shadow-lg text-white`}>
+    <div className={`relative overflow-hidden ${cardClasses} p-6 rounded-2xl text-white`}>
       <div className="flex justify-between items-start">
         <div>
-          <p className="text-sm font-medium opacity-80 mb-1">{title}</p>
-          <h2 className="text-3xl font-bold">{value}</h2>
+          <p className="text-sm opacity-90 mb-1" style={{ fontWeight: 600 }}>
+            {title}
+          </p>
+          <h2 className="text-3xl mb-3" style={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
+            {value}
+          </h2>
+          <p className="text-xs opacity-80">{subtitle}</p>
         </div>
-        <div className="bg-white/20 p-2 rounded-xl">
-          {isRevenue ? <Payments fontSize="medium" /> : <Star fontSize="medium" />}
+        <div className="bg-white/20 p-2.5 rounded-xl">
+          {isRevenue ? <DollarSign className="w-5 h-5" /> : <Star className="w-5 h-5" />}
         </div>
       </div>
-      <p className="mt-4 text-xs opacity-70">{subtitle}</p>
-      {isRevenue && (
-        <div className="absolute -right-4 -bottom-4 opacity-10">
-          <TrendingUp style={{ fontSize: '4rem' }} />
-        </div>
-      )}
     </div>
   )
 }

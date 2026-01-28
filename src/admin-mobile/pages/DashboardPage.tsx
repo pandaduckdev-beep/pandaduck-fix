@@ -7,6 +7,12 @@ import { useEffect, useState } from 'react'
 import { RepairRequest } from '@/types/database'
 import { supabase } from '@/lib/supabase'
 
+interface RecentRepair extends RepairRequest {
+  controller_models?: {
+    model_name: string
+  }
+}
+
 interface Stats {
   totalRepairs: number
   pendingRepairs: number
@@ -35,7 +41,7 @@ export default function DashboardPage() {
     averageRating: 0,
     totalReviews: 0,
   })
-  const [recentRepairs, setRecentRepairs] = useState<RepairRequest[]>([])
+  const [recentRepairs, setRecentRepairs] = useState<RecentRepair[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -121,7 +127,12 @@ export default function DashboardPage() {
       // Recent repairs
       const { data: recentRepairsData } = await supabase
         .from('repair_requests')
-        .select('*')
+        .select(`
+          *,
+          controller_models!repair_requests_controller_model_fkey (
+            model_name
+          )
+        `)
         .order('created_at', { ascending: false })
         .limit(4)
 
@@ -159,12 +170,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-24">
+    <div className="bg-white min-h-screen pb-20">
       {loading ? (
-        <div className="fixed inset-0 flex items-center justify-center bg-background-light dark:bg-background-dark z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4" />
-            <p className="text-slate-600 dark:text-slate-400">로딩 중...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#007AFF] mx-auto mb-4" />
+            <p className="text-[#86868B] text-sm" style={{ fontWeight: 600 }}>
+              로딩 중...
+            </p>
           </div>
         </div>
       ) : (
@@ -192,7 +205,7 @@ export default function DashboardPage() {
 
             {/* Status Cards */}
             <section>
-              <h3 className="text-lg font-bold mb-4 px-1 text-gray-900 dark:text-gray-100">
+              <h3 className="text-lg mb-4 text-[#1D1D1F]" style={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
                 수리 진행 현황
               </h3>
               <div className="flex overflow-x-auto gap-3 no-scrollbar pb-2">
@@ -206,20 +219,21 @@ export default function DashboardPage() {
 
             {/* Recent Requests */}
             <section>
-              <div className="flex justify-between items-end mb-4 px-1">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              <div className="flex justify-between items-end mb-3">
+                <h3 className="text-lg text-[#1D1D1F]" style={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
                   최근 수리 신청
                 </h3>
               </div>
-              <div className="space-y-3">
+              <div className="bg-white rounded-xl overflow-hidden px-4">
                 {recentRepairs.map((request) => (
                   <RepairRequestCard
                     key={request.id}
                     customerName={request.customer_name}
-                    controllerModel={request.controller_model}
+                    controllerModel={request.controller_models?.model_name || request.controller_model}
                     status={request.status}
                     amount={request.total_amount}
                     date={formatTime(request.created_at)}
+                    hasReview={request.has_review}
                   />
                 ))}
               </div>

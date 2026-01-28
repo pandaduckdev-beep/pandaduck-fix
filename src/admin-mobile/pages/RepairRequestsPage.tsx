@@ -5,10 +5,17 @@ import { useEffect, useState } from 'react'
 import { RepairStatus, RepairRequest } from '@/types/database'
 import { supabase } from '@/lib/supabase'
 import { useNavigate } from 'react-router-dom'
+import { Search } from 'lucide-react'
+
+interface RepairRequestWithModel extends RepairRequest {
+  controller_models?: {
+    model_name: string
+  }
+}
 
 export default function RepairRequestsPage() {
   const navigate = useNavigate()
-  const [requests, setRequests] = useState<RepairRequest[]>([])
+  const [requests, setRequests] = useState<RepairRequestWithModel[]>([])
   const [selectedStatus, setSelectedStatus] = useState<RepairStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -19,7 +26,12 @@ export default function RepairRequestsPage() {
   const fetchRequests = async () => {
     let query = supabase
       .from('repair_requests')
-      .select('*')
+      .select(`
+        *,
+        controller_models!repair_requests_controller_model_fkey (
+          model_name
+        )
+      `)
       .order('created_at', { ascending: false })
 
     if (selectedStatus !== 'all') {
@@ -51,13 +63,14 @@ export default function RepairRequestsPage() {
   }
 
   return (
-    <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-24">
+    <div className="bg-white min-h-screen pb-20">
       <MobileHeader
         title="수리 신청 관리"
         rightAction={
           <button
             onClick={() => navigate('/admin-mobile/add-request')}
-            className="w-14 h-14 bg-blue-500 dark:bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center active:scale-95 transition-transform"
+            className="w-12 h-12 bg-[#007AFF] text-white rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95"
+            style={{ fontWeight: 700, fontSize: '24px' }}
           >
             +
           </button>
@@ -67,9 +80,7 @@ export default function RepairRequestsPage() {
       <main className="p-5 space-y-4">
         {/* Search */}
         <div className="relative">
-          <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
-            search
-          </span>
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-[#86868B]" />
           <input
             type="text"
             placeholder="고객명, 전화번호, 컨트롤러 검색..."
@@ -77,7 +88,8 @@ export default function RepairRequestsPage() {
             onChange={(e) => {
               setSearchQuery(e.target.value)
             }}
-            className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
+            className="w-full bg-[#F5F5F7] border-none rounded-[16px] py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[#007AFF]/20 transition-all placeholder:text-[#86868B]"
+            style={{ fontWeight: 500 }}
           />
         </div>
 
@@ -85,41 +97,45 @@ export default function RepairRequestsPage() {
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
           <button
             onClick={() => setSelectedStatus('all')}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+            className={`px-4 py-2 rounded-[14px] text-xs whitespace-nowrap transition-all ${
               selectedStatus === 'all'
-                ? 'bg-blue-500 text-white'
-                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                ? 'bg-[#007AFF] text-white'
+                : 'bg-white border border-[rgba(0,0,0,0.08)] text-[#86868B]'
             }`}
+            style={{ fontWeight: 600 }}
           >
             전체 ({requests.length})
           </button>
           <button
             onClick={() => setSelectedStatus('pending')}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+            className={`px-4 py-2 rounded-[14px] text-xs whitespace-nowrap transition-all ${
               selectedStatus === 'pending'
-                ? 'bg-amber-500 text-white'
-                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                ? 'bg-[#FF9500] text-white'
+                : 'bg-white border border-[rgba(0,0,0,0.08)] text-[#86868B]'
             }`}
+            style={{ fontWeight: 600 }}
           >
             대기중 ({requests.filter((r) => r.status === 'pending').length})
           </button>
           <button
             onClick={() => setSelectedStatus('confirmed')}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+            className={`px-4 py-2 rounded-[14px] text-xs whitespace-nowrap transition-all ${
               selectedStatus === 'confirmed'
-                ? 'bg-blue-500 text-white'
-                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                ? 'bg-[#007AFF] text-white'
+                : 'bg-white border border-[rgba(0,0,0,0.08)] text-[#86868B]'
             }`}
+            style={{ fontWeight: 600 }}
           >
             확인됨 ({requests.filter((r) => r.status === 'confirmed').length})
           </button>
           <button
             onClick={() => setSelectedStatus('completed')}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+            className={`px-4 py-2 rounded-[14px] text-xs whitespace-nowrap transition-all ${
               selectedStatus === 'completed'
-                ? 'bg-green-500 text-white'
-                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                ? 'bg-[#34C759] text-white'
+                : 'bg-white border border-[rgba(0,0,0,0.08)] text-[#86868B]'
             }`}
+            style={{ fontWeight: 600 }}
           >
             완료 ({requests.filter((r) => r.status === 'completed').length})
           </button>
@@ -127,19 +143,20 @@ export default function RepairRequestsPage() {
 
         {/* Request List */}
         <div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4">
+          <p className="text-sm text-[#86868B] mb-3" style={{ fontWeight: 600 }}>
             총 {filteredRequests.length}건의 수리 요청
           </p>
-          <div className="space-y-4">
+          <div className="bg-white rounded-xl overflow-hidden px-4">
             {filteredRequests.map((request) => (
               <RepairRequestCard
                 key={request.id}
                 customerName={request.customer_name}
-                controllerModel={request.controller_model}
+                controllerModel={request.controller_models?.model_name || request.controller_model}
                 status={request.status}
                 amount={request.total_amount}
                 date={formatTime(request.created_at)}
-                onClick={() => navigate(`/admin-mobile/request/${request.id}`)}
+                hasReview={request.has_review}
+                onClick={() => navigate(`/admin-mobile/repairs/${request.id}`)}
               />
             ))}
           </div>
