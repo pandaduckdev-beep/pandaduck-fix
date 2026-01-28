@@ -136,6 +136,24 @@ export default function DashboardPage() {
         .order('created_at', { ascending: false })
         .limit(4)
 
+      // Check reviews for each recent repair
+      const recentRepairsWithReviews = recentRepairsData
+        ? await Promise.all(
+            recentRepairsData.map(async (request) => {
+              const { data: review } = await supabase
+                .from('reviews')
+                .select('id')
+                .eq('repair_request_id', request.id)
+                .maybeSingle()
+
+              return {
+                ...request,
+                has_review: !!review,
+              }
+            })
+          )
+        : []
+
       setStats({
         totalRepairs: totalRepairs || 0,
         pendingRepairs: pendingRepairs || 0,
@@ -150,7 +168,7 @@ export default function DashboardPage() {
         totalReviews,
       })
 
-      setRecentRepairs(recentRepairsData || [])
+      setRecentRepairs(recentRepairsWithReviews)
     } catch (error) {
       console.error('Error loading stats:', error)
     } finally {

@@ -46,7 +46,25 @@ export default function RepairRequestsPage() {
 
     const { data } = await query
 
-    if (data) setRequests(data)
+    if (data) {
+      // Check reviews for each request
+      const requestsWithReviews = await Promise.all(
+        data.map(async (request) => {
+          const { data: review } = await supabase
+            .from('reviews')
+            .select('id')
+            .eq('repair_request_id', request.id)
+            .maybeSingle()
+
+          return {
+            ...request,
+            has_review: !!review,
+          }
+        })
+      )
+
+      setRequests(requestsWithReviews)
+    }
   }
 
   const filteredRequests = searchQuery
