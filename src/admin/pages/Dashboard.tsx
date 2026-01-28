@@ -21,6 +21,9 @@ interface RecentRepair {
   id: string;
   customer_name: string;
   controller_model: string;
+  controller_models?: {
+    model_name: string;
+  };
   status: string;
   created_at: string;
   total_amount: number;
@@ -124,7 +127,12 @@ export function Dashboard() {
       // 최근 수리 신청 (최근 5개)
       const { data: repairs } = await supabase
         .from('repair_requests')
-        .select('*')
+        .select(`
+          *,
+          controller_models!repair_requests_controller_model_fkey (
+            model_name
+          )
+        `)
         .order('created_at', { ascending: false })
         .limit(5);
 
@@ -346,7 +354,9 @@ export function Dashboard() {
                         {statusLabels[repair.status as keyof typeof statusLabels]}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 truncate mb-1">{repair.controller_model}</p>
+                    <p className="text-sm text-gray-600 truncate mb-1">
+                      {repair.controller_models?.model_name || repair.controller_model}
+                    </p>
                     <p className="text-xs text-gray-500">{formatDate(repair.created_at)}</p>
                   </div>
                   <div className="text-right ml-4">
