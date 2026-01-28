@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "devCommand": "npm run dev",
-  "installCommand": "npm install --legacy-peer-deps --no-optional && npm install --legacy-peer-deps rollup vite @vitejs/plugin-react tailwindcss @tailwindcss/vite",
+  "installCommand": "npm cache clean --force && npm install --legacy-peer-deps",
   "framework": "vite",
   "rewrites": [
     {
