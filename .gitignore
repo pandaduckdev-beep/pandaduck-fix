@@ -38,3 +38,4 @@ workbox-*.js
 .env
 .env.local
 .env.production
+package-lock.json
