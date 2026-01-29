@@ -146,7 +146,12 @@ export function ServiceDetailModal({ service, options = [], isOpen, onClose, onB
                         key={option.id}
                         className="flex-shrink-0 w-[280px] sm:w-[320px] snap-start bg-[#F5F5F7] rounded-[20px] p-5"
                       >
-                        <h4 className="text-base font-semibold mb-2">{option.name}</h4>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-base font-semibold">{option.name}</h4>
+                          <span className="text-sm font-semibold text-[#000000]">
+                            +₩{option.price.toLocaleString()}
+                          </span>
+                        </div>
                         <p className="text-sm text-[#86868B] leading-relaxed">
                           {option.detailedDescription || option.description}
                         </p>
@@ -157,36 +162,20 @@ export function ServiceDetailModal({ service, options = [], isOpen, onClose, onB
               </div>
             )}
 
-            {/* Info Grid */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-[#F5F5F7] rounded-[20px] p-4 text-center">
-                <div className="text-lg mb-1" style={{ fontWeight: 700 }}>
-                  {service.price}
-                </div>
-                <div className="text-xs text-[#86868B]">가격</div>
+            {/* CTA Section with Price */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-sm text-[#86868B]">기본 가격</span>
+                <span className="text-xl font-bold text-[#000000]">{service.price}</span>
               </div>
-              <div className="bg-[#F5F5F7] rounded-[20px] p-4 text-center">
-                <div className="text-lg mb-1" style={{ fontWeight: 700 }}>
-                  {service.duration}
-                </div>
-                <div className="text-xs text-[#86868B]">작업시간</div>
-              </div>
-              <div className="bg-[#F5F5F7] rounded-[20px] p-4 text-center">
-                <div className="text-lg mb-1" style={{ fontWeight: 700 }}>
-                  {service.warranty}
-                </div>
-                <div className="text-xs text-[#86868B]">보증기간</div>
-              </div>
+              <button
+                onClick={onBookService}
+                className="w-full bg-[#000000] text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
+                style={{ fontWeight: 600 }}
+              >
+                이 서비스 신청하기
+              </button>
             </div>
-
-            {/* CTA Button */}
-            <button
-              onClick={onBookService}
-              className="w-full bg-[#000000] text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
-              style={{ fontWeight: 600 }}
-            >
-              이 서비스 신청하기
-            </button>
           </div>
         </div>
       </div>
