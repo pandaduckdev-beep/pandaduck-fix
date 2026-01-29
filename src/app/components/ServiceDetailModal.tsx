@@ -64,7 +64,7 @@ export function ServiceDetailModal({ service, options = [], isOpen, onClose, onB
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="sticky top-0 bg-white/95 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)] px-6 py-4 flex items-center justify-between rounded-t-[28px]">
+          <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)] px-6 py-4 flex items-center justify-between rounded-t-[28px]">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-[#F5F5F7] rounded-full flex items-center justify-center">
                 {service.icon}
@@ -101,11 +101,6 @@ export function ServiceDetailModal({ service, options = [], isOpen, onClose, onB
               </p>
             </div>
 
-            {/* Options Section - Show accordion if no images, or if there are options */}
-            {options.length > 0 && !hasImages && (
-              <OptionAccordion options={options} isExpanded={true} showSelection={false} />
-            )}
-
             {/* Features */}
             <div>
               <h3 className="text-base mb-3" style={{ fontWeight: 600 }}>
@@ -137,6 +132,30 @@ export function ServiceDetailModal({ service, options = [], isOpen, onClose, onB
                 ))}
               </div>
             </div>
+
+            {/* Options Section - Horizontal Scrolling Cards */}
+            {options.length > 0 && (
+              <div>
+                <h3 className="text-base mb-3" style={{ fontWeight: 600 }}>
+                  옵션 정보
+                </h3>
+                <div className="relative -mx-6 px-6">
+                  <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2">
+                    {options.map((option) => (
+                      <div
+                        key={option.id}
+                        className="flex-shrink-0 w-[280px] sm:w-[320px] snap-start bg-[#F5F5F7] rounded-[20px] p-5"
+                      >
+                        <h4 className="text-base font-semibold mb-2">{option.name}</h4>
+                        <p className="text-sm text-[#86868B] leading-relaxed">
+                          {option.detailedDescription || option.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Info Grid */}
             <div className="grid grid-cols-3 gap-3">

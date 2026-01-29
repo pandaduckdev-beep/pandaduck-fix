@@ -5,6 +5,7 @@ export interface OptionItem {
   id: string
   name: string
   description: string
+  detailedDescription?: string
   price: number
   imageUrl?: string
 }

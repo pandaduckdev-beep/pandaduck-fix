@@ -73,6 +73,7 @@ export interface Database {
           controller_service_id: string
           option_name: string
           option_description: string
+          detailed_description: string | null
           additional_price: number
           image_url: string | null
           display_order: number
@@ -85,6 +86,7 @@ export interface Database {
           controller_service_id: string
           option_name: string
           option_description: string
+          detailed_description?: string | null
           additional_price?: number
           image_url?: string | null
           display_order?: number
@@ -97,6 +99,7 @@ export interface Database {
           controller_service_id?: string
           option_name?: string
           option_description?: string
+          detailed_description?: string | null
           additional_price?: number
           image_url?: string | null
           display_order?: number

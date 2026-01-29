@@ -97,7 +97,7 @@ function SortableOptionItem({
             />
           </div>
           <div>
-            <Label htmlFor={`edit_desc_${option.id}`}>옵션 설명</Label>
+            <Label htmlFor={`edit_desc_${option.id}`}>옵션 설명 (간단)</Label>
             <Input
               id={`edit_desc_${option.id}`}
               value={editingData?.option_description || ''}
@@ -108,6 +108,25 @@ function SortableOptionItem({
                 })
               }
               className="w-full"
+              placeholder="선택 화면에 표시될 간단한 설명"
+            />
+          </div>
+          <div>
+            <Label htmlFor={`edit_detailed_desc_${option.id}`}>
+              옵션 상세 설명 (선택)
+              <span className="text-xs text-gray-500 ml-2">서비스 상세 페이지용</span>
+            </Label>
+            <textarea
+              id={`edit_detailed_desc_${option.id}`}
+              value={editingData?.detailed_description || ''}
+              onChange={(e) =>
+                onEditingDataChange({
+                  ...editingData,
+                  detailed_description: e.target.value,
+                })
+              }
+              className="w-full min-h-[80px] px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="서비스 상세보기에서 표시될 자세한 설명 (비어있으면 기본 설명 사용)"
             />
           </div>
           <div>
@@ -257,6 +276,7 @@ export function ServiceOptionsModal({
   const [formData, setFormData] = useState({
     option_name: '',
     option_description: '',
+    detailed_description: '',
     additional_price: 0,
     image_url: null as string | null,
   })
@@ -265,6 +285,7 @@ export function ServiceOptionsModal({
   const [editingData, setEditingData] = useState<{
     option_name?: string
     option_description?: string
+    detailed_description?: string
     additional_price?: number
     image_url?: string | null
   } | null>(null)
@@ -362,13 +383,14 @@ export function ServiceOptionsModal({
         controller_service_id: service.id,
         option_name: formData.option_name,
         option_description: formData.option_description,
+        detailed_description: formData.detailed_description,
         additional_price: Number(formData.additional_price) || 0,
         image_url: formData.image_url,
         is_active: true,
       })
 
       setLocalOptions([...localOptions, newOption])
-      setFormData({ option_name: '', option_description: '', additional_price: 0, image_url: null })
+      setFormData({ option_name: '', option_description: '', detailed_description: '', additional_price: 0, image_url: null })
       toast.success('옵션이 추가되었습니다.')
     } catch (error) {
       console.error('Failed to add option:', error)
@@ -398,6 +420,7 @@ export function ServiceOptionsModal({
     setEditingData({
       option_name: option.option_name,
       option_description: option.option_description,
+      detailed_description: option.detailed_description || '',
       additional_price: option.additional_price,
       image_url: option.image_url || null,
     })
@@ -475,15 +498,76 @@ export function ServiceOptionsModal({
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="option_description">옵션 설명</Label>
+                  <Label htmlFor="option_description">옵션 설명 (간단)</Label>
                   <Input
                     id="option_description"
                     value={formData.option_description}
                     onChange={(e) =>
                       setFormData({ ...formData, option_description: e.target.value })
                     }
-                    placeholder="옵션에 대한 간단 설명"
+                    placeholder="선택 화면에 표시될 간단한 설명"
                   />
+                </div>
+                <div>
+                  <Label htmlFor="detailed_description">
+                    옵션 상세 설명 (선택)
+                    <span className="text-xs text-gray-500 ml-2">서비스 상세 페이지용</span>
+                  </Label>
+                  <textarea
+                    id="detailed_description"
+                    value={formData.detailed_description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, detailed_description: e.target.value })
+                    }
+                    className="w-full min-h-[80px] px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="서비스 상세보기에서 표시될 자세한 설명 (비어있으면 기본 설명 사용)"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="image_url">옵션 이미지 (선택)</Label>
+                  <div className="mt-2 space-y-2">
+                    {formData.image_url && (
+                      <div className="relative w-full h-32 rounded-lg overflow-hidden border border-gray-200">
+                        <img
+                          src={formData.image_url}
+                          alt="옵션 이미지"
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFormData({
+                              ...formData,
+                              image_url: null,
+                            })
+                          }
+                          className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <label className="flex-1 cursor-pointer">
+                        <div className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-300 transition">
+                          <Upload className="w-4 h-4" />
+                          <span className="text-sm font-medium">
+                            {uploading ? '업로드 중...' : '이미지 업로드'}
+                          </span>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleImageUpload(file, false)
+                          }}
+                          disabled={uploading}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </div>
                 <Button type="submit" disabled={!formData.option_name} className="w-full">
                   <Plus className="w-4 h-4 mr-2" />

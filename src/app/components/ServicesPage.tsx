@@ -168,6 +168,7 @@ export function ServicesPage() {
         id: opt.id,
         name: opt.option_name,
         description: opt.option_description,
+        detailedDescription: opt.detailed_description || undefined,
         price: opt.additional_price,
         imageUrl: opt.image_url || undefined,
       }))
