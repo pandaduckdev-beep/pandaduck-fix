@@ -103,6 +103,9 @@ export interface CreateRepairRequestParams {
   controllerModel: string
   controllerModelName?: string
   issueDescription?: string
+  postalCode?: string
+  address?: string
+  detailAddress?: string
   services: Array<{
     serviceId: string
     serviceName?: string
@@ -129,6 +132,9 @@ export async function createRepairRequest(
       customer_email: params.customerEmail,
       controller_model: params.controllerModel,
       issue_description: params.issueDescription,
+      postal_code: params.postalCode,
+      address: params.address,
+      detail_address: params.detailAddress,
       total_amount: params.totalAmount,
       status: 'pending',
     })

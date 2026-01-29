@@ -116,6 +116,9 @@ export interface Database {
           customer_email: string | null
           controller_model: string
           issue_description: string | null
+          postal_code: string | null
+          address: string | null
+          detail_address: string | null
           status: RepairStatus
           total_amount: number
           estimated_completion_date: string | null
@@ -132,6 +135,9 @@ export interface Database {
           customer_email?: string | null
           controller_model: string
           issue_description?: string | null
+          postal_code?: string | null
+          address?: string | null
+          detail_address?: string | null
           status?: RepairStatus
           total_amount: number
           estimated_completion_date?: string | null
@@ -148,6 +154,9 @@ export interface Database {
           customer_email?: string | null
           controller_model?: string
           issue_description?: string | null
+          postal_code?: string | null
+          address?: string | null
+          detail_address?: string | null
           status?: RepairStatus
           total_amount?: number
           estimated_completion_date?: string | null
@@ -195,7 +204,7 @@ export interface Database {
           rating: number
           content: string
           service_name: string
-          image_url: string | null
+          image_urls: string[]
           is_approved: boolean
           is_public: boolean
           created_at: string
@@ -208,7 +217,7 @@ export interface Database {
           rating: number
           content: string
           service_name: string
-          image_url?: string | null
+          image_urls?: string[]
           is_approved?: boolean
           is_public?: boolean
           created_at?: string
@@ -221,7 +230,7 @@ export interface Database {
           rating?: number
           content?: string
           service_name?: string
-          image_url?: string | null
+          image_urls?: string[]
           is_approved?: boolean
           is_public?: boolean
           created_at?: string

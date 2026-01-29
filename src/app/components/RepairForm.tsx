@@ -8,6 +8,7 @@ import {
   MapPin,
   Phone,
   User,
+  Search,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -17,6 +18,7 @@ import { getControllerModelName } from '@/utils/controllerModels'
 import { getControllerModelById } from '@/services/pricingService'
 import { toast } from 'sonner'
 import { useSlideUp } from '@/hooks/useSlideUp'
+import { AddressSearchModal } from '@/app/components/AddressSearchModal'
 
 /**
  * 한국 전화번호 포맷 함수 (010-0000-0000)
@@ -50,7 +52,9 @@ export function RepairForm() {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    postalCode: '',
     address: '',
+    detailAddress: '',
     pickupMethod: 'express' as 'express' | 'dropoff',
   })
 
@@ -59,6 +63,7 @@ export function RepairForm() {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showConvenienceModal, setShowConvenienceModal] = useState(false)
+  const [showAddressSearch, setShowAddressSearch] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // 페이지 진입 시 스크롤 위치를 최상단으로 이동
@@ -100,12 +105,14 @@ export function RepairForm() {
         customerEmail: undefined,
         controllerModel: controllerModelUuid, // UUID 사용
         controllerModelName: controllerModel ? getControllerModelName(controllerModel) : undefined,
+        postalCode: formData.postalCode,
+        address: formData.address,
+        detailAddress: formData.detailAddress,
         issueDescription: [
           conditionData?.conditions.length
             ? `상태: [${conditionData.conditions.join(', ')}]`
             : '',
           conditionData?.notes ? `요청사항: ${conditionData.notes}` : '',
-          `고객 주소: ${formData.address}`,
         ]
           .filter(Boolean)
           .join('\n'),
@@ -137,7 +144,15 @@ export function RepairForm() {
     navigate('/')
   }
 
-  const isFormValid = formData.name && formData.phone && formData.address
+  const isFormValid = formData.name && formData.phone && formData.postalCode && formData.address && formData.detailAddress
+
+  const handleAddressComplete = (data: { postalCode: string; address: string }) => {
+    setFormData({
+      ...formData,
+      postalCode: data.postalCode,
+      address: data.address,
+    })
+  }
 
   return (
     <div className="min-h-screen bg-white pb-8">
@@ -321,13 +336,47 @@ export function RepairForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-[#86868B] pl-4">고객 주소</label>
+            <label className="text-sm text-[#86868B] pl-4">배송 주소</label>
+
+            {/* Postal Code and Address Search Button */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={formData.postalCode}
+                readOnly
+                placeholder="우편번호"
+                className="w-32 px-6 py-4 bg-[#F5F5F7] rounded-[28px] border-2 border-transparent text-center"
+                style={{ fontWeight: 500 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowAddressSearch(true)}
+                className="flex-1 px-6 py-4 bg-[#000000] text-white rounded-[28px] transition-all hover:scale-[0.98] active:scale-[0.96] flex items-center justify-center gap-2"
+                style={{ fontWeight: 600 }}
+              >
+                <Search className="w-4 h-4" />
+                주소 검색
+              </button>
+            </div>
+
+            {/* Main Address (read-only, filled from search) */}
             <input
               type="text"
               value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              placeholder="서울특별시 강남구..."
-              className="w-full px-6 py-4 bg-[#F5F5F7] rounded-[28px] border-2 border-transparent focus:border-[#000000] focus:outline-none transition-colors"
+              readOnly
+              placeholder="주소를 검색해주세요"
+              className="w-full px-6 py-4 bg-[#F5F5F7] rounded-[28px] border-2 border-transparent"
+              style={{ fontWeight: 500 }}
+            />
+
+            {/* Detail Address (user input) */}
+            <input
+              type="text"
+              value={formData.detailAddress}
+              onChange={(e) => setFormData({ ...formData, detailAddress: e.target.value })}
+              placeholder="상세 주소 (동/호수 등)"
+              disabled={!formData.address}
+              className="w-full px-6 py-4 bg-[#F5F5F7] rounded-[28px] border-2 border-transparent focus:border-[#000000] focus:outline-none transition-colors disabled:opacity-50"
               style={{ fontWeight: 500 }}
             />
           </div>
@@ -624,7 +673,7 @@ export function RepairForm() {
                   <div className="flex items-start justify-between">
                     <span className="text-[#86868B]">주소</span>
                     <span className="text-right" style={{ fontWeight: 600 }}>
-                      {formData.address}
+                      ({formData.postalCode}) {formData.address} {formData.detailAddress}
                     </span>
                   </div>
                 </div>
@@ -762,6 +811,13 @@ export function RepairForm() {
           </div>
         </div>
       )}
+
+      {/* Address Search Modal */}
+      <AddressSearchModal
+        isOpen={showAddressSearch}
+        onClose={() => setShowAddressSearch(false)}
+        onComplete={handleAddressComplete}
+      />
     </div>
   )
 }

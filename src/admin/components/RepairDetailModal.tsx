@@ -28,20 +28,41 @@ interface RepairDetailModalProps {
 export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModalProps) {
   if (!isOpen) return null
 
-  // issue_description 파싱
+  // Get address from structured fields, fallback to parsing
+  const getCustomerAddress = () => {
+    // Priority 1: Use structured fields if available
+    if (repair.postal_code && repair.address) {
+      const parts = [
+        `[${repair.postal_code}]`,
+        repair.address,
+        repair.detail_address
+      ].filter(Boolean)
+      return parts.join(' ')
+    }
+
+    // Priority 2: Fallback to parsing issue_description (for old data)
+    if (repair.issue_description) {
+      const addressMatch = repair.issue_description.match(/고객 주소:\s*(.+)/)
+      if (addressMatch) return addressMatch[1].trim()
+    }
+
+    return null
+  }
+
+  const customerAddress = getCustomerAddress()
+
+  // issue_description 파싱 (conditions, notes only)
   const parseIssueDescription = (description: string | null) => {
-    if (!description) return { address: null, conditions: null, notes: null }
-    const addressMatch = description.match(/고객 주소:\s*(.+)/)
+    if (!description) return { conditions: null, notes: null }
     const conditionsMatch = description.match(/상태:\s*\[(.+?)\]/)
     const notesMatch = description.match(/요청사항:\s*(.+?)(?:\n|$)/)
     return {
-      address: addressMatch ? addressMatch[1].trim() : null,
       conditions: conditionsMatch ? conditionsMatch[1].split(',').map((s) => s.trim()) : null,
       notes: notesMatch ? notesMatch[1].trim() : null,
     }
   }
 
-  const { address: customerAddress, conditions: customerConditions, notes: customerNotes } = parseIssueDescription(repair.issue_description)
+  const { conditions: customerConditions, notes: customerNotes } = parseIssueDescription(repair.issue_description)
 
   // 서비스 가격 합계 계산
   const servicesTotal = repair.services?.reduce(

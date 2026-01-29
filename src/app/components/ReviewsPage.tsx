@@ -3,6 +3,7 @@ import { Footer } from '@/app/components/Footer'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
+import { ReviewImageCarousel } from '@/app/components/ReviewImageCarousel'
 import { supabase } from '@/lib/supabase'
 import { maskName } from '@/lib/reviewUtils'
 import { useSlideUp } from '@/hooks/useSlideUp'
@@ -173,12 +174,12 @@ export function ReviewsPage() {
       <MenuDrawer isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
       {/* Hero */}
-      <section className="max-w-md mx-auto px-6 pt-12 pb-8">
+      <section className="max-w-md mx-auto px-6 pt-8 sm:pt-12 pb-6 sm:pb-8">
         <div ref={setRef(0)} className="slide-up" style={{ transitionDelay: '0s' }}>
-          <h1 className="text-4xl mb-4" style={{ fontWeight: 700 }}>
+          <h1 className="text-3xl sm:text-4xl mb-3 sm:mb-4" style={{ fontWeight: 700 }}>
             고객 후기
           </h1>
-          <p className="text-lg text-[#86868B]">
+          <p className="text-base sm:text-lg text-[#86868B] leading-relaxed">
             PandaDuck Fix를 경험한 고객님들의
             <br />
             솔직한 후기를 확인해보세요
@@ -186,62 +187,62 @@ export function ReviewsPage() {
         </div>
 
         {/* Stats */}
-        <div ref={setRef(1)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 mt-8" style={{ transitionDelay: '0.1s' }}>
+        <div ref={setRef(1)} className="slide-up bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-5 sm:p-6 mt-6 sm:mt-8" style={{ transitionDelay: '0.1s' }}>
           <div className="grid grid-cols-2 divide-x divide-[rgba(0,0,0,0.1)]">
-            <div className="text-center pr-4">
+            <div className="text-center pr-3 sm:pr-4">
               <div className="flex items-center justify-center gap-1 mb-2">
-                <Star className="w-6 h-6 fill-current" />
-                <span className="text-3xl" style={{ fontWeight: 700 }}>
+                <Star className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
+                <span className="text-2xl sm:text-3xl" style={{ fontWeight: 700 }}>
                   {averageRating}
                 </span>
               </div>
-              <p className="text-sm text-[#86868B]">평균 평점</p>
+              <p className="text-xs sm:text-sm text-[#86868B]">평균 평점</p>
             </div>
-            <div className="text-center pl-4">
-              <div className="text-3xl mb-2" style={{ fontWeight: 700 }}>
+            <div className="text-center pl-3 sm:pl-4">
+              <div className="text-2xl sm:text-3xl mb-2" style={{ fontWeight: 700 }}>
                 {totalReviews}
               </div>
-              <p className="text-sm text-[#86868B]">누적 후기</p>
+              <p className="text-xs sm:text-sm text-[#86868B]">누적 후기</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Reviews List */}
-      <section className="max-w-md mx-auto px-6 pb-8">
+      <section className="max-w-md mx-auto px-6 pb-6 sm:pb-8">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-black" />
           </div>
         ) : (
           <>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {reviews.map((review, index) => (
                 <div
                   key={review.id}
                   ref={setRef(index + 2)}
-                  className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4"
+                  className="slide-up bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-6 space-y-3 sm:space-y-4"
                   style={{ transitionDelay: `${Math.min(index * 0.1, 0.5)}s` }}
                 >
                   <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span style={{ fontWeight: 600 }}>{maskName(review.customer_name)}</span>
-                        <span className="text-xs text-[#86868B]">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-sm sm:text-base" style={{ fontWeight: 600 }}>{maskName(review.customer_name)}</span>
+                        <span className="text-xs text-[#86868B] whitespace-nowrap">
                           {new Date(review.created_at).toLocaleDateString('ko-KR')}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-0.5">
                         {[...Array(review.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-current text-[#000000]" />
+                          <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current text-[#000000]" />
                         ))}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
                     {review.service_name.split(',').map((service: string, index: number) => (
-                      <div key={index} className="px-3 py-1.5 bg-white rounded-full">
+                      <div key={index} className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-white rounded-full flex-shrink-0">
                         <span className="text-xs" style={{ fontWeight: 600 }}>
                           {service.trim()}
                         </span>
@@ -249,27 +250,23 @@ export function ReviewsPage() {
                     ))}
                   </div>
 
-                  <p className="text-sm leading-relaxed">{review.content}</p>
+                  <p className="text-sm sm:text-base leading-relaxed text-[#1d1d1f]">{review.content}</p>
 
-                  {review.image_url && (
-                    <img
-                      src={review.image_url}
-                      alt="Review"
-                      className="w-full h-48 object-cover rounded-[20px]"
-                    />
+                  {review.image_urls && review.image_urls.length > 0 && (
+                    <ReviewImageCarousel images={review.image_urls} />
                   )}
                 </div>
               ))}
             </div>
 
             {loadingMore && (
-              <div className="flex items-center justify-center py-8">
+              <div className="flex items-center justify-center py-6 sm:py-8">
                 <Loader2 className="w-6 h-6 animate-spin text-black" />
               </div>
             )}
 
             {!hasMore && reviews.length > 0 && (
-              <div className="text-center py-8 text-[#86868B] text-sm">
+              <div className="text-center py-6 sm:py-8 text-[#86868B] text-xs sm:text-sm">
                 모든 리뷰를 불러왔습니다
               </div>
             )}
@@ -277,25 +274,25 @@ export function ReviewsPage() {
         )}
 
         {!loading && reviews.length === 0 && (
-          <div className="text-center py-12 text-[#86868B]">등록된 리뷰가 없습니다.</div>
+          <div className="text-center py-12 text-[#86868B] text-sm">등록된 리뷰가 없습니다.</div>
         )}
       </section>
 
       {/* CTA Section */}
-      <section className="max-w-md mx-auto px-6 pb-12">
+      <section className="max-w-md mx-auto px-6 pb-8 sm:pb-12">
         <div ref={setRef(reviews.length + 2)} className="slide-up" style={{ transitionDelay: '0s' }}>
-          <div className="bg-[#000000] text-white rounded-[28px] p-8 text-center space-y-4">
-            <h3 className="text-2xl" style={{ fontWeight: 700 }}>
+          <div className="bg-[#000000] text-white rounded-[20px] sm:rounded-[28px] p-6 sm:p-8 text-center space-y-3 sm:space-y-4">
+            <h3 className="text-xl sm:text-2xl" style={{ fontWeight: 700 }}>
               당신의 후기를 기다립니다
             </h3>
-            <p className="text-[#86868B]">
+            <p className="text-sm sm:text-base text-[#86868B]">
               PandaDuck Fix와 함께
               <br />
               최고의 게이밍 경험을 만들어보세요
             </p>
             <button
               onClick={() => navigate('/controllers')}
-              className="w-full bg-white text-black py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-6"
+              className="w-full bg-white text-black py-3.5 sm:py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96] mt-4 sm:mt-6 text-sm sm:text-base"
               style={{ fontWeight: 600 }}
             >
               수리 신청하기

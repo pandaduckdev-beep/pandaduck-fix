@@ -130,8 +130,8 @@ export function ReviewPage() {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    if (images.length + files.length > 5) {
-      toast.error('이미지는 최대 5개까지 업로드할 수 있습니다.')
+    if (images.length + files.length > 3) {
+      toast.error('이미지는 최대 3개까지 업로드할 수 있습니다.')
       return
     }
     setImages([...images, ...files])
@@ -195,7 +195,7 @@ export function ReviewPage() {
         rating,
         content: comment.trim(),
         service_name: serviceName,
-        image_url: imageUrls.length > 0 ? imageUrls[0] : null,
+        image_urls: imageUrls,
         is_approved: false,
         is_public: false,
       })
@@ -206,7 +206,7 @@ export function ReviewPage() {
         rating,
         content: comment.trim(),
         service_name: serviceName,
-        image_url: imageUrls.length > 0 ? imageUrls[0] : null,
+        image_urls: imageUrls,
         is_approved: false,
         is_public: false,
       })
@@ -404,10 +404,10 @@ export function ReviewPage() {
             {/* Images */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-4">
-                사진 첨부 <span className="text-gray-400 font-normal text-xs">(선택, 최대 5장)</span>
+                사진 첨부 <span className="text-gray-400 font-normal text-xs">(선택, 최대 3장)</span>
               </label>
               <div className="space-y-4">
-                {images.length < 5 && (
+                {images.length < 3 && (
                   <label className="flex flex-col items-center justify-center w-full h-36 border border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition">
                     <Upload className="w-7 h-7 text-gray-300 mb-2" />
                     <span className="text-sm text-gray-500">클릭하여 이미지 업로드</span>

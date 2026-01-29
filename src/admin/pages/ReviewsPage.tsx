@@ -418,16 +418,21 @@ export function ReviewsPage() {
                 </div>
               </div>
 
-              {/* Review Image */}
-              {selectedReview.image_url && (
+              {/* Review Images */}
+              {selectedReview.image_urls && selectedReview.image_urls.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-500 mb-3">첨부 이미지</h3>
+                  <h3 className="text-sm font-semibold text-gray-500 mb-3">첨부 이미지 ({selectedReview.image_urls.length}장)</h3>
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <img
-                      src={selectedReview.image_url}
-                      alt="리뷰 이미지"
-                      className="w-full max-h-96 object-cover rounded-lg"
-                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      {selectedReview.image_urls.map((imageUrl, index) => (
+                        <img
+                          key={index}
+                          src={imageUrl}
+                          alt={`리뷰 이미지 ${index + 1}`}
+                          className="w-full h-48 object-cover rounded-lg"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
