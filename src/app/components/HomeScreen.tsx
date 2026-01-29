@@ -285,6 +285,7 @@ export function HomeScreen() {
       {/* Service Detail Modal */}
       <ServiceDetailModal
         service={selectedService}
+        options={[]}
         isOpen={selectedService !== null}
         onClose={() => setSelectedService(null)}
         onBookService={handleBookService}

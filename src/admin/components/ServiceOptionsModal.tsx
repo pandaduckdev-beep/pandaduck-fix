@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, Edit, X, Check, PlusCircle, GripVertical } from 'lucide-react'
+import { Plus, Trash2, Edit, X, Check, PlusCircle, GripVertical, Upload, Image as ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
+import { supabase } from '@/lib/supabase'
 import {
   DndContext,
   closestCenter,
@@ -40,6 +41,8 @@ interface SortableOptionItemProps {
   onCancel: () => void
   onDelete: () => void
   onEditingDataChange: (data: any) => void
+  onImageUpload: (file: File) => Promise<void>
+  uploading: boolean
 }
 
 function SortableOptionItem({
@@ -51,7 +54,15 @@ function SortableOptionItem({
   onCancel,
   onDelete,
   onEditingDataChange,
+  onImageUpload,
+  uploading,
 }: SortableOptionItemProps) {
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      await onImageUpload(file)
+    }
+  }
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: option.id,
   })
@@ -114,6 +125,49 @@ function SortableOptionItem({
               className="w-full"
             />
           </div>
+          <div>
+            <Label>옵션 이미지 (선택)</Label>
+            <div className="mt-2 space-y-2">
+              {editingData?.image_url && (
+                <div className="relative w-full h-32 rounded-lg overflow-hidden border border-gray-200">
+                  <img
+                    src={editingData.image_url}
+                    alt="옵션 이미지"
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onEditingDataChange({
+                        ...editingData,
+                        image_url: null,
+                      })
+                    }
+                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <label className="flex-1 cursor-pointer">
+                  <div className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-300 transition">
+                    <Upload className="w-4 h-4" />
+                    <span className="text-sm font-medium">
+                      {uploading ? '업로드 중...' : '이미지 업로드'}
+                    </span>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    disabled={uploading}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={onCancel} className="flex-1">
               <X className="w-4 h-4" />
@@ -136,8 +190,20 @@ function SortableOptionItem({
             >
               <GripVertical className="w-5 h-5 text-gray-400" />
             </div>
+            {option.image_url && (
+              <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                <img
+                  src={option.image_url}
+                  alt={option.option_name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
             <div className="flex-1">
-              <div className="font-medium text-gray-900">{option.option_name}</div>
+              <div className="font-medium text-gray-900 flex items-center gap-2">
+                {option.option_name}
+                {option.image_url && <ImageIcon className="w-4 h-4 text-gray-400" />}
+              </div>
               <div className="text-sm text-gray-600">{option.option_description}</div>
             </div>
             <div className="flex items-center gap-4">
@@ -192,6 +258,7 @@ export function ServiceOptionsModal({
     option_name: '',
     option_description: '',
     additional_price: 0,
+    image_url: null as string | null,
   })
 
   const [editingOptionId, setEditingOptionId] = useState<string | null>(null)
@@ -199,7 +266,10 @@ export function ServiceOptionsModal({
     option_name?: string
     option_description?: string
     additional_price?: number
+    image_url?: string | null
   } | null>(null)
+
+  const [uploading, setUploading] = useState(false)
 
   const [localOptions, setLocalOptions] = useState<any[]>(options || [])
 
@@ -215,6 +285,41 @@ export function ServiceOptionsModal({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   )
+
+  // 이미지 업로드 함수
+  const handleImageUpload = async (file: File, isEditing: boolean = false) => {
+    if (!file) return
+
+    setUploading(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `option-${Math.random()}.${fileExt}`
+      const filePath = `service-images/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('service-images')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('service-images').getPublicUrl(filePath)
+
+      if (isEditing) {
+        setEditingData({ ...editingData, image_url: publicUrl })
+      } else {
+        setFormData({ ...formData, image_url: publicUrl })
+      }
+
+      toast.success('이미지가 업로드되었습니다.')
+    } catch (error) {
+      console.error('Failed to upload image:', error)
+      toast.error('이미지 업로드에 실패했습니다.')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
@@ -258,11 +363,12 @@ export function ServiceOptionsModal({
         option_name: formData.option_name,
         option_description: formData.option_description,
         additional_price: Number(formData.additional_price) || 0,
+        image_url: formData.image_url,
         is_active: true,
       })
 
       setLocalOptions([...localOptions, newOption])
-      setFormData({ option_name: '', option_description: '', additional_price: 0 })
+      setFormData({ option_name: '', option_description: '', additional_price: 0, image_url: null })
       toast.success('옵션이 추가되었습니다.')
     } catch (error) {
       console.error('Failed to add option:', error)
@@ -293,6 +399,7 @@ export function ServiceOptionsModal({
       option_name: option.option_name,
       option_description: option.option_description,
       additional_price: option.additional_price,
+      image_url: option.image_url || null,
     })
   }
 
@@ -414,6 +521,8 @@ export function ServiceOptionsModal({
                           onCancel={cancelEditing}
                           onDelete={() => handleDeleteOption(option.id)}
                           onEditingDataChange={setEditingData}
+                          onImageUpload={(file) => handleImageUpload(file, true)}
+                          uploading={uploading}
                         />
                       ))}
                     </div>

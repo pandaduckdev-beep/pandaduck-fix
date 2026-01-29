@@ -74,6 +74,8 @@ export interface Database {
           option_name: string
           option_description: string
           additional_price: number
+          image_url: string | null
+          display_order: number
           is_active: boolean
           created_at: string
           updated_at: string
@@ -84,6 +86,8 @@ export interface Database {
           option_name: string
           option_description: string
           additional_price?: number
+          image_url?: string | null
+          display_order?: number
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -94,6 +98,8 @@ export interface Database {
           option_name?: string
           option_description?: string
           additional_price?: number
+          image_url?: string | null
+          display_order?: number
           is_active?: boolean
           created_at?: string
           updated_at?: string

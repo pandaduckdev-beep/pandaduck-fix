@@ -34,6 +34,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
 import { ServiceDetailModal } from '@/app/components/ServiceDetailModal'
+import type { OptionItem } from '@/app/components/OptionAccordion'
 import { fetchControllerModels, fetchControllerServices } from '@/lib/api'
 import { useSlideUp } from '@/hooks/useSlideUp'
 import type {
@@ -93,6 +94,7 @@ export function ServicesPage() {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [selectedService, setSelectedService] = useState<ServiceDetail | null>(null)
+  const [selectedOptions, setSelectedOptions] = useState<OptionItem[]>([])
   const [services, setServices] = useState<ControllerServiceWithOptions[]>([])
   const [controllers, setControllers] = useState<ControllerModel[]>([])
   const [selectedController, setSelectedController] = useState<string>('')
@@ -160,7 +162,18 @@ export function ServicesPage() {
         warranty: service.warranty || '1년',
         image: service.image_url || undefined,
       }
+
+      // Transform options to OptionItem format
+      const optionsDetail: OptionItem[] = (service.options || []).map((opt) => ({
+        id: opt.id,
+        name: opt.option_name,
+        description: opt.option_description,
+        price: opt.additional_price,
+        imageUrl: opt.image_url || undefined,
+      }))
+
       setSelectedService(serviceDetail)
+      setSelectedOptions(optionsDetail)
     }
   }
 
@@ -332,6 +345,7 @@ export function ServicesPage() {
       {/* Service Detail Modal */}
       <ServiceDetailModal
         service={selectedService}
+        options={selectedOptions}
         isOpen={selectedService !== null}
         onClose={() => setSelectedService(null)}
         onBookService={handleBookService}

@@ -1,4 +1,6 @@
 import { X, Check } from "lucide-react";
+import { ImageCarousel, type CarouselImage } from "./ImageCarousel";
+import { OptionAccordion, type OptionItem } from "./OptionAccordion";
 
 interface ServiceDetail {
   id: string;
@@ -16,13 +18,36 @@ interface ServiceDetail {
 
 interface ServiceDetailModalProps {
   service: ServiceDetail | null;
+  options?: OptionItem[];
   isOpen: boolean;
   onClose: () => void;
   onBookService: () => void;
 }
 
-export function ServiceDetailModal({ service, isOpen, onClose, onBookService }: ServiceDetailModalProps) {
+export function ServiceDetailModal({ service, options = [], isOpen, onClose, onBookService }: ServiceDetailModalProps) {
   if (!isOpen || !service) return null;
+
+  // Determine if we should show carousel (if any images exist)
+  const hasImages = !!(service.image || options.some((opt) => opt.imageUrl))
+
+  // Collect all images for carousel
+  const carouselImages: CarouselImage[] = []
+  if (service.image) {
+    carouselImages.push({
+      url: service.image,
+      alt: service.title,
+      label: '서비스 메인',
+    })
+  }
+  options.forEach((opt) => {
+    if (opt.imageUrl) {
+      carouselImages.push({
+        url: opt.imageUrl,
+        alt: opt.name,
+        label: opt.name,
+      })
+    }
+  })
 
   return (
     <>
@@ -61,13 +86,9 @@ export function ServiceDetailModal({ service, isOpen, onClose, onBookService }: 
 
           {/* Content */}
           <div className="p-6 space-y-6">
-            {/* Image */}
-            {service.image && (
-              <img
-                src={service.image}
-                alt={service.title}
-                className="w-full h-48 object-cover rounded-[20px]"
-              />
+            {/* Image Carousel or Single Image */}
+            {hasImages && carouselImages.length > 0 && (
+              <ImageCarousel images={carouselImages} />
             )}
 
             {/* Description */}
@@ -79,6 +100,11 @@ export function ServiceDetailModal({ service, isOpen, onClose, onBookService }: 
                 {service.description}
               </p>
             </div>
+
+            {/* Options Section - Show accordion if no images, or if there are options */}
+            {options.length > 0 && !hasImages && (
+              <OptionAccordion options={options} isExpanded={true} showSelection={false} />
+            )}
 
             {/* Features */}
             <div>
