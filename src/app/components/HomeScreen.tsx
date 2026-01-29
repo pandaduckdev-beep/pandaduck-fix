@@ -170,7 +170,7 @@ export function HomeScreen() {
               className="text-lg text-[#86868B] max-w-xs mx-auto"
               style={{ fontWeight: 400 }}
             >
-              프로 게이머를 위한 전문 컨트롤러 수리 및 커스터마이징
+              게이머를 위한 전문 컨트롤러 수리 및 커스터마이징
             </p>
           </div>
           <div ref={setRef(2)} className="slide-up pt-4" style={{ transitionDelay: '0.2s' }}>

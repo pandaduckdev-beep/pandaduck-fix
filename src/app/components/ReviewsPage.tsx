@@ -20,6 +20,10 @@ export function ReviewsPage() {
   const PAGE_SIZE = 20
   const { setRef } = useSlideUp(reviews.length + 4)
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   // 통계 데이터 로드 (평균 평점, 총 리뷰 수)
   useEffect(() => {
     const loadStats = async () => {

@@ -39,3 +39,6 @@ workbox-*.js
 .env.local
 .env.production
 package-lock.json
+
+# Supabase CLI temp files
+supabase/.temp/

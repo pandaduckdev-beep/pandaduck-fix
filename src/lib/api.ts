@@ -7,6 +7,34 @@ import type {
 } from '../types/database'
 
 // ============================================================================
+// Telegram Notification via Supabase Edge Function
+// ============================================================================
+
+export async function notifyTelegram(
+  type: 'repair_request' | 'review',
+  data: Record<string, unknown>
+): Promise<void> {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+  if (!supabaseUrl) return
+
+  const edgeFunctionUrl = `${supabaseUrl}/functions/v1/notify-telegram`
+
+  try {
+    await fetch(edgeFunctionUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ type, data }),
+    })
+  } catch {
+    // 알림 실패는 메인 플로에 영향을 주지 않음
+    console.warn('Telegram notification failed')
+  }
+}
+
+// ============================================================================
 // Services API
 // ============================================================================
 
@@ -73,10 +101,13 @@ export interface CreateRepairRequestParams {
   customerPhone: string
   customerEmail?: string
   controllerModel: string
+  controllerModelName?: string
   issueDescription?: string
   services: Array<{
     serviceId: string
+    serviceName?: string
     optionId?: string
+    optionName?: string
     servicePrice: number
     optionPrice?: number
   }>
@@ -126,6 +157,25 @@ export async function createRepairRequest(
     await supabase.from('repair_requests').delete().eq('id', repairRequest.id)
     throw new Error(`Failed to add services to repair request: ${servicesError.message}`)
   }
+
+  // 텔레그램 알림 (비동기, 실패 시 무시)
+  notifyTelegram('repair_request', {
+    customerName: params.customerName,
+    customerPhone: params.customerPhone,
+    customerEmail: params.customerEmail,
+    controllerModel: params.controllerModel,
+    controllerModelName: params.controllerModelName,
+    issueDescription: params.issueDescription,
+    totalAmount: params.totalAmount,
+    services: params.services.map((s) => ({
+      serviceId: s.serviceId,
+      serviceName: s.serviceName,
+      optionId: s.optionId,
+      optionName: s.optionName,
+      servicePrice: s.servicePrice,
+      optionPrice: s.optionPrice,
+    })),
+  })
 
   return repairRequest
 }
@@ -185,6 +235,14 @@ export async function submitReview(params: SubmitReviewParams): Promise<Review> 
   if (error || !data) {
     throw new Error(`Failed to submit review: ${error?.message}`)
   }
+
+  // 텔레그램 알림 (비동기, 실패 시 무시)
+  notifyTelegram('review', {
+    customerName: params.customerName,
+    rating: params.rating,
+    content: params.content,
+    serviceName: params.serviceName,
+  })
 
   return data
 }

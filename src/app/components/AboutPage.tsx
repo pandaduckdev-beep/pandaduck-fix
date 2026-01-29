@@ -1,6 +1,6 @@
 import { Menu, Target, Award, Users, Heart } from "lucide-react";
 import { Footer } from "@/app/components/Footer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MenuDrawer } from "@/app/components/MenuDrawer";
 import { useSlideUp } from "@/hooks/useSlideUp";
@@ -9,6 +9,10 @@ export function AboutPage() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { setRef } = useSlideUp(10);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">

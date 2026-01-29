@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { notifyTelegram } from '@/lib/api'
 import { Star, Upload, CheckCircle, Loader2 } from 'lucide-react'
 import { maskName } from '@/lib/reviewUtils'
 import { toast } from 'sonner'
@@ -222,6 +223,15 @@ export function ReviewPage() {
       }
 
       console.log('Review submitted successfully:', reviewData)
+
+      // 텔레그램 알림
+      notifyTelegram('review', {
+        customerName: repairInfo.customer_name,
+        rating,
+        content: comment.trim(),
+        serviceName,
+      })
+
       setShowConfirmModal(false)
       setSubmitted(true)
       toast.success('리뷰가 성공적으로 제출되었습니다!')

@@ -99,6 +99,7 @@ export function RepairForm() {
         customerPhone: formData.phone,
         customerEmail: undefined,
         controllerModel: controllerModelUuid, // UUID 사용
+        controllerModelName: controllerModel ? getControllerModelName(controllerModel) : undefined,
         issueDescription: [
           conditionData?.conditions.length
             ? `상태: [${conditionData.conditions.join(', ')}]`
@@ -110,7 +111,9 @@ export function RepairForm() {
           .join('\n'),
         services: selectionData.services.map((service) => ({
           serviceId: service.uuid, // UUID 사용
+          serviceName: service.name,
           optionId: service.selectedOption?.id,
+          optionName: service.selectedOption?.name,
           servicePrice: service.price,
           optionPrice: service.selectedOption?.price || 0,
         })),

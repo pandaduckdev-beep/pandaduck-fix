@@ -100,6 +100,10 @@ export function ServicesPage() {
   const { setRef } = useSlideUp(services.length + 4)
 
   useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
+  useEffect(() => {
     loadControllers()
   }, [])
 
