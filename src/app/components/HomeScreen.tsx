@@ -137,7 +137,7 @@ export function HomeScreen() {
     try {
       const { data, error } = await supabase
         .from('reviews')
-        .select('customer_name, rating, content, service_name, repair_requests!inner(service_name)')
+        .select('customer_name, rating, content, service_name, images, repair_requests!inner(service_name)')
         .eq('rating', 5)
         .eq('is_approved', true)
         .eq('is_public', true)
@@ -156,6 +156,7 @@ export function HomeScreen() {
         rating: review.rating,
         content: review.content,
         service: review.service_name || review.repair_requests?.service_name || '수리 서비스',
+        images: review.images || [],
       }))
 
       // 데이터가 있으면 교체
@@ -336,6 +337,21 @@ export function HomeScreen() {
                   {review.name}
                 </div>
               </div>
+
+              {/* 리뷰 이미지 */}
+              {review.images && review.images.length > 0 && (
+                <div className="mb-3 flex gap-2 overflow-x-auto">
+                  {review.images.map((image: string, imgIndex: number) => (
+                    <img
+                      key={imgIndex}
+                      src={image}
+                      alt={`리뷰 이미지 ${imgIndex + 1}`}
+                      className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                    />
+                  ))}
+                </div>
+              )}
+
               <p className="text-sm leading-relaxed">{review.content}</p>
             </div>
           ))}
