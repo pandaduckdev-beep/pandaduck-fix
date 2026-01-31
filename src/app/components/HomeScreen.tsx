@@ -140,7 +140,7 @@ export function HomeScreen() {
     try {
       const { data, error } = await supabase
         .from('reviews')
-        .select('customer_name, rating, content, service_name, images, repair_requests!inner(service_name)')
+        .select('customer_name, rating, content, service_name, images')
         .eq('rating', 5)
         .eq('is_approved', true)
         .eq('is_public', true)
@@ -158,7 +158,7 @@ export function HomeScreen() {
           : '고객',
         rating: review.rating,
         content: review.content,
-        service: review.service_name || review.repair_requests?.service_name || '수리 서비스',
+        service: review.service_name || '수리 서비스',
         images: review.images || [],
       }))
 
