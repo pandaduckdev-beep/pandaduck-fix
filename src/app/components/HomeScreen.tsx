@@ -150,7 +150,7 @@ export function HomeScreen() {
 
       console.log('Fetched reviews:', data) // 디버깅용
       data?.forEach((review: any, index: number) => {
-        console.log(`Review ${index} images:`, review.images, `Type: ${typeof review.images}`, `Is Array: ${Array.isArray(review.images)}`)
+        console.log(`Review ${index} image_urls:`, review.image_urls, `Type: ${typeof review.image_urls}`, `Is Array: ${Array.isArray(review.image_urls)}`)
       })
 
       // 이름 마스킹 처리
@@ -161,7 +161,7 @@ export function HomeScreen() {
         rating: review.rating,
         content: review.content,
         service: review.service_name || '수리 서비스',
-        images: Array.isArray(review.images) ? review.images : [],
+        images: Array.isArray(review.image_urls) ? review.image_urls : [],
       }))
 
       // 데이터가 있으면 교체
