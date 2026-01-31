@@ -101,8 +101,26 @@ const processSteps = [
 export function HomeScreen() {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [reviews, setReviews] = useState<any[]>([])
-  const [reviewsLoaded, setReviewsLoaded] = useState(false)
+  const [reviews, setReviews] = useState<any[]>([
+    {
+      name: '김*민',
+      rating: 5,
+      content: '스틱 드리프트로 고생했는데 홀 이펙트로 바꿔주니 완벽해졌어요!',
+      service: '스틱 드리프트 해결',
+    },
+    {
+      name: '이*호',
+      rating: 5,
+      content: '클릭키 버튼 교체 후 훨씬 좋은 키감입니다. 빠르고 정확해요.',
+      service: '클릭키 버튼',
+    },
+    {
+      name: '박*현',
+      rating: 5,
+      content: '배터리 업그레이드 후 플레이타임이 3배로 늘었네요. 대박!',
+      service: '배터리 업그레이드',
+    },
+  ])
   const { setRef } = useSlideUp(25)
 
   const supabase = createClient(
@@ -138,32 +156,13 @@ export function HomeScreen() {
         service: review.service_name,
       }))
 
-      setReviews(maskedReviews)
-      setReviewsLoaded(true)
+      // 데이터가 있으면 교체
+      if (maskedReviews.length > 0) {
+        setReviews(maskedReviews)
+      }
     } catch (error) {
       console.error('Failed to fetch reviews:', error)
-      // 에러 시 기본 리뷰 표시
-      setReviews([
-        {
-          name: '김*민',
-          rating: 5,
-          content: '스틱 드리프트로 고생했는데 홀 이펙트로 바꿔주니 완벽해졌어요!',
-          service: '스틱 드리프트 해결',
-        },
-        {
-          name: '이*호',
-          rating: 5,
-          content: '클릭키 버튼 교체 후 훨씬 좋은 키감입니다. 빠르고 정확해요.',
-          service: '클릭키 버튼',
-        },
-        {
-          name: '박*현',
-          rating: 5,
-          content: '배터리 업그레이드 후 플레이타임이 3배로 늘었네요. 대박!',
-          service: '배터리 업그레이드',
-        },
-      ])
-      setReviewsLoaded(true)
+      // 에러 시 기본 리뷰 유지
     }
   }
 
@@ -314,33 +313,31 @@ export function HomeScreen() {
           </h2>
           <p className="text-lg text-[#86868B]">실제 고객의 솔직한 리뷰</p>
         </div>
-        {reviewsLoaded && (
-          <div className="space-y-4">
-            {reviews.map((review, index) => (
-              <div
-                key={index}
-                ref={setRef(19 + index)}
-                className="slide-up bg-[#F5F5F7] rounded-[28px] p-6"
-                style={{ transitionDelay: `${index * 0.05}s` }}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <div className="flex items-center gap-1 mb-1">
-                      {Array.from({ length: review.rating }).map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-[#FFB800] text-[#FFB800]" />
-                      ))}
-                    </div>
-                    <div className="text-sm text-[#86868B]">{review.service}</div>
+        <div className="space-y-4">
+          {reviews.map((review, index) => (
+            <div
+              key={index}
+              ref={setRef(19 + index)}
+              className="slide-up bg-[#F5F5F7] rounded-[28px] p-6"
+              style={{ transitionDelay: `${index * 0.05}s` }}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <div className="flex items-center gap-1 mb-1">
+                    {Array.from({ length: review.rating }).map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-[#FFB800] text-[#FFB800]" />
+                    ))}
                   </div>
-                  <div className="text-sm" style={{ fontWeight: 600 }}>
-                    {review.name}
-                  </div>
+                  <div className="text-sm text-[#86868B]">{review.service}</div>
                 </div>
-                <p className="text-sm leading-relaxed">{review.content}</p>
+                <div className="text-sm" style={{ fontWeight: 600 }}>
+                  {review.name}
+                </div>
               </div>
-            ))}
-          </div>
-        )}
+              <p className="text-sm leading-relaxed">{review.content}</p>
+            </div>
+          ))}
+        </div>
         <div ref={setRef(22)} className="slide-up mt-6" style={{ transitionDelay: '0s' }}>
           <button
             onClick={() => navigate('/reviews')}
