@@ -361,34 +361,51 @@ export function ReviewPage() {
                 별점 <span className="text-red-500">*</span>
               </label>
               <div className="flex items-center gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    onContextMenu={(e) => {
-                      e.preventDefault()
-                      // 우클릭 시 0.5단위로 조정
-                      if (rating === star && star < 5) {
-                        setRating(star + 0.5)
-                      } else if (rating === star + 0.5 && star > 1) {
-                        setRating(star - 0.5)
-                      }
-                    }}
-                    className="transition-all hover:scale-110"
-                    title={`${star}점 (좌클릭 시 0.5단위 조정)`}
-                  >
-                    <Star
-                      className={`w-8 h-8 ${
-                        star <= (hoverRating || rating)
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-200'
-                      } transition-colors`}
-                    />
-                  </button>
-                ))}
+                {[1, 2, 3, 4, 5].map((star) => {
+                  const currentRating = hoverRating || rating
+                  const isFilled = star <= currentRating
+                  const isHalf = !isFilled && star - 0.5 === currentRating
+
+                  return (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      onContextMenu={(e) => {
+                        e.preventDefault()
+                        // 우클릭 시 0.5단위로 조정
+                        if (rating === star && star < 5) {
+                          setRating(star + 0.5)
+                        } else if (rating === star + 0.5 && star > 1) {
+                          setRating(star - 0.5)
+                        }
+                      }}
+                      className="transition-all hover:scale-110 relative"
+                      title={`${star}점 (우클릭 시 0.5단위 조정)`}
+                    >
+                      {isHalf ? (
+                        // 반채움 별
+                        <div className="relative w-8 h-8">
+                          <Star className="w-8 h-8 text-gray-200 absolute inset-0" />
+                          <Star
+                            className="w-8 h-8 fill-yellow-400 text-yellow-400 absolute inset-0"
+                            style={{ clipPath: 'inset(0 50% 0 0)' }}
+                          />
+                        </div>
+                      ) : (
+                        <Star
+                          className={`w-8 h-8 ${
+                            isFilled
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-gray-200'
+                          } transition-colors`}
+                        />
+                      )}
+                    </button>
+                  )
+                })}
                 {rating > 0 && (
                   <span className="ml-4 text-lg font-medium text-gray-700">
                     {rating.toFixed(1)}
