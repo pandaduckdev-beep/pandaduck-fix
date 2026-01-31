@@ -31,8 +31,8 @@ export function ReviewPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
-  // 0.5단위 별점 생성
-  const ratingOptions = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
+  // 별점은 5개만 표시 (정수), 실제값은 0.5단위
+  const displayRating = Math.ceil(rating)
 
   useEffect(() => {
     loadRepairInfo()
@@ -361,19 +361,28 @@ export function ReviewPage() {
                 별점 <span className="text-red-500">*</span>
               </label>
               <div className="flex items-center gap-2">
-                {ratingOptions.map((value) => (
+                {[1, 2, 3, 4, 5].map((star) => (
                   <button
-                    key={value}
+                    key={star}
                     type="button"
-                    onClick={() => setRating(value)}
-                    onMouseEnter={() => setHoverRating(value)}
+                    onClick={() => setRating(star)}
+                    onMouseEnter={() => setHoverRating(star)}
                     onMouseLeave={() => setHoverRating(0)}
+                    onContextMenu={(e) => {
+                      e.preventDefault()
+                      // 우클릭 시 0.5단위로 조정
+                      if (rating === star && star < 5) {
+                        setRating(star + 0.5)
+                      } else if (rating === star + 0.5 && star > 1) {
+                        setRating(star - 0.5)
+                      }
+                    }}
                     className="transition-all hover:scale-110"
-                    title={`${value}점`}
+                    title={`${star}점 (좌클릭 시 0.5단위 조정)`}
                   >
                     <Star
                       className={`w-8 h-8 ${
-                        value <= (hoverRating || rating)
+                        star <= (hoverRating || rating)
                           ? 'fill-yellow-400 text-yellow-400'
                           : 'text-gray-200'
                       } transition-colors`}
