@@ -335,7 +335,7 @@ export function HomeScreen() {
                   </div>
                   <div className="text-sm text-[#86868B]">{review.service}</div>
                 </div>
-                <div className="text-sm" style={{ fontWeight: 600 }}>
+                <div className="text-sm whitespace-nowrap" style={{ fontWeight: 600 }}>
                   {review.name}
                 </div>
               </div>
