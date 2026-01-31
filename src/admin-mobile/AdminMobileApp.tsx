@@ -5,7 +5,6 @@ import DashboardPage from './pages/DashboardPage'
 import RepairRequestsPage from './pages/RepairRequestsPage'
 import RepairRequestDetailPage from './pages/RepairRequestDetailPage'
 import ReviewsPage from './pages/ReviewsPage'
-import ReviewDetailPage from './pages/ReviewDetailPage'
 import SettingsPage from './pages/SettingsPage'
 import ControllerModelsPage from './pages/ControllerModelsPage'
 import ServicesPage from './pages/ServicesPage'
@@ -49,7 +48,7 @@ function AdminMobileContent() {
       <Route path="repairs" element={<RepairRequestsPage />} />
       <Route path="repairs/:id" element={<RepairRequestDetailPage />} />
       <Route path="reviews" element={<ReviewsPage />} />
-      <Route path="reviews/:id" element={<ReviewDetailPage />} />
+      <Route path="reviews/:id" element={<PlaceholderPage title="리뷰 상세" />} />
       <Route path="revenue" element={<PlaceholderPage title="매출 통계" />} />
       <Route path="expenses" element={<PlaceholderPage title="지출 관리" />} />
       <Route path="controllers" element={<ControllerModelsPage />} />
