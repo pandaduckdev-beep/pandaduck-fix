@@ -19,10 +19,10 @@ import { useSlideUp } from '@/hooks/useSlideUp'
 const services = [
   {
     icon: <Zap className="w-6 h-6" />,
-    title: '스틱 드리프트 해결',
-    description: '홀 이펙트 센서로 영구적 해결',
+    title: '스틱 쏠림(드리프트) 해결',
+    description: 'TMR 센서로 영구적 해결',
     features: [
-      '홀 이펙트 센서 교체',
+      'TMR 센서 교체',
       '완벽한 0포인트 복원',
       '정밀한 캘리브레이션',
       '원활한 조작감 보장',
@@ -31,8 +31,8 @@ const services = [
   },
   {
     icon: <CircuitBoard className="w-6 h-6" />,
-    title: '클릭키 버튼',
-    description: 'eXtremeRate 프리미엄 스위치',
+    title: '클릭키 버튼 교체',
+    description: 'eXtremeRate 프리미엄 스위치로 교체',
     features: ['만족스러운 키감', '빠른 입력 반응', '프로게이머 수준', '오래 지속하는 퀄리티'],
     path: '/services/list',
   },
@@ -40,13 +40,13 @@ const services = [
     icon: <Plus className="w-6 h-6" />,
     title: '백버튼 모드',
     description: '프로급 후면 패들 장착',
-    features: ['컴퓨터 표준 레이아웃', '인체공학적 위치', '맞춤형 조절', '편리한 할당'],
+    features: ['프로게이머 수준', '맞춤형 조절', '편리한 할당'],
     path: '/services/list',
   },
   {
     icon: <Battery className="w-6 h-6" />,
     title: '배터리 업그레이드',
-    description: '최대 3배 더 긴 플레이타임',
+    description: '최대 4000mAh 배터리로 업그레이드',
     features: ['고효율 대용량 배터리', '안전한 교체 공정', '완벽한 호환성', '장시간 플레이 지원'],
     path: '/services/list',
   },
@@ -158,7 +158,10 @@ export function HomeScreen() {
           </div>
           <div ref={setRef(1)} className="slide-up" style={{ transitionDelay: '0.1s' }}>
             <p className="text-lg text-[#86868B] max-w-xs mx-auto" style={{ fontWeight: 400 }}>
-              게이머를 위한 전문 컨트롤러 수리 및 커스터마이징
+              게이머를 위한 전문 컨트롤러 수리,
+            </p>
+            <p className="text-lg text-[#86868B] max-w-xs mx-auto" style={{ fontWeight: 400 }}>
+              컨트롤러 커스터마이징
             </p>
           </div>
           <div ref={setRef(2)} className="slide-up pt-4" style={{ transitionDelay: '0.2s' }}>
@@ -186,7 +189,7 @@ export function HomeScreen() {
           <h2 className="text-3xl mb-2" style={{ fontWeight: 700 }}>
             제공 서비스
           </h2>
-          <p className="text-lg text-[#86868B]">프로게이머를 위한 최고 품질 서비스</p>
+          <p className="text-lg text-[#86868B]">게이머를 위한 최고 품질 서비스</p>
         </div>
         <div className="space-y-4">
           {services.map((service, index) => (
@@ -234,7 +237,7 @@ export function HomeScreen() {
       <section className="max-w-md mx-auto px-6 pb-20">
         <div ref={setRef(10)} className="slide-up mb-6" style={{ transitionDelay: '0s' }}>
           <h2 className="text-3xl mb-2" style={{ fontWeight: 700 }}>
-            작업 과정
+            수리 과정
           </h2>
           <p className="text-lg text-[#86868B]">간단한 7단계로 완벽한 수리</p>
         </div>
