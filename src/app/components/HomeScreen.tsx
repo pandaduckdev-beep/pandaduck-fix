@@ -345,9 +345,24 @@ export function HomeScreen() {
               {review.images && review.images.length > 0 && (
                 <div className="mb-3 flex gap-2 overflow-x-auto">
                   {review.images.map((image: any, imgIndex: number) => {
+                    console.log(`Processing image ${imgIndex}:`, image, typeof image)
+
                     // 문자열이면 그대로 사용, 객체면 url 속성 사용
-                    const imageUrl = typeof image === 'string' ? image : image?.url
-                    if (!imageUrl) return null
+                    let imageUrl = null
+                    if (typeof image === 'string') {
+                      imageUrl = image
+                    } else if (image?.url) {
+                      imageUrl = image.url
+                    } else if (image?.publicUrl) {
+                      imageUrl = image.publicUrl
+                    }
+
+                    if (!imageUrl) {
+                      console.log(`Skipping image ${imgIndex}: no URL found`, image)
+                      return null
+                    }
+
+                    console.log(`Rendering image ${imgIndex}:`, imageUrl)
 
                     return (
                       <img
@@ -356,7 +371,7 @@ export function HomeScreen() {
                         alt={`리뷰 이미지 ${imgIndex + 1}`}
                         className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
                         onError={(e) => {
-                          console.error('이미지 로드 실패:', imageUrl)
+                          console.error('이미지 로드 실패:', imageUrl, image)
                           e.currentTarget.style.display = 'none'
                         }}
                       />
