@@ -102,6 +102,7 @@ export function HomeScreen() {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [reviews, setReviews] = useState<any[]>([])
+  const [reviewsLoaded, setReviewsLoaded] = useState(false)
   const { setRef } = useSlideUp(25)
 
   const supabase = createClient(
@@ -138,6 +139,7 @@ export function HomeScreen() {
       }))
 
       setReviews(maskedReviews)
+      setReviewsLoaded(true)
     } catch (error) {
       console.error('Failed to fetch reviews:', error)
       // 에러 시 기본 리뷰 표시
@@ -161,12 +163,9 @@ export function HomeScreen() {
           service: '배터리 업그레이드',
         },
       ])
+      setReviewsLoaded(true)
     }
   }
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
 
   return (
     <div className="min-h-screen bg-white">
@@ -315,31 +314,33 @@ export function HomeScreen() {
           </h2>
           <p className="text-lg text-[#86868B]">실제 고객의 솔직한 리뷰</p>
         </div>
-        <div className="space-y-4">
-          {reviews.map((review, index) => (
-            <div
-              key={index}
-              ref={setRef(19 + index)}
-              className="slide-up bg-[#F5F5F7] rounded-[28px] p-6"
-              style={{ transitionDelay: `${index * 0.05}s` }}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <div className="flex items-center gap-1 mb-1">
-                    {Array.from({ length: review.rating }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-[#FFB800] text-[#FFB800]" />
-                    ))}
+        {reviewsLoaded && (
+          <div className="space-y-4">
+            {reviews.map((review, index) => (
+              <div
+                key={index}
+                ref={setRef(19 + index)}
+                className="slide-up bg-[#F5F5F7] rounded-[28px] p-6"
+                style={{ transitionDelay: `${index * 0.05}s` }}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      {Array.from({ length: review.rating }).map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-[#FFB800] text-[#FFB800]" />
+                      ))}
+                    </div>
+                    <div className="text-sm text-[#86868B]">{review.service}</div>
                   </div>
-                  <div className="text-sm text-[#86868B]">{review.service}</div>
+                  <div className="text-sm" style={{ fontWeight: 600 }}>
+                    {review.name}
+                  </div>
                 </div>
-                <div className="text-sm" style={{ fontWeight: 600 }}>
-                  {review.name}
-                </div>
+                <p className="text-sm leading-relaxed">{review.content}</p>
               </div>
-              <p className="text-sm leading-relaxed">{review.content}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
         <div ref={setRef(22)} className="slide-up mt-6" style={{ transitionDelay: '0s' }}>
           <button
             onClick={() => navigate('/reviews')}
