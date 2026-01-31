@@ -137,7 +137,7 @@ export function HomeScreen() {
     try {
       const { data, error } = await supabase
         .from('reviews')
-        .select('customer_name, rating, content, service_name')
+        .select('customer_name, rating, content, service_name, repair_requests!inner(service_name)')
         .eq('rating', 5)
         .eq('is_approved', true)
         .eq('is_public', true)
@@ -146,14 +146,16 @@ export function HomeScreen() {
 
       if (error) throw error
 
+      console.log('Fetched reviews:', data) // 디버깅용
+
       // 이름 마스킹 처리
-      const maskedReviews = (data || []).map((review) => ({
+      const maskedReviews = (data || []).map((review: any) => ({
         name: review.customer_name
           ? review.customer_name.charAt(0) + '*'.repeat(review.customer_name.length - 1)
           : '고객',
         rating: review.rating,
         content: review.content,
-        service: review.service_name,
+        service: review.service_name || review.repair_requests?.service_name || '수리 서비스',
       }))
 
       // 데이터가 있으면 교체
