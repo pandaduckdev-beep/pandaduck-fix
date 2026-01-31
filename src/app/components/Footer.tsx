@@ -20,17 +20,25 @@ export function Footer() {
             연락처
           </h4>
           <div className="space-y-3">
-            <div className="flex items-center gap-3 text-sm text-[#86868B]">
+            <a
+              href="tel:010-3971-9794"
+              className="flex items-center gap-3 text-sm text-[#86868B] hover:text-[#007AFF] transition-colors"
+              aria-label="전화 걸기: 010-3971-9794"
+            >
               <Phone className="w-4 h-4" />
               <span>010-3971-9794</span>
-            </div>
-            <div className="flex items-center gap-3 text-sm text-[#86868B]">
+            </a>
+            <a
+              href="mailto:contact@pandaduck.kr"
+              className="flex items-center gap-3 text-sm text-[#86868B] hover:text-[#007AFF] transition-colors"
+              aria-label="이메일 보내기: contact@pandaduck.kr"
+            >
               <Mail className="w-4 h-4" />
               <span>contact@pandaduck.kr</span>
-            </div>
+            </a>
             <div className="flex items-start gap-3 text-sm text-[#86868B]">
-              <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span>경기도 광주시 태전동</span>
+              <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <address className="not-italic">경기도 광주시 태전동</address>
             </div>
           </div>
         </div>

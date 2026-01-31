@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
   GripVertical,
 } from 'lucide-react'
+import { useToast } from '@/hooks/useToast.tsx'
 
 interface OptionItem {
   id: string
@@ -35,6 +36,7 @@ interface EditingOption {
 export default function ServiceOptionsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { warning, error } = useToast()
   const [serviceName, setServiceName] = useState('')
   const [options, setOptions] = useState<OptionItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -105,7 +107,7 @@ export default function ServiceOptionsPage() {
 
   const handleSaveOption = async () => {
     if (!editingData?.option_name.trim()) {
-      alert('옵션명을 입력해주세요.')
+      warning('입력 필요', '옵션명을 입력해주세요.')
       return
     }
 
@@ -173,7 +175,7 @@ export default function ServiceOptionsPage() {
       setEditingData({ ...editingData!, image_url: publicUrl })
     } catch (error) {
       console.error('Failed to upload image:', error)
-      alert('이미지 업로드에 실패했습니다.')
+      error('업로드 실패', '이미지 업로드에 실패했습니다.')
     } finally {
       setUploading(false)
     }

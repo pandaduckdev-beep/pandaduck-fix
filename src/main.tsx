@@ -13,7 +13,21 @@ import { ReviewPage } from './pages/ReviewPage'
 import { AdminApp } from './admin/AdminApp.tsx'
 import AdminMobileApp from './admin-mobile/AdminMobileApp'
 import './styles/index.css'
+import './styles/accessibility.css'
 import './test-supabase'
+
+// Service Worker 등록
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('Service Worker registered: ', registration)
+      })
+      .catch((registrationError) => {
+        console.log('Service Worker registration failed: ', registrationError)
+      })
+  })
+}
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>

@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { nanoid } from 'nanoid'
+import { toast } from '../hooks/useToast.tsx'
 
 export async function generateReviewToken(repairRequestId: string): Promise<string> {
   const token = nanoid(32)
@@ -59,5 +60,5 @@ export function openKakaoTalk(url: string, customerName: string) {
 
   // 임시로 클립보드에 복사
   copyToClipboard(message)
-  alert('리뷰 요청 메시지가 클립보드에 복사되었습니다.\n카카오톡에서 붙여넣기 해주세요.')
+  toast('info', '클립보드에 복사 완료', '리뷰 요청 메시지가 클립보드에 복사되었습니다.\n카카오톡에서 붙여넣기 해주세요.')
 }

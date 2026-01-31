@@ -237,7 +237,7 @@ export function RepairsPage() {
       setPostRepairNotes(repair.post_repair_notes || '')
     } catch (error) {
       console.error('Failed to load repair detail:', error)
-      alert('상세 정보를 불러오는데 실패했습니다.')
+      toast.error('상세 정보를 불러오는데 실패했습니다.')
     } finally {
       setLoadingDetail(false)
     }
@@ -271,7 +271,7 @@ export function RepairsPage() {
       setPostRepairNotes('')
     } catch (error) {
       console.error('Failed to update status:', error)
-      alert('상태 변경에 실패했습니다.')
+      toast.error('상태 변경에 실패했습니다.')
     }
   }
 

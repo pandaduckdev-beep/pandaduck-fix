@@ -20,7 +20,7 @@ const statusConfig = {
   confirmed: {
     label: '확인됨',
     bg: 'bg-[#E6F2FF]',
-    text: 'text-[#007AFF]',
+    text: 'text-[var(--ios-blue)]',
   },
   in_progress: {
     label: '진행중',
@@ -75,7 +75,7 @@ export function RepairRequestCard({
                   리뷰완료
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 bg-[#E6F2FF] text-[#007AFF] rounded-md flex-shrink-0" style={{ fontWeight: 600 }}>
+                <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 bg-[#E6F2FF] text-[var(--ios-blue)] rounded-md flex-shrink-0" style={{ fontWeight: 600 }}>
                   <MessageSquare className="w-3 h-3" />
                   리뷰요청
                 </span>

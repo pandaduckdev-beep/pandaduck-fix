@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom'
+import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 
 export interface SelectedService {
   id: string // service_id (TEXT)
@@ -26,5 +27,9 @@ export interface ConditionData {
 }
 
 export default function App() {
-  return <Outlet />
+  return (
+    <ErrorBoundary>
+      <Outlet />
+    </ErrorBoundary>
+  )
 }

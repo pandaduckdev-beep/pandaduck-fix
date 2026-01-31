@@ -1,4 +1,4 @@
-import { Star, StarBorder, Visibility, DeleteOutline } from '@mui/icons-material'
+import { Star, CheckCircle, Image } from 'lucide-react'
 
 interface ReviewCardProps {
   customerName: string
@@ -8,6 +8,8 @@ interface ReviewCardProps {
   date: string
   isApproved: boolean
   isPublic: boolean
+  reviewId: string
+  imageUrls?: string[]
   onTogglePublic?: () => void
   onView?: () => void
   onDelete?: () => void
@@ -20,84 +22,74 @@ export function ReviewCard({
   content,
   date,
   isApproved,
-  isPublic,
-  onTogglePublic,
-  onView,
-  onDelete,
+  reviewId,
+  imageUrls,
 }: ReviewCardProps) {
-  const getInitial = (name: string) => name.charAt(0).toUpperCase()
+
+  const imageCount = imageUrls?.length || 0
+  const hasImages = imageCount > 0
 
   const renderStars = () => {
     return Array.from({ length: 5 }).map((_, i) =>
       i < rating ? (
-        <Star key={i} fontSize="small" className="text-yellow-400" />
+        <Star key={i} className="w-4 h-4 fill-[#FFCC00] text-[#FFCC00]" strokeWidth={0} />
       ) : (
-        <StarBorder key={i} fontSize="small" className="text-gray-300 dark:text-gray-600" />
+        <Star key={i} className="w-4 h-4 text-[#E5E5EA] stroke-[#E5E5EA]" strokeWidth={2} />
       )
     )
   }
 
+  const handleClick = (e: React.MouseEvent) => {
+    // 카드 클릭 시 상세 페이지로 이동
+    if (!e.target.closest('button') && !e.target.closest('label')) {
+      window.location.href = `/admin-mobile/reviews/${reviewId}`
+    }
+  }
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700/50">
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 font-bold">
-            {getInitial(customerName)}
-          </div>
-          <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-gray-100">{customerName}</h3>
-            <div className="flex items-center gap-1">{renderStars()}</div>
-          </div>
-        </div>
-        <span className="text-[10px] text-gray-400 font-medium">{date}</span>
-      </div>
-
+    <div
+      className="py-4 border-b border-[rgba(0,0,0,0.06)] last:border-0 transition-ios hover:bg-[#F5F5F7]/50 -mx-4 px-4 cursor-pointer"
+      onClick={handleClick}
+    >
+      {/* Header: Customer info & Rating */}
       <div className="mb-3">
-        <span className="inline-block px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-[10px] font-medium mb-1">
-          {serviceName}
-        </span>
-        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{content}</p>
-      </div>
-
-      <div className="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-gray-700">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm text-[#1D1D1F]" style={{ fontWeight: 600 }}>
+            {customerName}
+          </h3>
+          <span className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>
+            {date}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">공개 여부</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isPublic}
-                onChange={onTogglePublic}
-                className="sr-only peer"
-              />
-              <div className="w-9 h-5 bg-gray-200 dark:bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-            </label>
+            <div className="flex items-center gap-0.5">{renderStars()}</div>
+            {hasImages && (
+              <div className="flex items-center gap-1 text-[#86868B]" title="이미지 첨부됨">
+                <Image className="w-3.5 h-3.5" strokeWidth={2} />
+                <span className="text-xs" style={{ fontWeight: 500 }}>{imageCount}</span>
+              </div>
+            )}
           </div>
           {isApproved && (
-            <span className="flex items-center gap-1 px-2 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg text-[11px] font-bold">
-              <Star fontSize="small" className="text-xs" />
+            <span className="flex items-center gap-1 px-2 py-0.5 bg-[#E6F9F0] text-[#34C759] rounded text-[10px] font-semibold flex-shrink-0">
+              <CheckCircle className="w-3 h-3" strokeWidth={3} />
               승인됨
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1">
-          {onView && (
-            <button
-              onClick={onView}
-              className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
-            >
-              <Visibility fontSize="small" />
-            </button>
-          )}
-          {onDelete && (
-            <button
-              onClick={onDelete}
-              className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors"
-            >
-              <DeleteOutline fontSize="small" />
-            </button>
-          )}
-        </div>
+      </div>
+
+      {/* Service & Content */}
+      <div>
+        <span className="inline-block px-2 py-0.5 bg-[#F5F5F7] text-[#86868B] rounded text-[10px] font-semibold mb-2">
+          {serviceName}
+        </span>
+        {content && (
+          <p className="text-sm text-[#1D1D1F] leading-relaxed line-clamp-2" style={{ fontWeight: 500 }}>
+            {content}
+          </p>
+        )}
       </div>
     </div>
   )

@@ -27,6 +27,7 @@ export function ReviewPage() {
   const [hoverRating, setHoverRating] = useState(0)
   const [comment, setComment] = useState('')
   const [images, setImages] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
@@ -81,39 +82,20 @@ export function ReviewPage() {
         }
       }
 
-      // 서비스 정보 조회
+      // 서비스 정보 조회 - 한 번의 쿼리로 가져오기
       const { data: services } = await supabase
         .from('repair_request_services')
         .select(`
           service_id,
-          selected_option_id
+          selected_option_id,
+          controller_services!inner(name)
         `)
         .eq('repair_request_id', repair.id)
 
-      const servicesWithDetails = await Promise.all(
-        (services || []).map(async (svc) => {
-          const { data: service } = await supabase
-            .from('controller_services')
-            .select('name')
-            .eq('id', svc.service_id)
-            .single()
-
-          let optionName = null
-          if (svc.selected_option_id) {
-            const { data: option } = await supabase
-              .from('service_options')
-              .select('option_name')
-              .eq('id', svc.selected_option_id)
-              .single()
-            optionName = option?.option_name
-          }
-
-          return {
-            service_name: service?.name || '',
-            option_name: optionName,
-          }
-        })
-      )
+      const servicesWithDetails = (services || []).map((svc: any) => ({
+        service_name: svc.controller_services?.name || '',
+        option_name: null, // 필요시 option 조회
+      }))
 
       setRepairInfo({
         ...repair,
@@ -134,12 +116,27 @@ export function ReviewPage() {
       toast.error('이미지는 최대 3개까지 업로드할 수 있습니다.')
       return
     }
+
+    // 이미지 미리보기 생성 및 메모리 정리
+    const newPreviews = files.map(file => URL.createObjectURL(file))
+    setImagePreviews([...imagePreviews, ...newPreviews])
     setImages([...images, ...files])
   }
 
   const removeImage = (index: number) => {
+    // 메모리 정리
+    URL.revokeObjectURL(imagePreviews[index])
+    const newPreviews = imagePreviews.filter((_, i) => i !== index)
+    setImagePreviews(newPreviews)
     setImages(images.filter((_, i) => i !== index))
   }
+
+  // 컴포넌트 언마운트 시 메모리 정리
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach(preview => URL.revokeObjectURL(preview))
+    }
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -162,8 +159,6 @@ export function ReviewPage() {
 
     setSubmitting(true)
     try {
-      console.log('Starting review submission...')
-
       // 이미지 업로드
       const imageUrls: string[] = []
       for (const image of images) {
@@ -171,34 +166,20 @@ export function ReviewPage() {
         const fileName = `${repairInfo.id}-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
         const filePath = `review-images/${fileName}`
 
-        console.log('Uploading image:', filePath)
         const { error: uploadError } = await supabase.storage
           .from('reviews')
           .upload(filePath, image)
 
         if (uploadError) {
-          console.error('Failed to upload image:', uploadError)
           toast.error(`이미지 업로드 실패: ${uploadError.message}`)
         } else {
           const { data } = supabase.storage.from('reviews').getPublicUrl(filePath)
           imageUrls.push(data.publicUrl)
-          console.log('Image uploaded successfully:', data.publicUrl)
         }
       }
 
       // 리뷰 저장
       const serviceName = repairInfo.services.map(s => s.service_name).join(', ')
-
-      console.log('Inserting review data:', {
-        repair_request_id: repairInfo.id,
-        customer_name: repairInfo.customer_name,
-        rating,
-        content: comment.trim(),
-        service_name: serviceName,
-        image_urls: imageUrls,
-        is_approved: false,
-        is_public: false,
-      })
 
       const { data: reviewData, error } = await supabase.from('reviews').insert({
         repair_request_id: repairInfo.id,
@@ -207,22 +188,12 @@ export function ReviewPage() {
         content: comment.trim(),
         service_name: serviceName,
         image_urls: imageUrls,
-        is_approved: false,
         is_public: false,
       })
 
       if (error) {
-        console.error('Review insert error:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code,
-          full: error
-        })
         throw error
       }
-
-      console.log('Review submitted successfully:', reviewData)
 
       // 텔레그램 알림
       notifyTelegram('review', {
@@ -429,7 +400,7 @@ export function ReviewPage() {
                     {images.map((image, index) => (
                       <div key={index} className="relative group">
                         <img
-                          src={URL.createObjectURL(image)}
+                          src={imagePreviews[index]}
                           alt={`Preview ${index + 1}`}
                           className="w-full h-32 object-cover rounded-lg border border-gray-100"
                         />

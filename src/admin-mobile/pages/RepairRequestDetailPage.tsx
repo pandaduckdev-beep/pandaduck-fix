@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { RepairRequest, RepairStatus, ControllerService, ControllerServiceOption } from '@/types/database'
-import { Calendar, MapPin, Phone, Mail, Package, MessageSquare, FileText, Send, Copy, CheckCircle, X } from 'lucide-react'
+import { Calendar, MapPin, Phone, Mail, Package, MessageSquare, FileText, Send, Copy, CheckCircle, X, AlertCircle, Star } from 'lucide-react'
 import { generateReviewToken, getReviewUrl, copyToClipboard, openKakaoTalk } from '@/lib/reviewUtils'
+import { useToast } from '@/hooks/useToast.tsx'
+import { SkeletonCard, SkeletonText } from '@/components/common/Skeleton'
 
 interface ServiceWithDetails {
   service_id: string
@@ -25,7 +27,7 @@ interface RepairRequestWithServices extends RepairRequest {
 
 const statusConfig = {
   pending: { label: '대기중', bg: 'bg-[#FFF9E6]', text: 'text-[#FF9500]' },
-  confirmed: { label: '확인됨', bg: 'bg-[#E6F2FF]', text: 'text-[#007AFF]' },
+  confirmed: { label: '확인됨', bg: 'bg-[#E6F2FF]', text: 'text-[var(--ios-blue)]' },
   in_progress: { label: '진행중', bg: 'bg-[#F3E6FF]', text: 'text-[#AF52DE]' },
   completed: { label: '완료', bg: 'bg-[#E6F9F0]', text: 'text-[#34C759]' },
   cancelled: { label: '취소', bg: 'bg-[#F5F5F7]', text: 'text-[#86868B]' },
@@ -34,9 +36,17 @@ const statusConfig = {
 export default function RepairRequestDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { success, error } = useToast()
+
+  const handleBack = () => {
+    navigate('/admin-mobile/repairs')
+  }
   const [repair, setRepair] = useState<RepairRequestWithServices | null>(null)
   const [loading, setLoading] = useState(true)
   const [adminNotes, setAdminNotes] = useState('')
+  const [beforeRepairNotes, setBeforeRepairNotes] = useState('')
+  const [afterRepairNotes, setAfterRepairNotes] = useState('')
+  const [editingNotes, setEditingNotes] = useState(false)
   const [updating, setUpdating] = useState(false)
   const [showReviewModal, setShowReviewModal] = useState(false)
   const [reviewUrl, setReviewUrl] = useState('')
@@ -64,6 +74,15 @@ export default function RepairRequestDetailPage() {
         .single()
 
       if (repairError) throw repairError
+
+      // 리뷰 여부 확인
+      const { data: reviewData } = await supabase
+        .from('reviews')
+        .select('id')
+        .eq('repair_request_id', id)
+        .maybeSingle()
+
+      const hasReview = !!reviewData
 
       // 서비스 정보 조회
       const { data: servicesData, error: servicesError } = await supabase
@@ -93,15 +112,25 @@ export default function RepairRequestDetailPage() {
           option: options?.find((opt) => opt.id === s.selected_option_id),
         }))
 
-        setRepair({ ...repairData, services: servicesWithDetails })
+        setRepair({ ...repairData, services: servicesWithDetails, has_review: hasReview })
       } else {
-        setRepair(repairData)
+        setRepair({ ...repairData, has_review: hasReview })
       }
 
       setAdminNotes(repairData.admin_notes || '')
+
+      // Parse admin_notes to extract before/after repair notes
+      if (repairData.admin_notes) {
+        const adminNotesText = repairData.admin_notes
+        const beforeNotesMatch = adminNotesText.match(/수리 전 메모:\s*\[(.*?)\]/s)
+        const afterNotesMatch = adminNotesText.match(/수리 후 메모:\s*\[(.*?)\]/s)
+
+        setBeforeRepairNotes(beforeNotesMatch ? beforeNotesMatch[1].trim() : '')
+        setAfterRepairNotes(afterNotesMatch ? afterNotesMatch[1].trim() : '')
+      }
     } catch (error) {
       console.error('Failed to load repair detail:', error)
-      alert('상세 정보를 불러오는데 실패했습니다.')
+      error('로드 실패', '상세 정보를 불러오는데 실패했습니다.')
       navigate('/admin-mobile/repairs')
     } finally {
       setLoading(false)
@@ -125,10 +154,10 @@ export default function RepairRequestDetailPage() {
       if (error) throw error
 
       setRepair({ ...repair, status: newStatus })
-      alert('상태가 변경되었습니다.')
+      success('완료', '상태가 변경되었습니다.')
     } catch (error) {
       console.error('Failed to update status:', error)
-      alert('상태 변경에 실패했습니다.')
+      error('실패', '상태 변경에 실패했습니다.')
     } finally {
       setUpdating(false)
     }
@@ -140,17 +169,40 @@ export default function RepairRequestDetailPage() {
     try {
       setUpdating(true)
 
+      // Combine all notes into admin_notes
+      let combinedNotes = adminNotes
+
+      // Add before/after repair notes to admin_notes
+      if (beforeRepairNotes || afterRepairNotes) {
+        const repairNotesParts: string[] = []
+        if (beforeRepairNotes) {
+          repairNotesParts.push(`수리 전 메모:\n[${beforeRepairNotes}]`)
+        }
+        if (afterRepairNotes) {
+          repairNotesParts.push(`수리 후 메모:\n[${afterRepairNotes}]`)
+        }
+
+        // Append to existing admin notes or create new section
+        if (combinedNotes) {
+          combinedNotes = `${combinedNotes}\n\n=== 수리 전후 메모 ===\n${repairNotesParts.join('\n\n')}`
+        } else {
+          combinedNotes = repairNotesParts.join('\n\n')
+        }
+      }
+
       const { error } = await supabase
         .from('repair_requests')
-        .update({ admin_notes: adminNotes || undefined })
+        .update({ admin_notes: combinedNotes || undefined })
         .eq('id', repair.id)
 
       if (error) throw error
 
-      alert('메모가 저장되었습니다.')
+      setRepair({ ...repair, admin_notes: combinedNotes || null })
+      setEditingNotes(false)
+      success('완료', '메모가 저장되었습니다.')
     } catch (error) {
       console.error('Failed to save notes:', error)
-      alert('메모 저장에 실패했습니다.')
+      error('실패', '메모 저장에 실패했습니다.')
     } finally {
       setUpdating(false)
     }
@@ -167,17 +219,17 @@ export default function RepairRequestDetailPage() {
       setRepair({ ...repair, review_token: token, review_sent_at: new Date().toISOString() })
     } catch (error) {
       console.error('Failed to generate review token:', error)
-      alert('리뷰 요청 링크 생성에 실패했습니다.')
+      error('실패', '리뷰 요청 링크 생성에 실패했습니다.')
     }
   }
 
   const handleCopyReviewLink = async () => {
     try {
       await copyToClipboard(reviewUrl)
-      alert('리뷰 링크가 클립보드에 복사되었습니다.')
+      success('완료', '리뷰 링크가 클립보드에 복사되었습니다.')
     } catch (error) {
       console.error('Failed to copy link:', error)
-      alert('복사에 실패했습니다.')
+      error('실패', '복사에 실패했습니다.')
     }
   }
 
@@ -194,12 +246,15 @@ export default function RepairRequestDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#F5F5F7] border-t-[#007AFF] rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-[#86868B] text-sm" style={{ fontWeight: 600 }}>
-            로딩 중...
-          </p>
+      <div className="min-h-screen bg-white pb-20">
+        <MobileHeader title="수리 요청 상세" onBack={handleBack} />
+        <div className="px-6 py-4 space-y-4">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+        <div className="text-center py-8">
+          <p className="text-[#86868B] text-sm font-medium">불러오는 중...</p>
         </div>
       </div>
     )
@@ -216,9 +271,36 @@ export default function RepairRequestDetailPage() {
   ) || 0
   const discount = servicesTotal - repair.total_amount
 
+  const shouldShowReviewButton = repair.status === 'completed' && !repair.has_review
+
   return (
     <div className="bg-[#F5F5F7] min-h-screen pb-20">
-      <MobileHeader title="수리 신청 상세" />
+      <MobileHeader
+        title="수리 신청 상세"
+        showBackButton={true}
+        onBack={handleBack}
+        rightAction={
+          repair.has_review ? (
+            <div className="flex items-center gap-1 px-3 py-1.5 bg-[#E6F9F0] rounded-full">
+              <CheckCircle className="w-4 h-4 text-[#34C759]" />
+              <span className="text-xs text-[#34C759]" style={{ fontWeight: 600 }}>
+                리뷰 완료
+              </span>
+            </div>
+          ) : shouldShowReviewButton ? (
+            <button
+              onClick={handleRequestReview}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E6F2FF] hover:bg-[#D0E7FF] rounded-full transition-ios btn-press"
+              title="리뷰 요청하기"
+            >
+              <Star className="w-4 h-4 text-[#007AFF] fill-[#007AFF]" />
+              <span className="text-xs text-[#007AFF]" style={{ fontWeight: 600 }}>
+                리뷰 요청
+              </span>
+            </button>
+          ) : null
+        }
+      />
 
       <main className="p-4 space-y-4">
         {/* 상태 및 기본 정보 */}
@@ -262,7 +344,7 @@ export default function RepairRequestDetailPage() {
                 <p className="text-xs text-[#86868B] mb-0.5">연락처</p>
                 <a
                   href={`tel:${repair.customer_phone}`}
-                  className="text-sm text-[#007AFF]"
+                  className="text-sm text-[var(--ios-blue)]"
                   style={{ fontWeight: 600 }}
                 >
                   {repair.customer_phone}
@@ -277,7 +359,7 @@ export default function RepairRequestDetailPage() {
                   <p className="text-xs text-[#86868B] mb-0.5">이메일</p>
                   <a
                     href={`mailto:${repair.customer_email}`}
-                    className="text-sm text-[#007AFF]"
+                    className="text-sm text-[var(--ios-blue)]"
                     style={{ fontWeight: 600 }}
                   >
                     {repair.customer_email}
@@ -289,10 +371,16 @@ export default function RepairRequestDetailPage() {
             {repair.issue_description && (() => {
               const addressMatch = repair.issue_description.match(/고객 주소:\s*(.+)/)
               const conditionsMatch = repair.issue_description.match(/상태:\s*\[(.+?)\]/)
+              const beforeConditionsMatch = repair.issue_description.match(/수리 전 특이사항:\s*\[(.*?)\]/)
+              const afterConditionsMatch = repair.issue_description.match(/수리 후 특이사항:\s*\[(.*?)\]/)
               const notesMatch = repair.issue_description.match(/요청사항:\s*(.+?)(?:\n|$)/)
+
               const address = addressMatch ? addressMatch[1].trim() : null
               const conditions = conditionsMatch ? conditionsMatch[1].split(',').map((s: string) => s.trim()) : null
+              const beforeConditions = beforeConditionsMatch ? beforeConditionsMatch[1].split(',').map((s: string) => s.trim()).filter(s => s) : null
+              const afterConditions = afterConditionsMatch ? afterConditionsMatch[1].split(',').map((s: string) => s.trim()).filter(s => s) : null
               const notes = notesMatch ? notesMatch[1].trim() : null
+
               return (
                 <>
                   {address && (
@@ -304,6 +392,41 @@ export default function RepairRequestDetailPage() {
                       </div>
                     </div>
                   )}
+
+                  {/* 수리 전 특이사항 */}
+                  {beforeConditions && beforeConditions.length > 0 && (
+                    <div className="flex items-start gap-3 bg-orange-50 p-3 rounded-lg border border-orange-100">
+                      <AlertCircle className="w-5 h-5 text-[#FF9500] flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-xs text-[#FF9500] font-semibold mb-1.5">수리 전 특이사항</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {beforeConditions.map((c: string, i: number) => (
+                            <span key={i} className="bg-white px-3 py-1 rounded-full text-xs text-[#1D1D1F]" style={{ fontWeight: 500 }}>
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 수리 후 특이사항 */}
+                  {afterConditions && afterConditions.length > 0 && (
+                    <div className="flex items-start gap-3 bg-green-50 p-3 rounded-lg border border-green-100">
+                      <CheckCircle className="w-5 h-5 text-[#34C759] flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-xs text-[#34C759] font-semibold mb-1.5">수리 후 특이사항</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {afterConditions.map((c: string, i: number) => (
+                            <span key={i} className="bg-white px-3 py-1 rounded-full text-xs text-[#1D1D1F]" style={{ fontWeight: 500 }}>
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {conditions && (
                     <div className="flex items-start gap-3">
                       <MessageSquare className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
@@ -328,7 +451,7 @@ export default function RepairRequestDetailPage() {
                       </div>
                     </div>
                   )}
-                  {!address && !conditions && !notes && (
+                  {!address && !conditions && !notes && !beforeConditions && !afterConditions && (
                     <div className="flex items-start gap-3">
                       <MessageSquare className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
                       <div className="flex-1">
@@ -428,34 +551,8 @@ export default function RepairRequestDetailPage() {
           </div>
         </div>
 
-        {/* 리뷰 요청 */}
-        {repair.status === 'completed' && (
-          <div className="bg-white rounded-2xl p-5">
-            <h3 className="text-base text-[#1D1D1F] mb-3" style={{ fontWeight: 700 }}>
-              리뷰 요청
-            </h3>
-            {repair.has_review ? (
-              <div className="flex items-center justify-center gap-2 py-4 bg-[#E6F9F0] rounded-xl">
-                <CheckCircle className="w-5 h-5 text-[#34C759]" />
-                <span className="text-sm text-[#34C759]" style={{ fontWeight: 600 }}>
-                  리뷰 완료
-                </span>
-              </div>
-            ) : (
-              <button
-                onClick={handleRequestReview}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-[#007AFF] text-white rounded-xl transition-all active:scale-98"
-                style={{ fontWeight: 600 }}
-              >
-                <Send className="w-5 h-5" />
-                리뷰 요청하기
-              </button>
-            )}
-          </div>
-        )}
-
         {/* 관리자 메모 */}
-        <div className="bg-white rounded-2xl p-5">
+        <div className="bg-white rounded-2xl p-5 space-y-4">
           <div className="flex items-center gap-2 mb-3">
             <FileText className="w-5 h-5 text-[#86868B]" />
             <h3 className="text-base text-[#1D1D1F]" style={{ fontWeight: 700 }}>
@@ -465,18 +562,101 @@ export default function RepairRequestDetailPage() {
           <textarea
             value={adminNotes}
             onChange={(e) => setAdminNotes(e.target.value)}
-            placeholder="메모를 입력하세요..."
-            rows={4}
+            placeholder="일반 메모를 입력하세요..."
+            rows={3}
             className="w-full bg-[#F5F5F7] border-none rounded-xl p-3 text-sm resize-none focus:ring-2 focus:ring-[#007AFF]/20 transition-all"
             style={{ fontWeight: 500 }}
           />
+
+          {/* 수리 전후 메모 작성 섹션 */}
+          <div className="pt-3 border-t border-[rgba(0,0,0,0.08)]">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertCircle className="w-4 h-4 text-[#FF9500]" />
+              <h4 className="text-sm text-[#1D1D1F]" style={{ fontWeight: 700 }}>
+                수리 전후 메모
+              </h4>
+            </div>
+
+            {editingNotes ? (
+              <div className="space-y-3">
+                {/* 수리 전 메모 */}
+                <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
+                  <p className="text-xs text-[#FF9500] font-semibold mb-2">수리 전</p>
+                  <textarea
+                    value={beforeRepairNotes}
+                    onChange={(e) => setBeforeRepairNotes(e.target.value)}
+                    placeholder="수리 전 특이사항을 입력하세요..."
+                    rows={2}
+                    className="w-full bg-white border border-orange-200 rounded-lg p-2 text-sm resize-none focus:ring-2 focus:ring-[#FF9500]/20 transition-all"
+                    style={{ fontWeight: 500 }}
+                  />
+                </div>
+
+                {/* 수리 후 메모 */}
+                <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                  <p className="text-xs text-[#34C759] font-semibold mb-2">수리 후</p>
+                  <textarea
+                    value={afterRepairNotes}
+                    onChange={(e) => setAfterRepairNotes(e.target.value)}
+                    placeholder="수리 후 특이사항을 입력하세요..."
+                    rows={2}
+                    className="w-full bg-white border border-green-200 rounded-lg p-2 text-sm resize-none focus:ring-2 focus:ring-[#34C759]/20 transition-all"
+                    style={{ fontWeight: 500 }}
+                  />
+                </div>
+
+                {/* 저장/취소 버튼 */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={saveNotes}
+                    disabled={updating}
+                    className="flex-1 py-2.5 bg-[#007AFF] text-white rounded-xl transition-all active:scale-98 text-sm"
+                    style={{ fontWeight: 600 }}
+                  >
+                    {updating ? '저장 중...' : '모두 저장'}
+                  </button>
+                  <button
+                    onClick={() => setEditingNotes(false)}
+                    disabled={updating}
+                    className="flex-1 py-2.5 bg-[#F5F5F7] text-[#1D1D1F] rounded-xl transition-all active:scale-98 text-sm"
+                    style={{ fontWeight: 600 }}
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setEditingNotes(true)}
+                className="w-full py-2.5 bg-[#F5F5F7] hover:bg-[#E8E8ED] text-[#1D1D1F] rounded-xl transition-all active:scale-98 text-sm"
+                style={{ fontWeight: 600 }}
+              >
+                ✏️ 수리 전후 메모 {beforeRepairNotes || afterRepairNotes ? '수정' : '작성'}
+              </button>
+            )}
+          </div>
+
+          {/* 일반 메모 저장 버튼 */}
           <button
-            onClick={saveNotes}
-            disabled={updating}
-            className="w-full mt-3 py-3 bg-[#007AFF] text-white rounded-xl transition-all active:scale-98"
+            onClick={() => {
+              // 일반 메모만 저장
+              if (!repair) return
+              supabase
+                .from('repair_requests')
+                .update({ admin_notes: adminNotes || undefined })
+                .eq('id', repair.id)
+                .then(({ error }) => {
+                  if (error) {
+                    error('실패', '메모 저장에 실패했습니다.')
+                  } else {
+                    success('완료', '메모가 저장되었습니다.')
+                  }
+                })
+            }}
+            className="w-full py-3 bg-[#007AFF] text-white rounded-xl transition-all active:scale-98"
             style={{ fontWeight: 600 }}
           >
-            메모 저장
+            일반 메모 저장
           </button>
         </div>
       </main>
@@ -507,7 +687,7 @@ export default function RepairRequestDetailPage() {
               </div>
 
               <div className="bg-[#E6F2FF] rounded-xl p-4">
-                <p className="text-xs text-[#007AFF] mb-1" style={{ fontWeight: 600 }}>
+                <p className="text-xs text-[var(--ios-blue)] mb-1" style={{ fontWeight: 600 }}>
                   리뷰 링크
                 </p>
                 <p className="text-xs text-[#1D1D1F] break-all font-mono">{reviewUrl}</p>

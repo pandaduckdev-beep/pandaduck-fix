@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
 import { useSlideUp } from '@/hooks/useSlideUp'
 import { createClient } from '@supabase/supabase-js'
+import { SkeletonCard } from '@/components/common/Skeleton'
 
 const services = [
   {
@@ -101,6 +102,7 @@ const processSteps = [
 export function HomeScreen() {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [loadingReviews, setLoadingReviews] = useState(true)
   const [reviews, setReviews] = useState<any[]>([
     {
       name: '김*민',
@@ -138,10 +140,10 @@ export function HomeScreen() {
 
   const fetchReviews = async () => {
     try {
+      setLoadingReviews(true)
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
-        .eq('is_approved', true)
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .limit(3)
@@ -171,6 +173,8 @@ export function HomeScreen() {
     } catch (error) {
       console.error('Failed to fetch reviews:', error)
       // 에러 시 기본 리뷰 유지
+    } finally {
+      setLoadingReviews(false)
     }
   }
 
@@ -185,6 +189,7 @@ export function HomeScreen() {
           <button
             onClick={() => setIsMenuOpen(true)}
             className="p-2 hover:bg-[#F5F5F7] rounded-full transition-colors"
+            aria-label="메뉴 열기"
           >
             <Menu className="w-6 h-6" />
           </button>
@@ -216,6 +221,8 @@ export function HomeScreen() {
               src="/images/dualsense-closeup.jpg"
               alt="DualSense Controller"
               className="w-full h-64 object-cover rounded-[28px]"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <div ref={setRef(3)} className="slide-up" style={{ transitionDelay: '0.3s' }}>
@@ -223,6 +230,7 @@ export function HomeScreen() {
               onClick={() => navigate('/controllers')}
               className="w-full bg-[#000000] text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
               style={{ fontWeight: 600 }}
+              aria-label="컨트롤러 수리 신청 시작하기"
             >
               수리 시작하기
             </button>
@@ -322,7 +330,14 @@ export function HomeScreen() {
           <p className="text-lg text-[#86868B]">실제 고객의 솔직한 리뷰</p>
         </div>
         <div className="space-y-4">
-          {reviews.map((review, index) => (
+          {loadingReviews ? (
+            <>
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </>
+          ) : (
+            reviews.map((review, index) => (
             <div
               key={index}
               ref={setRef(19 + index)}
@@ -372,6 +387,8 @@ export function HomeScreen() {
                         src={imageUrl}
                         alt={`리뷰 이미지 ${imgIndex + 1}`}
                         className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           console.error('이미지 로드 실패:', imageUrl, image)
                           e.currentTarget.style.display = 'none'
@@ -384,13 +401,15 @@ export function HomeScreen() {
 
               <p className="text-sm leading-relaxed">{review.content}</p>
             </div>
-          ))}
+            ))
+          )}
         </div>
         <div ref={setRef(22)} className="slide-up mt-6" style={{ transitionDelay: '0s' }}>
           <button
             onClick={() => navigate('/reviews')}
             className="w-full bg-[#000000] text-white py-3 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
             style={{ fontWeight: 600 }}
+            aria-label="모든 고객 리뷰 보기 페이지로 이동"
           >
             더 많은 리뷰 보기
           </button>

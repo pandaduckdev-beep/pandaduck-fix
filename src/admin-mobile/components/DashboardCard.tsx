@@ -19,7 +19,7 @@ export function DashboardCard({
 
   const cardClasses =
     color === 'primary'
-      ? 'bg-gradient-to-br from-[#007AFF] to-[#0051D5]'
+      ? 'bg-gradient-to-br from-[var(--ios-blue)] to-[#0051D5]'
       : 'bg-gradient-to-br from-[#FF9500] to-[#FF6B00]'
 
   return (

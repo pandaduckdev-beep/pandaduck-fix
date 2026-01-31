@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { ControllerService, ControllerModel } from '@/types/database'
 import { supabase } from '@/lib/supabase'
 import { useNavigate } from 'react-router-dom'
+import { SkeletonCard } from '@/components/common/Skeleton'
 import {
   Gamepad2,
   Cpu,
@@ -137,8 +138,14 @@ export default function ServicesPage() {
 
       <main className="p-5 space-y-4">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-2 border-gray-200 border-t-[#007AFF] rounded-full animate-spin" />
+          <div className="space-y-4 py-4">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <div className="text-center py-4">
+              <p className="text-[#86868B] text-sm font-medium">불러오는 중...</p>
+            </div>
           </div>
         ) : (
           <>

@@ -36,6 +36,7 @@ import {
   Trash2,
   Pencil,
 } from 'lucide-react'
+import { useToast } from '@/hooks/useToast.tsx'
 
 interface ServiceWithOptions extends ControllerService {
   options: any[]
@@ -119,6 +120,7 @@ const iconOptions = [
 export default function EditServicePage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { warning, success, error } = useToast()
   const [service, setService] = useState<ServiceWithOptions | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -187,7 +189,7 @@ export default function EditServicePage() {
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      alert('서비스명을 입력해주세요.')
+      warning('입력 필요', '서비스명을 입력해주세요.')
       return
     }
 
@@ -204,11 +206,11 @@ export default function EditServicePage() {
 
       if (error) throw error
 
-      alert('서비스가 수정되었습니다.')
+      success('완료', '서비스가 수정되었습니다.')
       navigate(-1)
     } catch (error) {
       console.error('Failed to update service:', error)
-      alert('서비스 수정에 실패했습니다.')
+      error('실패', '서비스 수정에 실패했습니다.')
     } finally {
       setSaving(false)
     }

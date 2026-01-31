@@ -12,7 +12,7 @@ const colorClasses = {
   },
   blue: {
     bg: 'bg-[#E6F2FF]',
-    text: 'text-[#007AFF]',
+    text: 'text-[var(--ios-blue)]',
     count: 'text-[#1D1D1F]',
   },
   purple: {

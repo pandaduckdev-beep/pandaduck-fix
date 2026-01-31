@@ -136,23 +136,24 @@ export default function DashboardPage() {
         .order('created_at', { ascending: false })
         .limit(4)
 
-      // Check reviews for each recent repair
-      const recentRepairsWithReviews = recentRepairsData
-        ? await Promise.all(
-            recentRepairsData.map(async (request) => {
-              const { data: review } = await supabase
-                .from('reviews')
-                .select('id')
-                .eq('repair_request_id', request.id)
-                .maybeSingle()
+      // FIX N+1: Batch fetch all reviews at once
+      let recentRepairsWithReviews = []
+      if (recentRepairsData && recentRepairsData.length > 0) {
+        const requestIds = recentRepairsData.map((r) => r.id)
+        const { data: reviews } = await supabase
+          .from('reviews')
+          .select('repair_request_id')
+          .in('repair_request_id', requestIds)
 
-              return {
-                ...request,
-                has_review: !!review,
-              }
-            })
-          )
-        : []
+        const reviewRequestIds = new Set(
+          reviews?.map((r) => r.repair_request_id) || []
+        )
+
+        recentRepairsWithReviews = recentRepairsData.map((request) => ({
+          ...request,
+          has_review: reviewRequestIds.has(request.id),
+        }))
+      }
 
       setStats({
         totalRepairs: totalRepairs || 0,
@@ -192,7 +193,7 @@ export default function DashboardPage() {
       {loading ? (
         <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#007AFF] mx-auto mb-4" />
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--ios-blue)] mx-auto mb-4" />
             <p className="text-[#86868B] text-sm" style={{ fontWeight: 600 }}>
               로딩 중...
             </p>

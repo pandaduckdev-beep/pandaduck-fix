@@ -1,0 +1,37 @@
+/* ============================================
+   iOS Typography System
+   ============================================ */
+
+/* iOS Title Styles */
+.text-ios-title {
+  @apply text-lg tracking-tight;
+  font-weight: 700;
+}
+
+.text-ios-subtitle {
+  @apply text-sm;
+  color: var(--ios-text-secondary);
+}
+
+.text-ios-body {
+  @apply text-base;
+  font-weight: 500;
+}
+
+.text-ios-caption {
+  @apply text-xs;
+  color: var(--ios-text-secondary);
+}
+
+/* iOS Font Weights */
+.font-ios-semibold {
+  font-weight: 600;
+}
+
+.font-ios-medium {
+  font-weight: 500;
+}
+
+.font-ios-regular {
+  font-weight: 400;
+}

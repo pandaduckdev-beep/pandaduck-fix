@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import type { DaumPostcodeData } from '@/types/daum-postcode'
+import { useToast } from '@/hooks/useToast.tsx'
 
 interface AddressSearchModalProps {
   isOpen: boolean
@@ -11,6 +12,7 @@ interface AddressSearchModalProps {
 
 export function AddressSearchModal({ isOpen, onClose, onComplete }: AddressSearchModalProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const { error: showError } = useToast()
 
   useEffect(() => {
     if (!isOpen || !containerRef.current) return
@@ -55,7 +57,7 @@ export function AddressSearchModal({ isOpen, onClose, onComplete }: AddressSearc
         }
       } catch (err) {
         console.error('Failed to load address search:', err)
-        alert('주소 검색을 불러오는데 실패했습니다.')
+        showError('로드 실패', '주소 검색을 불러오는데 실패했습니다.')
         onClose()
       }
     }

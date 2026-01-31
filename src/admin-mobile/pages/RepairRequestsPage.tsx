@@ -1,79 +1,31 @@
 import { MobileHeader } from '../components/MobileHeader'
 import { MobileFooterNav } from '../components/MobileFooterNav'
 import { RepairRequestCard } from '../components/RepairRequestCard'
-import { useEffect, useState } from 'react'
-import { RepairStatus, RepairRequest } from '@/types/database'
-import { supabase } from '@/lib/supabase'
+import { useState } from 'react'
+import { RepairStatus } from '@/types/database'
+import { SkeletonCard } from '@/components/common/Skeleton'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
-
-interface RepairRequestWithModel extends RepairRequest {
-  controller_models?: {
-    model_name: string
-  }
-}
+import { useRepairRequests } from '../hooks/useRepairRequests'
+import { useDebouncedValue } from '@/lib/debounce'
 
 export default function RepairRequestsPage() {
   const navigate = useNavigate()
-  const [requests, setRequests] = useState<RepairRequestWithModel[]>([])
   const [selectedStatus, setSelectedStatus] = useState<RepairStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const debouncedSearch = useDebouncedValue(searchQuery, 300)
 
-  useEffect(() => {
-    fetchRequests()
-  }, [selectedStatus])
+  // Use custom hook with debounced search
+  const { requests, loading, error } = useRepairRequests({
+    status: selectedStatus,
+    searchQuery: debouncedSearch,
+    enabled: true,
+  })
 
-  const fetchRequests = async () => {
-    let query = supabase
-      .from('repair_requests')
-      .select(`
-        *,
-        controller_models!repair_requests_controller_model_fkey (
-          model_name
-        )
-      `)
-      .order('created_at', { ascending: false })
-
-    if (selectedStatus !== 'all') {
-      query = query.eq('status', selectedStatus)
-    }
-
-    if (searchQuery) {
-      query = query.or(
-        `customer_name.ilike.%${searchQuery}%,controller_model.ilike.%${searchQuery}%`
-      )
-    }
-
-    const { data } = await query
-
-    if (data) {
-      // Check reviews for each request
-      const requestsWithReviews = await Promise.all(
-        data.map(async (request) => {
-          const { data: review } = await supabase
-            .from('reviews')
-            .select('id')
-            .eq('repair_request_id', request.id)
-            .maybeSingle()
-
-          return {
-            ...request,
-            has_review: !!review,
-          }
-        })
-      )
-
-      setRequests(requestsWithReviews)
-    }
+  // Handle errors
+  if (error) {
+    console.error('Failed to load repair requests:', error)
   }
-
-  const filteredRequests = searchQuery
-    ? requests.filter(
-        (req) =>
-          req.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          req.controller_model.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : requests
 
   const formatTime = (date: string) => {
     const d = new Date(date)
@@ -82,20 +34,22 @@ export default function RepairRequestsPage() {
 
   return (
     <div className="bg-white min-h-screen pb-20">
-      <MobileHeader
-        title="수리 신청 관리"
-        rightAction={
-          <button
-            onClick={() => navigate('/admin-mobile/add-request')}
-            className="w-12 h-12 bg-[#007AFF] text-white rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95"
-            style={{ fontWeight: 700, fontSize: '24px' }}
-          >
-            +
-          </button>
-        }
-      />
+      <MobileHeader title="수리 신청 관리" />
 
       <main className="p-5 space-y-4">
+        {loading ? (
+          <div className="space-y-4 py-4">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <div className="text-center py-4">
+              <p className="text-[#86868B] text-sm font-medium">불러오는 중...</p>
+            </div>
+          </div>
+        ) : (
+          <>
         {/* Search */}
         <div className="relative">
           <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-[#86868B]" />
@@ -106,13 +60,13 @@ export default function RepairRequestsPage() {
             onChange={(e) => {
               setSearchQuery(e.target.value)
             }}
-            className="w-full bg-[#F5F5F7] border-none rounded-[16px] py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[#007AFF]/20 transition-all placeholder:text-[#86868B]"
+            className="w-full bg-[#F5F5F7] border-none rounded-[16px] py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[var(--ios-blue)]/20 transition-all placeholder:text-[#86868B]"
             style={{ fontWeight: 500 }}
           />
         </div>
 
         {/* Status Filter */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
           <button
             onClick={() => setSelectedStatus('all')}
             className={`px-4 py-2 rounded-[14px] text-xs whitespace-nowrap transition-all ${
@@ -147,6 +101,17 @@ export default function RepairRequestsPage() {
             확인됨 ({requests.filter((r) => r.status === 'confirmed').length})
           </button>
           <button
+            onClick={() => setSelectedStatus('in_progress')}
+            className={`px-4 py-2 rounded-[14px] text-xs whitespace-nowrap transition-all ${
+              selectedStatus === 'in_progress'
+                ? 'bg-[#AF52DE] text-white'
+                : 'bg-white border border-[rgba(0,0,0,0.08)] text-[#86868B]'
+            }`}
+            style={{ fontWeight: 600 }}
+          >
+            진행중 ({requests.filter((r) => r.status === 'in_progress').length})
+          </button>
+          <button
             onClick={() => setSelectedStatus('completed')}
             className={`px-4 py-2 rounded-[14px] text-xs whitespace-nowrap transition-all ${
               selectedStatus === 'completed'
@@ -157,15 +122,26 @@ export default function RepairRequestsPage() {
           >
             완료 ({requests.filter((r) => r.status === 'completed').length})
           </button>
+          <button
+            onClick={() => setSelectedStatus('cancelled')}
+            className={`px-4 py-2 rounded-[14px] text-xs whitespace-nowrap transition-all ${
+              selectedStatus === 'cancelled'
+                ? 'bg-[#86868B] text-white'
+                : 'bg-white border border-[rgba(0,0,0,0.08)] text-[#86868B]'
+            }`}
+            style={{ fontWeight: 600 }}
+          >
+            취소 ({requests.filter((r) => r.status === 'cancelled').length})
+          </button>
         </div>
 
         {/* Request List */}
         <div>
           <p className="text-sm text-[#86868B] mb-3" style={{ fontWeight: 600 }}>
-            총 {filteredRequests.length}건의 수리 요청
+            총 {requests.length}건의 수리 요청
           </p>
           <div className="bg-white rounded-xl overflow-hidden px-4">
-            {filteredRequests.map((request) => (
+            {requests.map((request) => (
               <RepairRequestCard
                 key={request.id}
                 customerName={request.customer_name}
@@ -179,6 +155,8 @@ export default function RepairRequestsPage() {
             ))}
           </div>
         </div>
+        </>
+        )}
       </main>
 
       <MobileFooterNav />

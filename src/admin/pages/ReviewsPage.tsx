@@ -5,12 +5,12 @@ import { toast } from 'sonner'
 import type { Review } from '@/types/database'
 import { getControllerModelById } from '@/services/pricingService'
 
-type ReviewStatus = 'all' | 'pending' | 'approved'
+type ReviewStatus = 'all' | 'public' | 'private'
 
 const STATUS_CONFIG: Record<ReviewStatus, { label: string; color: string }> = {
   all: { label: '전체 상태', color: '' },
-  pending: { label: '승인 대기', color: 'bg-yellow-100 text-yellow-800' },
-  approved: { label: '승인됨', color: 'bg-green-100 text-green-800' },
+  public: { label: '공개', color: 'bg-green-100 text-green-800' },
+  private: { label: '비공개', color: 'bg-gray-100 text-gray-800' },
 }
 
 interface ReviewWithRequest extends Review {
@@ -31,10 +31,10 @@ export function ReviewsPage() {
     try {
       let query = supabase.from('reviews').select('*').order('created_at', { ascending: false })
 
-      if (statusFilter === 'pending') {
-        query = query.eq('is_approved', false)
-      } else if (statusFilter === 'approved') {
-        query = query.eq('is_approved', true)
+      if (statusFilter === 'private') {
+        query = query.eq('is_public', false)
+      } else if (statusFilter === 'public') {
+        query = query.eq('is_public', true)
       }
 
       const { data, error } = await query
@@ -122,22 +122,6 @@ export function ReviewsPage() {
       review.content.toLowerCase().includes(search)
     )
   })
-
-  const toggleApproval = async (reviewId: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('reviews')
-        .update({ is_approved: !currentStatus })
-        .eq('id', reviewId)
-
-      if (error) throw error
-      await loadReviews()
-      toast.success(!currentStatus ? '리뷰가 승인되었습니다.' : '리뷰 승인이 취소되었습니다.')
-    } catch (error) {
-      console.error('Failed to toggle approval:', error)
-      toast.error('승인 상태 변경에 실패했습니다.')
-    }
-  }
 
   const togglePublic = async (reviewId: string, currentStatus: boolean) => {
     try {
@@ -229,7 +213,6 @@ export function ReviewsPage() {
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">서비스</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">평점</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">리뷰 내용</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">승인</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">공개</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">작성일</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">작업</th>
@@ -251,27 +234,6 @@ export function ReviewsPage() {
                   <div className="max-w-[200px] truncate text-sm text-gray-700">
                     {review.content}
                   </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
-                      review.is_approved
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}
-                  >
-                    {review.is_approved ? (
-                      <>
-                        <CheckCircle className="w-3 h-3" />
-                        승인됨
-                      </>
-                    ) : (
-                      <>
-                        <XCircle className="w-3 h-3" />
-                        대기
-                      </>
-                    )}
-                  </span>
                 </td>
                 <td className="px-6 py-4">
                   <button
@@ -302,22 +264,7 @@ export function ReviewsPage() {
                       className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
                       title="상세보기"
                     >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => toggleApproval(review.id, review.is_approved)}
-                      className={`p-2 hover:rounded-lg transition ${
-                        review.is_approved
-                          ? 'text-gray-600 hover:bg-gray-100'
-                          : 'text-green-600 hover:bg-green-50'
-                      }`}
-                      title={review.is_approved ? '승인 취소' : '승인'}
-                    >
-                      {review.is_approved ? (
-                        <XCircle className="w-4 h-4" />
-                      ) : (
-                        <CheckCircle className="w-4 h-4" />
-                      )}
+                      <Cog className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => deleteReview(review.id)}
@@ -440,28 +387,6 @@ export function ReviewsPage() {
               {/* Status */}
               <div className="border-t border-gray-200 pt-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="text-sm text-gray-600 mb-1">승인 상태</div>
-                    <div
-                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
-                        selectedReview.is_approved
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}
-                    >
-                      {selectedReview.is_approved ? (
-                        <>
-                          <CheckCircle className="w-3 h-3" />
-                          승인됨
-                        </>
-                      ) : (
-                        <>
-                          <XCircle className="w-3 h-3" />
-                          대기
-                        </>
-                      )}
-                    </div>
-                  </div>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="text-sm text-gray-600 mb-1">공개 상태</div>
                     <div
