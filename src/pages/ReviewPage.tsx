@@ -358,7 +358,7 @@ export function ReviewPage() {
               <label className="block text-sm font-semibold text-gray-700 mb-4">
                 별점 <span className="text-red-500">*</span>
               </label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
@@ -378,11 +378,6 @@ export function ReviewPage() {
                     />
                   </button>
                 ))}
-                {rating > 0 && (
-                  <span className="ml-4 text-lg font-medium text-gray-700">
-                    {rating}점
-                  </span>
-                )}
               </div>
             </div>
 
