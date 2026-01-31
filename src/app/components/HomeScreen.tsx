@@ -141,7 +141,7 @@ export function HomeScreen() {
         .eq('rating', 5)
         .eq('is_approved', true)
         .eq('is_public', true)
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: false })
         .limit(3)
 
       if (error) throw error
