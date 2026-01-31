@@ -308,8 +308,8 @@ export function HomeScreen() {
       </section>
 
       {/* Reviews Section */}
-      <section className="max-w-md mx-auto px-6 pb-20">
-        <div ref={setRef(18)} className="slide-up mb-6" style={{ transitionDelay: '0s' }}>
+      <section className="max-w-md mx-auto px-6 pb-20 bg-[#F5F5F7]">
+        <div ref={setRef(18)} className="slide-up mb-6 pt-6" style={{ transitionDelay: '0s' }}>
           <h2 className="text-3xl mb-2" style={{ fontWeight: 700 }}>
             고객 후기
           </h2>
@@ -340,10 +340,10 @@ export function HomeScreen() {
             </div>
           ))}
         </div>
-        <div ref={setRef(22)} className="slide-up mt-6" style={{ transitionDelay: '0s' }}>
+        <div ref={setRef(22)} className="slide-up mt-6 pb-6" style={{ transitionDelay: '0s' }}>
           <button
             onClick={() => navigate('/reviews')}
-            className="w-full bg-[#F5F5F7] text-black py-3 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
+            className="w-full bg-white text-black py-3 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
             style={{ fontWeight: 600 }}
           >
             더 많은 리뷰 보기
