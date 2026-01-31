@@ -393,7 +393,7 @@ export function ReviewPage() {
                 onChange={(e) => setComment(e.target.value)}
                 rows={6}
                 placeholder="서비스에 대한 경험을 자세히 작성해주세요."
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-black outline-none resize-none transition bg-white"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-0 focus:border-gray-300 outline-none resize-none transition bg-white"
                 maxLength={1000}
               />
               <p className="text-xs text-gray-400 mt-2 text-right">
