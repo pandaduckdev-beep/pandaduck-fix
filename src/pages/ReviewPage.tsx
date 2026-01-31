@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { notifyTelegram } from '@/lib/api'
@@ -25,6 +25,8 @@ export function ReviewPage() {
   const [repairInfo, setRepairInfo] = useState<RepairInfo | null>(null)
   const [rating, setRating] = useState(0)
   const [hoverRating, setHoverRating] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const ratingContainerRef = useRef<HTMLDivElement>(null)
   const [comment, setComment] = useState('')
   const [images, setImages] = useState<File[]>([])
   const [imagePreviews, setImagePreviews] = useState<string[]>([])
@@ -168,6 +170,35 @@ export function ReviewPage() {
       imagePreviews.forEach(preview => URL.revokeObjectURL(preview))
     }
   }, [])
+
+  // 별점 드래그/클릭 핸들러
+  const handleRatingDrag = (clientX: number, containerRef: React.RefObject<HTMLDivElement>) => {
+    if (!containerRef.current) return
+
+    const rect = containerRef.current.getBoundingClientRect()
+    let x = clientX - rect.left
+
+    // 영역을 벗어나면 클램핑
+    x = Math.max(0, Math.min(x, rect.width))
+
+    const percentage = x / rect.width
+    const rawRating = percentage * 5
+
+    // 0.5단위로 반올림하고 0.5-5 범위로 제한
+    const newRating = Math.min(5, Math.max(0.5, Math.round(rawRating * 2) / 2))
+    setRating(newRating)
+  }
+
+  // 개별 별 클릭 핸들러 (왼쪽/오른쪽 구분)
+  const handleStarClick = (star: number, clientX: number, element: HTMLDivElement) => {
+    const rect = element.getBoundingClientRect()
+    const x = clientX - rect.left
+    const isLeftHalf = x < rect.width / 2
+
+    // 왼쪽 클릭: 0.5단위, 오른쪽 클릭: 정수
+    const newRating = isLeftHalf ? star - 0.5 : star
+    setRating(newRating)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -358,26 +389,69 @@ export function ReviewPage() {
               <label className="block text-sm font-semibold text-gray-700 mb-4">
                 별점 <span className="text-red-500">*</span>
               </label>
-              <div className="flex items-center justify-center gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    className="transition-all hover:scale-110"
-                    title={`${star}점`}
-                  >
-                    <Star
-                      className={`w-8 h-8 ${
-                        star <= (hoverRating || rating)
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-200'
-                      } transition-colors`}
-                    />
-                  </button>
-                ))}
+              <div
+                ref={ratingContainerRef}
+                className="flex items-center justify-center gap-1 select-none cursor-pointer"
+                onMouseDown={(e) => {
+                  if (e.currentTarget === ratingContainerRef.current) {
+                    setIsDragging(true)
+                    handleRatingDrag(e.clientX, ratingContainerRef)
+                  }
+                }}
+                onMouseMove={(e) => {
+                  if (isDragging) {
+                    handleRatingDrag(e.clientX, ratingContainerRef)
+                  }
+                }}
+                onMouseUp={() => setIsDragging(false)}
+                onMouseLeave={() => setIsDragging(false)}
+                onTouchStart={(e) => {
+                  setIsDragging(true)
+                  handleRatingDrag(e.touches[0].clientX, ratingContainerRef)
+                }}
+                onTouchMove={(e) => {
+                  if (isDragging) {
+                    handleRatingDrag(e.touches[0].clientX, ratingContainerRef)
+                  }
+                }}
+                onTouchEnd={() => setIsDragging(false)}
+              >
+                {[1, 2, 3, 4, 5].map((star) => {
+                  const isFilled = star <= rating
+                  const isHalf = !isFilled && star - 0.5 === rating
+
+                  return (
+                    <div
+                      key={star}
+                      className="relative w-10 h-10"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleStarClick(star, e.clientX, e.currentTarget)
+                      }}
+                    >
+                      {isHalf ? (
+                        // 반채움 별
+                        <>
+                          <Star className="w-10 h-10 text-gray-200 absolute inset-0" strokeWidth={1.5} />
+                          <Star
+                            className="w-10 h-10 fill-yellow-400 text-yellow-400 absolute inset-0"
+                            strokeWidth={1.5}
+                            style={{ clipPath: 'inset(0 50% 0 0)' }}
+                          />
+                        </>
+                      ) : (
+                        <Star
+                          className={`w-10 h-10 transition-colors ${
+                            isFilled
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-gray-200'
+                          }`}
+                          strokeWidth={1.5}
+                        />
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
