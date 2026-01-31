@@ -120,7 +120,8 @@ export function HomeScreen() {
         .from('reviews')
         .select('customer_name, rating, content, service_name')
         .eq('rating', 5)
-        .eq('is_visible', true)
+        .eq('is_approved', true)
+        .eq('is_public', true)
         .order('created_at', { ascending: false })
         .limit(3)
 
