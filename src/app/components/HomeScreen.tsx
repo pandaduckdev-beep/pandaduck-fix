@@ -140,8 +140,7 @@ export function HomeScreen() {
     try {
       const { data, error } = await supabase
         .from('reviews')
-        .select('customer_name, rating, content, service_name, images')
-        .eq('rating', 5)
+        .select('*')
         .eq('is_approved', true)
         .eq('is_public', true)
         .order('created_at', { ascending: false })
