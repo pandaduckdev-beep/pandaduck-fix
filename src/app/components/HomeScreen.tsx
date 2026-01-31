@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
 import { useSlideUp } from '@/hooks/useSlideUp'
+import { createClient } from '@supabase/supabase-js'
 
 const services = [
   {
@@ -97,31 +98,70 @@ const processSteps = [
   },
 ]
 
-const reviews = [
-  {
-    name: '김*민',
-    rating: 5,
-    content: '스틱 드리프트로 고생했는데 홀 이펙트로 바꿔주니 완벽해졌어요!',
-    service: '스틱 드리프트 해결',
-  },
-  {
-    name: '이*호',
-    rating: 5,
-    content: '클릭키 버튼 교체 후 훨씬 좋은 키감입니다. 빠르고 정확해요.',
-    service: '클릭키 버튼',
-  },
-  {
-    name: '박*현',
-    rating: 5,
-    content: '배터리 업그레이드 후 플레이타임이 3배로 늘었네요. 대박!',
-    service: '배터리 업그레이드',
-  },
-]
-
 export function HomeScreen() {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [reviews, setReviews] = useState<any[]>([])
   const { setRef } = useSlideUp(25)
+
+  const supabase = createClient(
+    import.meta.env.VITE_SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_ANON_KEY
+  )
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    fetchReviews()
+  }, [])
+
+  const fetchReviews = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('customer_name, rating, content, service_name')
+        .eq('rating', 5)
+        .eq('is_visible', true)
+        .order('created_at', { ascending: false })
+        .limit(3)
+
+      if (error) throw error
+
+      // 이름 마스킹 처리
+      const maskedReviews = (data || []).map((review) => ({
+        name: review.customer_name
+          ? review.customer_name.charAt(0) + '*'.repeat(review.customer_name.length - 1)
+          : '고객',
+        rating: review.rating,
+        content: review.content,
+        service: review.service_name,
+      }))
+
+      setReviews(maskedReviews)
+    } catch (error) {
+      console.error('Failed to fetch reviews:', error)
+      // 에러 시 기본 리뷰 표시
+      setReviews([
+        {
+          name: '김*민',
+          rating: 5,
+          content: '스틱 드리프트로 고생했는데 홀 이펙트로 바꿔주니 완벽해졌어요!',
+          service: '스틱 드리프트 해결',
+        },
+        {
+          name: '이*호',
+          rating: 5,
+          content: '클릭키 버튼 교체 후 훨씬 좋은 키감입니다. 빠르고 정확해요.',
+          service: '클릭키 버튼',
+        },
+        {
+          name: '박*현',
+          rating: 5,
+          content: '배터리 업그레이드 후 플레이타임이 3배로 늘었네요. 대박!',
+          service: '배터리 업그레이드',
+        },
+      ])
+    }
+  }
 
   useEffect(() => {
     window.scrollTo(0, 0)
