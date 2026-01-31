@@ -31,6 +31,9 @@ export function ReviewPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
+  // 0.5단위 별점 생성
+  const ratingOptions = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
+
   useEffect(() => {
     loadRepairInfo()
   }, [token])
@@ -82,20 +85,50 @@ export function ReviewPage() {
         }
       }
 
-      // 서비스 정보 조회 - 한 번의 쿼리로 가져오기
-      const { data: services } = await supabase
+      // 서비스 정보 조회 - 서비스와 옵션 모두 가져오기
+      const { data: repairServices } = await supabase
         .from('repair_request_services')
-        .select(`
-          service_id,
-          selected_option_id,
-          controller_services!inner(name)
-        `)
+        .select('service_id, selected_option_id')
         .eq('repair_request_id', repair.id)
 
-      const servicesWithDetails = (services || []).map((svc: any) => ({
-        service_name: svc.controller_services?.name || '',
-        option_name: null, // 필요시 option 조회
-      }))
+      if (!repairServices || repairServices.length === 0) {
+        setRepairInfo({
+          ...repair,
+          controller_model: controllerModelName,
+          services: [],
+        })
+        return
+      }
+
+      // 서비스 이름 가져오기
+      const serviceIds = repairServices.map(s => s.service_id)
+      const { data: services } = await supabase
+        .from('controller_services')
+        .select('id, name')
+        .in('id', serviceIds)
+
+      // 옵션 이름 가져오기 (선택된 옵션이 있는 경우만)
+      const optionIds = repairServices
+        .filter(s => s.selected_option_id)
+        .map(s => s.selected_option_id)
+
+      let options: any[] = []
+      if (optionIds.length > 0) {
+        const { data: optionsData } = await supabase
+          .from('controller_service_options')
+          .select('id, option_name')
+          .in('id', optionIds)
+        options = optionsData || []
+      }
+
+      const servicesWithDetails = repairServices.map((svc) => {
+        const service = services?.find(s => s.id === svc.service_id)
+        const option = options.find(o => o.id === svc.selected_option_id)
+        return {
+          service_name: service?.name || '알 수 없는 서비스',
+          option_name: option?.option_name || null,
+        }
+      })
 
       setRepairInfo({
         ...repair,
@@ -327,19 +360,20 @@ export function ReviewPage() {
               <label className="block text-sm font-semibold text-gray-700 mb-4">
                 별점 <span className="text-red-500">*</span>
               </label>
-              <div className="flex items-center gap-3">
-                {[1, 2, 3, 4, 5].map((star) => (
+              <div className="flex items-center gap-2">
+                {ratingOptions.map((value) => (
                   <button
-                    key={star}
+                    key={value}
                     type="button"
-                    onClick={() => setRating(star)}
-                    onMouseEnter={() => setHoverRating(star)}
+                    onClick={() => setRating(value)}
+                    onMouseEnter={() => setHoverRating(value)}
                     onMouseLeave={() => setHoverRating(0)}
                     className="transition-all hover:scale-110"
+                    title={`${value}점`}
                   >
                     <Star
-                      className={`w-9 h-9 ${
-                        star <= (hoverRating || rating)
+                      className={`w-8 h-8 ${
+                        value <= (hoverRating || rating)
                           ? 'fill-yellow-400 text-yellow-400'
                           : 'text-gray-200'
                       } transition-colors`}
@@ -348,7 +382,7 @@ export function ReviewPage() {
                 ))}
                 {rating > 0 && (
                   <span className="ml-4 text-lg font-medium text-gray-700">
-                    {rating}.0
+                    {rating.toFixed(1)}
                   </span>
                 )}
               </div>
