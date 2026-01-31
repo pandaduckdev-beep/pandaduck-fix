@@ -149,7 +149,9 @@ export function HomeScreen() {
       if (error) throw error
 
       console.log('Fetched reviews:', data) // 디버깅용
-      console.log('Sample review images:', data?.[0]?.images) // 이미지 데이터 구조 확인
+      data?.forEach((review: any, index: number) => {
+        console.log(`Review ${index} images:`, review.images, `Type: ${typeof review.images}`, `Is Array: ${Array.isArray(review.images)}`)
+      })
 
       // 이름 마스킹 처리
       const maskedReviews = (data || []).map((review: any) => ({
