@@ -107,18 +107,21 @@ export function HomeScreen() {
       rating: 5,
       content: '스틱 드리프트로 고생했는데 홀 이펙트로 바꿔주니 완벽해졌어요!',
       service: '스틱 드리프트 해결',
+      images: [],
     },
     {
       name: '이*호',
       rating: 5,
       content: '클릭키 버튼 교체 후 훨씬 좋은 키감입니다. 빠르고 정확해요.',
       service: '클릭키 버튼',
+      images: [],
     },
     {
       name: '박*현',
       rating: 5,
       content: '배터리 업그레이드 후 플레이타임이 3배로 늘었네요. 대박!',
       service: '배터리 업그레이드',
+      images: [],
     },
   ])
   const { setRef } = useSlideUp(25)
@@ -341,14 +344,24 @@ export function HomeScreen() {
               {/* 리뷰 이미지 */}
               {review.images && review.images.length > 0 && (
                 <div className="mb-3 flex gap-2 overflow-x-auto">
-                  {review.images.map((image: string, imgIndex: number) => (
-                    <img
-                      key={imgIndex}
-                      src={image}
-                      alt={`리뷰 이미지 ${imgIndex + 1}`}
-                      className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                    />
-                  ))}
+                  {review.images.map((image: any, imgIndex: number) => {
+                    // 문자열이면 그대로 사용, 객체면 url 속성 사용
+                    const imageUrl = typeof image === 'string' ? image : image?.url
+                    if (!imageUrl) return null
+
+                    return (
+                      <img
+                        key={imgIndex}
+                        src={imageUrl}
+                        alt={`리뷰 이미지 ${imgIndex + 1}`}
+                        className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                        onError={(e) => {
+                          console.error('이미지 로드 실패:', imageUrl)
+                          e.currentTarget.style.display = 'none'
+                        }}
+                      />
+                    )
+                  })}
                 </div>
               )}
 
