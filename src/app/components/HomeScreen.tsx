@@ -149,6 +149,7 @@ export function HomeScreen() {
       if (error) throw error
 
       console.log('Fetched reviews:', data) // 디버깅용
+      console.log('Sample review images:', data?.[0]?.images) // 이미지 데이터 구조 확인
 
       // 이름 마스킹 처리
       const maskedReviews = (data || []).map((review: any) => ({
@@ -158,7 +159,7 @@ export function HomeScreen() {
         rating: review.rating,
         content: review.content,
         service: review.service_name || '수리 서비스',
-        images: review.images || [],
+        images: Array.isArray(review.images) ? review.images : [],
       }))
 
       // 데이터가 있으면 교체
