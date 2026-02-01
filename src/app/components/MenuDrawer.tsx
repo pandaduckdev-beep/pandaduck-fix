@@ -76,40 +76,25 @@ export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
           <div className="border-t border-[rgba(0,0,0,0.05)]">
             <div className="px-6 py-5">
               <h4 className="text-xs tracking-wider mb-4" style={{ fontWeight: 700, color: '#1D1D1F' }}>
-                고객지원
+                수리문의
               </h4>
 
               <div className="space-y-3">
-                {/* 전화번호 표시 */}
-                <div className="text-center py-2">
-                  <p className="text-xs text-[#86868B] mb-1">고객센터</p>
-                  <p className="text-lg" style={{ fontWeight: 700, color: '#1D1D1F' }}>
-                    010-3971-9794
-                  </p>
-                </div>
-
-                {/* Phone & SMS 버튼 */}
-                <div className="flex gap-2">
-                  <a
-                    href="tel:010-3971-9794"
-                    className="flex-1 flex items-center justify-center gap-2 p-3 bg-[#F5F5F7] hover:bg-[#E8E8ED] rounded-[16px] transition-colors"
-                  >
-                    <Phone className="w-4 h-4" />
-                    <span className="text-sm" style={{ fontWeight: 600, color: '#1D1D1F' }}>
-                      전화
-                    </span>
-                  </a>
-
-                  <a
-                    href="sms:010-3971-9794"
-                    className="flex-1 flex items-center justify-center gap-2 p-3 bg-[#F5F5F7] hover:bg-[#E8E8ED] rounded-[16px] transition-colors"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    <span className="text-sm" style={{ fontWeight: 600, color: '#1D1D1F' }}>
-                      문자
-                    </span>
-                  </a>
-                </div>
+                {/* Phone */}
+                <a
+                  href="tel:010-3971-9794"
+                  className="flex items-center justify-between p-3 bg-[#F5F5F7] hover:bg-[#E8E8ED] rounded-[16px] transition-colors group"
+                >
+                  <div className="flex-1">
+                    <p className="text-xs text-[#86868B] mb-0.5">전화 문의</p>
+                    <p className="text-base" style={{ fontWeight: 600, color: '#1D1D1F' }}>
+                      010-3971-9794
+                    </p>
+                  </div>
+                  <div className="text-xs text-[#86868B] group-hover:text-[#1D1D1F] transition-colors">
+                    전화하기 →
+                  </div>
+                </a>
 
                 {/* KakaoTalk */}
                 <a
@@ -122,13 +107,6 @@ export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
                   <MessageCircle className="w-4 h-4" />
                   <span className="text-sm">카카오톡 상담</span>
                 </a>
-              </div>
-
-              {/* Business Hours */}
-              <div className="mt-4 pt-4 border-t border-[rgba(0,0,0,0.08)]">
-                <p className="text-xs text-[#86868B] text-center">
-                  평일 10:00 - 18:00
-                </p>
               </div>
             </div>
           </div>
