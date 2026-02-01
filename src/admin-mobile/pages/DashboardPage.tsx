@@ -114,8 +114,8 @@ export default function DashboardPage() {
       // Reviews
       const { data: reviews } = await supabase
         .from('reviews')
-        .select('*')
-        .eq('is_approved', true)
+        .select('rating')
+        .eq('is_public', true)
         .returns<{ rating?: number }[]>()
 
       const totalReviews = reviews?.length || 0

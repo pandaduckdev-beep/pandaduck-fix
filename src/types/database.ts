@@ -205,7 +205,6 @@ export interface Database {
           content: string
           service_name: string
           image_urls: string[]
-          is_approved: boolean
           is_public: boolean
           created_at: string
           updated_at: string
@@ -218,7 +217,6 @@ export interface Database {
           content: string
           service_name: string
           image_urls?: string[]
-          is_approved?: boolean
           is_public?: boolean
           created_at?: string
           updated_at?: string
@@ -231,7 +229,6 @@ export interface Database {
           content?: string
           service_name?: string
           image_urls?: string[]
-          is_approved?: boolean
           is_public?: boolean
           created_at?: string
           updated_at?: string

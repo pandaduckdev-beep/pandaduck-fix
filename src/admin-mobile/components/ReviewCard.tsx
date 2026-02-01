@@ -1,4 +1,4 @@
-import { Star, CheckCircle, Image } from 'lucide-react'
+import { Star, Image } from 'lucide-react'
 
 interface ReviewCardProps {
   customerName: string
@@ -6,7 +6,6 @@ interface ReviewCardProps {
   serviceName: string
   content: string
   date: string
-  isApproved: boolean
   isPublic: boolean
   reviewId: string
   imageUrls?: string[]
@@ -21,7 +20,6 @@ export function ReviewCard({
   serviceName,
   content,
   date,
-  isApproved,
   reviewId,
   imageUrls,
 }: ReviewCardProps) {
@@ -71,12 +69,6 @@ export function ReviewCard({
               </div>
             )}
           </div>
-          {isApproved && (
-            <span className="flex items-center gap-1 px-2 py-0.5 bg-[#E6F9F0] text-[#34C759] rounded text-[10px] font-semibold flex-shrink-0">
-              <CheckCircle className="w-3 h-3" strokeWidth={3} />
-              승인됨
-            </span>
-          )}
         </div>
       </div>
 

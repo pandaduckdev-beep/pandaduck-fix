@@ -35,7 +35,7 @@ interface RecentReview {
   rating: number;
   comment: string;
   created_at: string;
-  is_approved: boolean;
+  is_public: boolean;
 }
 
 export function Dashboard() {
@@ -136,11 +136,10 @@ export function Dashboard() {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      // 최근 리뷰 (최근 5개, 승인되지 않은 것 우선)
+      // 최근 리뷰 (최근 5개)
       const { data: recentReviewsData } = await supabase
         .from('reviews')
         .select('*')
-        .order('is_approved', { ascending: true })
         .order('created_at', { ascending: false })
         .limit(5);
 

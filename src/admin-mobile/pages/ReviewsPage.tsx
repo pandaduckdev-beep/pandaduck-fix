@@ -97,7 +97,6 @@ export default function ReviewsPage() {
                 serviceName={review.service_name}
                 content={review.content}
                 date={formatTime(review.created_at)}
-                isApproved={review.is_approved}
                 isPublic={review.is_public}
                 imageUrls={review.image_urls}
                 onTogglePublic={() => togglePublic(review)}
