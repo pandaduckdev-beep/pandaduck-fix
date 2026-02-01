@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Search, Eye, CheckCircle, XCircle, Trash2, Star, X } from 'lucide-react'
+import { Search, Eye, CheckCircle, XCircle, Trash2, Star, X, Cog } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Review } from '@/types/database'
 import { getControllerModelById } from '@/services/pricingService'

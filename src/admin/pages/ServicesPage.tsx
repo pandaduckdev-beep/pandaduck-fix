@@ -218,7 +218,6 @@ export function ServicesPage() {
         .from('controller_services')
         .select('*, controller_service_options(*)')
         .eq('controller_model_id', selectedController)
-        .eq('is_active', true) // 활성화된 서비스만 표시
         .order('display_order', { ascending: true })
 
       if (error) throw error
