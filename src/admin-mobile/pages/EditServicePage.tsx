@@ -343,7 +343,7 @@ export default function EditServicePage() {
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="예: 홀 이펙트 센서 업그레이드"
-            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/20"
+            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-0 focus:border-blue-400"
             style={{ fontWeight: 500 }}
           />
         </div>
@@ -358,7 +358,7 @@ export default function EditServicePage() {
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="서비스에 대한 간단 설명"
-            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/20"
+            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-0 focus:border-blue-400"
             style={{ fontWeight: 500 }}
           />
         </div>
@@ -374,7 +374,7 @@ export default function EditServicePage() {
             onChange={(e) => setFormData({ ...formData, base_price: Number(e.target.value) || 0 })}
             placeholder="0"
             min="0"
-            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/20"
+            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-0 focus:border-blue-400"
             style={{ fontWeight: 500 }}
           />
         </div>
@@ -389,7 +389,7 @@ export default function EditServicePage() {
             value={formData.subtitle}
             onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
             placeholder="서비스 부제목 (선택사항)"
-            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/20"
+            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-0 focus:border-blue-400"
             style={{ fontWeight: 500 }}
           />
         </div>
@@ -404,7 +404,7 @@ export default function EditServicePage() {
             onChange={(e) => setFormData({ ...formData, detailed_description: e.target.value })}
             placeholder="서비스에 대한 상세 설명"
             rows={4}
-            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/20 resize-none"
+            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-0 focus:border-blue-400 resize-none"
             style={{ fontWeight: 500 }}
           />
         </div>
@@ -419,7 +419,7 @@ export default function EditServicePage() {
             value={formData.duration}
             onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
             placeholder="예: 1일, 2~3일"
-            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/20"
+            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-0 focus:border-blue-400"
             style={{ fontWeight: 500 }}
           />
         </div>
@@ -434,7 +434,7 @@ export default function EditServicePage() {
             value={formData.warranty}
             onChange={(e) => setFormData({ ...formData, warranty: e.target.value })}
             placeholder="예: 1년, 6개월"
-            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/20"
+            className="w-full px-4 py-3 bg-white rounded-xl border border-[rgba(0,0,0,0.06)] text-[15px] focus:outline-none focus:ring-0 focus:border-blue-400"
             style={{ fontWeight: 500 }}
           />
         </div>

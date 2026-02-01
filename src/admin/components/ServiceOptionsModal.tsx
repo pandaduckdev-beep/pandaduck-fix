@@ -125,7 +125,7 @@ function SortableOptionItem({
                   detailed_description: e.target.value,
                 })
               }
-              className="w-full min-h-[80px] px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full min-h-[80px] px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-0 focus:border-gray-400"
               placeholder="서비스 상세보기에서 표시될 자세한 설명 (비어있으면 기본 설명 사용)"
             />
           </div>
@@ -519,7 +519,7 @@ export function ServiceOptionsModal({
                     onChange={(e) =>
                       setFormData({ ...formData, detailed_description: e.target.value })
                     }
-                    className="w-full min-h-[80px] px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full min-h-[80px] px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-0 focus:border-gray-400"
                     placeholder="서비스 상세보기에서 표시될 자세한 설명 (비어있으면 기본 설명 사용)"
                   />
                 </div>

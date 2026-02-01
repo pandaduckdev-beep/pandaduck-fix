@@ -28,6 +28,7 @@ export function useSlideUp(count: number) {
       { threshold: 0.1, rootMargin: "0px 0px -20px 0px" }
     );
 
+    // 현재 refs에 있는 모든 요소를 관찰
     refs.current.forEach((el) => {
       if (el) {
         const idx = refs.current.indexOf(el);
@@ -39,7 +40,7 @@ export function useSlideUp(count: number) {
     });
 
     return () => observer.disconnect();
-  }, [count]);
+  }); // count 의존성 제거 - 매 렌더링마다 refs 확인
 
   return { setRef };
 }

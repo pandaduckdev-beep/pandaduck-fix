@@ -40,7 +40,7 @@ export default function ReviewsPage() {
             placeholder="고객명, 서비스명, 리뷰 내용 검색..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#F5F5F7] border-none rounded-[16px] py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[#007AFF]/20 transition-all placeholder:text-[#86868B]"
+            className="w-full bg-[#F5F5F7] border-none rounded-[16px] py-3 pl-10 pr-4 text-sm focus:ring-0 focus:border-gray-400 transition-all placeholder:text-[#86868B]"
             style={{ fontWeight: 500 }}
           />
         </div>

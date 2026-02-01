@@ -564,7 +564,7 @@ export default function RepairRequestDetailPage() {
             onChange={(e) => setAdminNotes(e.target.value)}
             placeholder="일반 메모를 입력하세요..."
             rows={3}
-            className="w-full bg-[#F5F5F7] border-none rounded-xl p-3 text-sm resize-none focus:ring-2 focus:ring-[#007AFF]/20 transition-all"
+            className="w-full bg-[#F5F5F7] border-none rounded-xl p-3 text-sm resize-none focus:ring-0 focus:border-gray-400 transition-all"
             style={{ fontWeight: 500 }}
           />
 
@@ -587,7 +587,7 @@ export default function RepairRequestDetailPage() {
                     onChange={(e) => setBeforeRepairNotes(e.target.value)}
                     placeholder="수리 전 특이사항을 입력하세요..."
                     rows={2}
-                    className="w-full bg-white border border-orange-200 rounded-lg p-2 text-sm resize-none focus:ring-2 focus:ring-[#FF9500]/20 transition-all"
+                    className="w-full bg-white border border-orange-200 rounded-lg p-2 text-sm resize-none focus:ring-0 focus:border-orange-400 transition-all"
                     style={{ fontWeight: 500 }}
                   />
                 </div>
@@ -600,7 +600,7 @@ export default function RepairRequestDetailPage() {
                     onChange={(e) => setAfterRepairNotes(e.target.value)}
                     placeholder="수리 후 특이사항을 입력하세요..."
                     rows={2}
-                    className="w-full bg-white border border-green-200 rounded-lg p-2 text-sm resize-none focus:ring-2 focus:ring-[#34C759]/20 transition-all"
+                    className="w-full bg-white border border-green-200 rounded-lg p-2 text-sm resize-none focus:ring-0 focus:border-green-400 transition-all"
                     style={{ fontWeight: 500 }}
                   />
                 </div>

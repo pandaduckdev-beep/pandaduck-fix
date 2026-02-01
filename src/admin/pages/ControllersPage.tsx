@@ -360,7 +360,7 @@ export function ControllersPage() {
                   value={formData.model_name}
                   onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none"
                   placeholder="예: DualSense"
                 />
               </div>
@@ -375,7 +375,7 @@ export function ControllersPage() {
                   onChange={(e) => setFormData({ ...formData, model_id: e.target.value })}
                   required
                   disabled={!!editingController}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none disabled:bg-gray-100"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none disabled:bg-gray-100"
                   placeholder="예: dualsense"
                 />
               </div>
@@ -386,7 +386,7 @@ export function ControllersPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none"
                   placeholder="컨트롤러 설명"
                 />
               </div>
@@ -399,7 +399,7 @@ export function ControllersPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none"
                 />
               </div>
 

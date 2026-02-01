@@ -60,7 +60,7 @@ export default function RepairRequestsPage() {
             onChange={(e) => {
               setSearchQuery(e.target.value)
             }}
-            className="w-full bg-[#F5F5F7] border-none rounded-[16px] py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[var(--ios-blue)]/20 transition-all placeholder:text-[#86868B]"
+            className="w-full bg-[#F5F5F7] border-none rounded-[16px] py-3 pl-10 pr-4 text-sm focus:ring-0 focus:border-gray-400 transition-all placeholder:text-[#86868B]"
             style={{ fontWeight: 500 }}
           />
         </div>

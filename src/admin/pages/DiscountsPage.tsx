@@ -394,7 +394,7 @@ function ComboModal({ combo, controllers, onClose, onSuccess }: ComboModalProps)
               value={formData.combo_name}
               onChange={(e) => setFormData({ ...formData, combo_name: e.target.value })}
               placeholder="예: 3개 이상 서비스 할인"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400"
               required
             />
           </div>
@@ -406,7 +406,7 @@ function ComboModal({ combo, controllers, onClose, onSuccess }: ComboModalProps)
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="할인에 대한 설명을 입력하세요"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent min-h-[80px]"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 min-h-[80px]"
             />
           </div>
 
@@ -420,7 +420,7 @@ function ComboModal({ combo, controllers, onClose, onSuccess }: ComboModalProps)
               onChange={(e) =>
                 setFormData({ ...formData, controller_model_id: e.target.value })
               }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400"
             >
               <option value="">전체 컨트롤러</option>
               {controllers.length === 0 ? (
@@ -453,7 +453,7 @@ function ComboModal({ combo, controllers, onClose, onSuccess }: ComboModalProps)
                     discount_type: e.target.value as 'percentage' | 'fixed',
                   })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400"
               >
                 <option value="percentage">퍼센트 (%)</option>
                 <option value="fixed">정액 (원)</option>
@@ -470,7 +470,7 @@ function ComboModal({ combo, controllers, onClose, onSuccess }: ComboModalProps)
                   setFormData({ ...formData, discount_value: Number(e.target.value) })
                 }
                 placeholder={formData.discount_type === 'percentage' ? '10' : '5000'}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400"
                 min="0"
                 step={formData.discount_type === 'percentage' ? '1' : '100'}
                 required
@@ -530,7 +530,7 @@ function ComboModal({ combo, controllers, onClose, onSuccess }: ComboModalProps)
                       setFormData({ ...formData, min_service_count: Number(e.target.value) || 0 })
                     }
                     placeholder="예: 3"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400"
                     min="1"
                   />
                   <div className="mt-2 bg-green-50 border border-green-200 rounded-lg p-3 text-xs text-green-800">
@@ -648,7 +648,7 @@ function ComboModal({ combo, controllers, onClose, onSuccess }: ComboModalProps)
               value={formData.priority || ''}
               onChange={(e) => setFormData({ ...formData, priority: Number(e.target.value) || 0 })}
               placeholder="0"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400"
             />
             <p className="text-xs text-gray-500 mt-1">
               높을수록 먼저 적용됩니다 (여러 할인이 동시에 적용 가능할 때)

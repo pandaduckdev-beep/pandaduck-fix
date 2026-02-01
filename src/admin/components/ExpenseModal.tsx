@@ -140,7 +140,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }: ExpenseModalProps) 
                 id="category_id"
                 value={formData.category_id}
                 onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400"
                 required
               >
                 {categories.map((cat) => (
@@ -195,7 +195,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess }: ExpenseModalProps) 
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="지출에 대한 상세 설명을 입력하세요"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent min-h-[100px]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 min-h-[100px]"
             />
           </div>
 

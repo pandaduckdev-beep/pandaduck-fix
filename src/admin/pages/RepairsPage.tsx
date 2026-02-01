@@ -362,7 +362,7 @@ export function RepairsPage() {
               placeholder="고객명, 전화번호, 컨트롤러 검색..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none"
             />
           </div>
 
@@ -370,7 +370,7 @@ export function RepairsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as RepairStatus | 'all')}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none"
           >
             <option value="all">전체 상태</option>
             {Object.entries(STATUS_CONFIG).map(([value, config]) => (
@@ -719,7 +719,7 @@ export function RepairsPage() {
                       onChange={(e) =>
                         updateStatus(selectedRepair.id, e.target.value as RepairStatus)
                       }
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none"
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none"
                     >
                       {Object.entries(STATUS_CONFIG).map(([value, config]) => (
                         <option key={value} value={value}>
@@ -914,7 +914,7 @@ export function RepairsPage() {
                   onChange={(e) => setAdminNotes(e.target.value)}
                   placeholder="일반적인 메모를 입력하세요..."
                   rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none resize-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none resize-none"
                 />
               </div>
 
@@ -925,7 +925,7 @@ export function RepairsPage() {
                   onChange={(e) => setPreRepairNotes(e.target.value)}
                   placeholder="수리 전 특이사항을 입력하세요..."
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none resize-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none resize-none"
                 />
               </div>
 
@@ -936,7 +936,7 @@ export function RepairsPage() {
                   onChange={(e) => setPostRepairNotes(e.target.value)}
                   placeholder="수리 후 특이사항을 입력하세요..."
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none resize-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none resize-none"
                 />
               </div>
 

@@ -141,6 +141,7 @@ export function HomeScreen() {
   const fetchReviews = async () => {
     try {
       setLoadingReviews(true)
+
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
@@ -150,18 +151,13 @@ export function HomeScreen() {
 
       if (error) throw error
 
-      console.log('Fetched reviews:', data) // 디버깅용
-      data?.forEach((review: any, index: number) => {
-        console.log(`Review ${index} image_urls:`, review.image_urls, `Type: ${typeof review.image_urls}`, `Is Array: ${Array.isArray(review.image_urls)}`)
-      })
-
       // 이름 마스킹 처리
       const maskedReviews = (data || []).map((review: any) => ({
         name: review.customer_name
           ? review.customer_name.charAt(0) + '*'.repeat(review.customer_name.length - 1)
           : '고객',
-        rating: review.rating,
-        content: review.content,
+        rating: review.rating || 5,
+        content: review.content || '',
         service: review.service_name || '수리 서비스',
         images: Array.isArray(review.image_urls) ? review.image_urls : [],
       }))
@@ -362,24 +358,13 @@ export function HomeScreen() {
               {review.images && review.images.length > 0 && (
                 <div className="mb-3 flex gap-2 overflow-x-auto">
                   {review.images.map((image: any, imgIndex: number) => {
-                    console.log(`Processing image ${imgIndex}:`, image, typeof image)
-
-                    // 문자열이면 그대로 사용, 객체면 url 속성 사용
+                    // 문자열이면 그대로 사용
                     let imageUrl = null
                     if (typeof image === 'string') {
                       imageUrl = image
-                    } else if (image?.url) {
-                      imageUrl = image.url
-                    } else if (image?.publicUrl) {
-                      imageUrl = image.publicUrl
                     }
 
-                    if (!imageUrl) {
-                      console.log(`Skipping image ${imgIndex}: no URL found`, image)
-                      return null
-                    }
-
-                    console.log(`Rendering image ${imgIndex}:`, imageUrl)
+                    if (!imageUrl) return null
 
                     return (
                       <img
@@ -390,7 +375,6 @@ export function HomeScreen() {
                         loading="lazy"
                         decoding="async"
                         onError={(e) => {
-                          console.error('이미지 로드 실패:', imageUrl, image)
                           e.currentTarget.style.display = 'none'
                         }}
                       />

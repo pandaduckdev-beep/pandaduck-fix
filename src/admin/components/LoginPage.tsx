@@ -53,7 +53,7 @@ export function LoginPage() {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none transition"
                 placeholder="admin@example.com"
                 autoFocus
                 disabled={loading}
@@ -73,7 +73,7 @@ export function LoginPage() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none transition"
                 placeholder="비밀번호를 입력하세요"
                 disabled={loading}
                 required
