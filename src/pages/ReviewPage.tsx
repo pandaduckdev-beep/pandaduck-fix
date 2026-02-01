@@ -20,6 +20,7 @@ interface RepairInfo {
 export function ReviewPage() {
   const { token } = useParams<{ token: string }>()
   const navigate = useNavigate()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [repairInfo, setRepairInfo] = useState<RepairInfo | null>(null)
@@ -408,20 +409,27 @@ export function ReviewPage() {
               </label>
               <div className="space-y-4">
                 {images.length < 3 && (
-                  <label className="flex flex-col items-center justify-center w-full h-36 border border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition">
-                    <Upload className="w-7 h-7 text-gray-300 mb-2" />
-                    <span className="text-sm text-gray-500">클릭하여 이미지 업로드</span>
-                    <span className="text-xs text-gray-400 mt-1">
-                      JPG, PNG (최대 5MB)
-                    </span>
+                  <div className="relative">
                     <input
+                      ref={fileInputRef}
                       type="file"
                       accept="image/*"
                       multiple
                       onChange={handleImageUpload}
                       className="hidden"
+                      id="image-upload"
                     />
-                  </label>
+                    <label
+                      htmlFor="image-upload"
+                      className="flex flex-col items-center justify-center w-full h-36 border border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition"
+                    >
+                      <Upload className="w-7 h-7 text-gray-300 mb-2" />
+                      <span className="text-sm text-gray-500">클릭하여 이미지 업로드</span>
+                      <span className="text-xs text-gray-400 mt-1">
+                        JPG, PNG (최대 5MB)
+                      </span>
+                    </label>
+                  </div>
                 )}
 
                 {images.length > 0 && (
