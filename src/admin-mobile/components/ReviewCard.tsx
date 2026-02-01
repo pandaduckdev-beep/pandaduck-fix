@@ -1,4 +1,4 @@
-import { Star, Image } from 'lucide-react'
+import { Star, Image, Loader2 } from 'lucide-react'
 
 interface ReviewCardProps {
   customerName: string
@@ -9,6 +9,7 @@ interface ReviewCardProps {
   isPublic: boolean
   reviewId: string
   imageUrls?: string[]
+  isToggling?: boolean
   onTogglePublic?: () => void
   onView?: () => void
   onDelete?: () => void
@@ -22,6 +23,7 @@ export function ReviewCard({
   date,
   reviewId,
   imageUrls,
+  isToggling = false,
 }: ReviewCardProps) {
 
   const imageCount = imageUrls?.length || 0

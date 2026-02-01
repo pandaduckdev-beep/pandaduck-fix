@@ -23,6 +23,7 @@ interface ReviewWithRequest extends Review {
 export function ReviewsPage() {
   const [reviews, setReviews] = useState<ReviewWithRequest[]>([])
   const [loading, setLoading] = useState(true)
+  const [togglingReviewId, setTogglingReviewId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<ReviewStatus>('all')
   const [selectedReview, setSelectedReview] = useState<ReviewWithRequest | null>(null)
@@ -125,6 +126,8 @@ export function ReviewsPage() {
 
   const togglePublic = async (reviewId: string, currentStatus: boolean) => {
     try {
+      setTogglingReviewId(reviewId)
+
       const { error } = await supabase
         .from('reviews')
         .update({ is_public: !currentStatus })
@@ -136,6 +139,8 @@ export function ReviewsPage() {
     } catch (error) {
       console.error('Failed to toggle public:', error)
       toast.error('공개 상태 변경에 실패했습니다.')
+    } finally {
+      setTogglingReviewId(null)
     }
   }
 
@@ -236,23 +241,29 @@ export function ReviewsPage() {
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <button
-                    onClick={() => togglePublic(review.id, review.is_public)}
-                    className={`relative inline-flex items-center h-6 w-11 rounded-full transition-colors ${
-                      review.is_public ? 'bg-green-600' : 'bg-gray-300'
-                    }`}
-                    title={
-                      review.is_public
-                        ? '공개 상태 (클릭하여 비공개)'
-                        : '비공개 상태 (클릭하여 공개)'
-                    }
-                  >
-                    <span
-                      className={`inline-block w-4 h-4 transform rounded-full bg-white transition-transform ${
-                        review.is_public ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => togglePublic(review.id, review.is_public)}
+                      disabled={togglingReviewId === review.id}
+                      className={`relative inline-flex items-center h-6 w-11 rounded-full transition-colors ${
+                        review.is_public ? 'bg-green-600' : 'bg-gray-300'
+                      } ${togglingReviewId === review.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      title={
+                        review.is_public
+                          ? '공개 상태 (클릭하여 비공개)'
+                          : '비공개 상태 (클릭하여 공개)'
+                      }
+                    >
+                      <span
+                        className={`inline-block w-4 h-4 transform rounded-full bg-white transition-transform ${
+                          review.is_public ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                    {togglingReviewId === review.id && (
+                      <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-600">
                   {new Date(review.created_at).toLocaleDateString('ko-KR')}

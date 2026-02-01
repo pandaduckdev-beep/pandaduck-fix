@@ -5,6 +5,7 @@ import { Review } from '@/types/database'
 export function useReviews(searchQuery: string = '') {
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
+  const [togglingReviewId, setTogglingReviewId] = useState<string | null>(null)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
@@ -33,13 +34,25 @@ export function useReviews(searchQuery: string = '') {
   }
 
   const togglePublic = async (review: Review) => {
-    const { error } = await supabase
-      .from('reviews')
-      .update({ is_public: !review.is_public })
-      .eq('id', review.id)
+    try {
+      setTogglingReviewId(review.id)
 
-    if (!error) {
-      setReviews(reviews.map((r) => (r.id === review.id ? { ...r, is_public: !r.is_public } : r)))
+      const { error } = await supabase
+        .from('reviews')
+        .update({ is_public: !review.is_public })
+        .eq('id', review.id)
+
+      if (!error) {
+        setReviews(reviews.map((r) => (r.id === review.id ? { ...r, is_public: !r.is_public } : r)))
+      } else {
+        throw error
+      }
+    } catch (err) {
+      console.error('Failed to toggle public:', err)
+      // 에러 발생 시 원래 상태로 복구하기 위해 재조회
+      fetchReviews()
+    } finally {
+      setTogglingReviewId(null)
     }
   }
 
@@ -64,6 +77,7 @@ export function useReviews(searchQuery: string = '') {
   return {
     reviews: filteredReviews,
     loading,
+    togglingReviewId,
     error,
     refetch: fetchReviews,
     togglePublic,

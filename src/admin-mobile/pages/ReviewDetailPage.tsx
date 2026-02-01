@@ -246,13 +246,20 @@ export default function ReviewDetailPage() {
             <button
               onClick={togglePublic}
               disabled={updating}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${
                 review.is_public
                   ? 'bg-[#007AFF] text-white'
                   : 'bg-[#F5F5F7] text-[#1D1D1F]'
-              }`}
+              } ${updating ? 'opacity-70' : ''}`}
             >
-              {review.is_public ? '공개중' : '비공개'}
+              {updating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <span>변경 중...</span>
+                </>
+              ) : (
+                <span>{review.is_public ? '공개중' : '비공개'}</span>
+              )}
             </button>
           </div>
 
