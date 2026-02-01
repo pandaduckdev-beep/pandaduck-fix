@@ -32,7 +32,6 @@ export function ReviewsPage() {
         const { data, error } = await supabase
           .from('reviews')
           .select('rating')
-          .eq('is_approved', true)
           .eq('is_public', true)
 
         if (error) throw error
@@ -68,7 +67,6 @@ export function ReviewsPage() {
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
-        .eq('is_approved', true)
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .range(from, to)
