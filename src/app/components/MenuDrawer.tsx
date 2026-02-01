@@ -1,4 +1,4 @@
-import { X, MessageCircle } from "lucide-react";
+import { X, MessageCircle, Phone, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface MenuDrawerProps {
@@ -80,21 +80,36 @@ export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
               </h4>
 
               <div className="space-y-3">
-                {/* Phone */}
-                <a
-                  href="tel:010-3971-9794"
-                  className="flex items-center justify-between p-3 bg-[#F5F5F7] hover:bg-[#E8E8ED] rounded-[16px] transition-colors group"
-                >
-                  <div className="flex-1">
-                    <p className="text-xs text-[#86868B] mb-0.5">전화 문의</p>
-                    <p className="text-base" style={{ fontWeight: 600, color: '#1D1D1F' }}>
-                      010-3971-9794
-                    </p>
-                  </div>
-                  <div className="text-xs text-[#86868B] group-hover:text-[#1D1D1F] transition-colors">
-                    전화하기 →
-                  </div>
-                </a>
+                {/* 전화번호 표시 */}
+                <div className="text-center py-2">
+                  <p className="text-xs text-[#86868B] mb-1">고객센터</p>
+                  <p className="text-lg" style={{ fontWeight: 700, color: '#1D1D1F' }}>
+                    010-3971-9794
+                  </p>
+                </div>
+
+                {/* Phone & SMS 버튼 */}
+                <div className="flex gap-2">
+                  <a
+                    href="tel:010-3971-9794"
+                    className="flex-1 flex items-center justify-center gap-2 p-3 bg-[#F5F5F7] hover:bg-[#E8E8ED] rounded-[16px] transition-colors"
+                  >
+                    <Phone className="w-4 h-4" />
+                    <span className="text-sm" style={{ fontWeight: 600, color: '#1D1D1F' }}>
+                      전화
+                    </span>
+                  </a>
+
+                  <a
+                    href="sms:010-3971-9794"
+                    className="flex-1 flex items-center justify-center gap-2 p-3 bg-[#F5F5F7] hover:bg-[#E8E8ED] rounded-[16px] transition-colors"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span className="text-sm" style={{ fontWeight: 600, color: '#1D1D1F' }}>
+                      문자
+                    </span>
+                  </a>
+                </div>
 
                 {/* KakaoTalk */}
                 <a
