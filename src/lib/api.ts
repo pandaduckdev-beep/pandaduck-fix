@@ -232,7 +232,6 @@ export async function submitReview(params: SubmitReviewParams): Promise<Review> 
       content: params.content,
       service_name: params.serviceName,
       image_url: params.imageUrl,
-      is_approved: false, // 관리자 승인 대기
       is_public: false,
     })
     .select()
@@ -254,13 +253,12 @@ export async function submitReview(params: SubmitReviewParams): Promise<Review> 
 }
 
 /**
- * 승인된 공개 리뷰 조회
+ * 공개 리뷰 조회
  */
 export async function fetchPublicReviews(limit = 20): Promise<Review[]> {
   const { data, error } = await supabase
     .from('reviews')
     .select('*')
-    .eq('is_approved', true)
     .eq('is_public', true)
     .order('created_at', { ascending: false })
     .limit(limit)
@@ -279,7 +277,6 @@ export async function fetchAverageRating(): Promise<number> {
   const { data, error } = await supabase
     .from('reviews')
     .select('rating')
-    .eq('is_approved', true)
     .eq('is_public', true)
 
   if (error || !data || data.length === 0) {
