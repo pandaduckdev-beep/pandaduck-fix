@@ -114,11 +114,11 @@ export function Dashboard() {
 
       const monthlyCompletedRepairs = monthlyCompletedRepairsData?.length || 0;
 
-      // 평균 평점 및 리뷰 수
+      // 평균 평점 및 리뷰 수 (공개된 리뷰 기준)
       const { data: reviews } = await supabase
         .from('reviews')
         .select('rating')
-        .eq('is_approved', true);
+        .eq('is_public', true);
 
       const averageRating = reviews && reviews.length > 0
         ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
@@ -400,11 +400,6 @@ export function Dashboard() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <p className="font-semibold text-gray-900 truncate">{review.customer_name}</p>
-                      {!review.is_approved && (
-                        <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 whitespace-nowrap flex-shrink-0">
-                          승인 필요
-                        </span>
-                      )}
                     </div>
                     <div className="flex items-center gap-1 ml-2">
                       {[...Array(5)].map((_, i) => (

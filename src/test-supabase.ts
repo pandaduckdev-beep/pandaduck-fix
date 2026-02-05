@@ -52,7 +52,6 @@ export async function testSupabaseConnection() {
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
       .select('*')
-      .eq('is_approved', true)
       .eq('is_public', true);
 
     if (reviewsError) {
