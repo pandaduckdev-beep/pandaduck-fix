@@ -4,6 +4,7 @@ import {
   Search,
   Eye,
   CheckCircle,
+  Check,
   Clock,
   XCircle,
   X,
@@ -66,6 +67,9 @@ export function RepairsPage() {
   const [adminNotes, setAdminNotes] = useState('')
   const [preRepairNotes, setPreRepairNotes] = useState('')
   const [postRepairNotes, setPostRepairNotes] = useState('')
+  const [editingPrice, setEditingPrice] = useState(false)
+  const [editedTotalAmount, setEditedTotalAmount] = useState(0)
+  const [updatingPrice, setUpdatingPrice] = useState(false)
 
   const loadRepairs = useCallback(async () => {
     try {
@@ -111,12 +115,16 @@ export function RepairsPage() {
 
               let option = null
               if (svc.selected_option_id) {
-                const { data: opt } = await supabase
-                  .from('controller_service_options')
-                  .select('*')
-                  .eq('id', svc.selected_option_id)
-                  .single()
-                option = opt
+                try {
+                  const { data: opt } = await supabase
+                    .from('controller_service_options')
+                    .select('*')
+                    .eq('id', svc.selected_option_id)
+                    .single()
+                  option = opt
+                } catch (err) {
+                  // Silently handle RLS error - option will remain null
+                }
               }
 
               return {
@@ -128,17 +136,23 @@ export function RepairsPage() {
           )
 
           // Check if review exists
-          const { data: review } = await supabase
-            .from('reviews')
-            .select('id')
-            .eq('repair_request_id', repair.id)
-            .single()
+          let hasReview = false
+          try {
+            const { data: review } = await supabase
+              .from('reviews')
+              .select('id')
+              .eq('repair_request_id', repair.id)
+              .single()
+            hasReview = !!review
+          } catch (err) {
+            // Silently handle RLS error - hasReview will remain false
+          }
 
           return {
             ...repair,
             services: servicesWithDetails,
             controller_models: controllerModels?.find((cm) => cm.id === repair.controller_model),
-            has_review: !!review,
+            has_review: hasReview,
           }
         })
       )
@@ -302,6 +316,31 @@ export function RepairsPage() {
     } catch (error) {
       console.error('Failed to save admin notes:', error)
       toast.error('메모 저장에 실패했습니다.')
+    }
+  }
+
+  const handleSaveTotalAmount = async () => {
+    if (!selectedRepairForManage) return
+
+    try {
+      setUpdatingPrice(true)
+
+      const { error } = await supabase
+        .from('repair_requests')
+        .update({ total_amount: editedTotalAmount })
+        .eq('id', selectedRepairForManage.id)
+
+      if (error) throw error
+
+      selectedRepairForManage.total_amount = editedTotalAmount
+      setEditingPrice(false)
+      await loadRepairs()
+      toast.success('총 금액이 수정되었습니다.')
+    } catch (error) {
+      console.error('Failed to update total amount:', error)
+      toast.error('총 금액 수정에 실패했습니다.')
+    } finally {
+      setUpdatingPrice(false)
     }
   }
 
@@ -469,6 +508,9 @@ export function RepairsPage() {
                         setAdminNotes(repair.admin_notes || '')
                         setPreRepairNotes(repair.pre_repair_notes || '')
                         setPostRepairNotes(repair.post_repair_notes || '')
+                        // 금액 수정 초기화
+                        setEditedTotalAmount(repair.total_amount)
+                        setEditingPrice(false)
                         setShowManageModal(true)
                       }}
                       className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
@@ -825,7 +867,55 @@ export function RepairsPage() {
                     ))}
                     <div className="flex items-center justify-between pt-2 border-t border-gray-200">
                       <span className="text-sm font-semibold">총 금액</span>
-                      <span className="font-bold">₩{selectedRepairForManage.total_amount.toLocaleString()}</span>
+                      <span className="font-bold">₩{(editingPrice ? editedTotalAmount : selectedRepairForManage.total_amount).toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  {/* 금액 수정 섹션 */}
+                  <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-gray-700 mb-2">총 금액 수정</p>
+                        {editingPrice ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              value={editedTotalAmount}
+                              onChange={(e) => setEditedTotalAmount(Math.max(0, parseInt(e.target.value) || 0))}
+                              className="w-32 px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                              disabled={updatingPrice}
+                            />
+                            <span className="text-xs text-gray-600">원</span>
+                            <div className="flex gap-1">
+                              <button
+                                onClick={handleSaveTotalAmount}
+                                disabled={updatingPrice}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs font-medium disabled:opacity-50"
+                              >
+                                <Check className="w-3 h-3" />
+                                {updatingPrice ? '저장 중...' : '저장'}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingPrice(false)
+                                  setEditedTotalAmount(selectedRepairForManage.total_amount)
+                                }}
+                                disabled={updatingPrice}
+                                className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-xs font-medium disabled:opacity-50"
+                              >
+                                취소
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setEditingPrice(true)}
+                            className="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-xs font-medium"
+                          >
+                            ✏️ 금액 수정
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -45,7 +45,7 @@ export function AboutPage() {
       <section className="max-w-md mx-auto px-6 pt-12 pb-8">
         <div ref={setRef(0)} className="slide-up" style={{ transitionDelay: '0s' }}>
           <h1 className="text-4xl mb-4" style={{ fontWeight: 700 }}>
-            회사소개
+            소개
           </h1>
           <p className="text-lg text-[#86868B]">
             게이머의 꿈을 현실로 만드는<br />
@@ -69,14 +69,14 @@ export function AboutPage() {
       <section className="max-w-md mx-auto px-6 pb-8">
         <div ref={setRef(2)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-8 space-y-4" style={{ transitionDelay: '0.2s' }}>
           <h2 className="text-2xl" style={{ fontWeight: 700 }}>
-            우리의 이야기
+            PandaDuck Fix의 이야기
           </h2>
           <p className="text-sm text-[#86868B] leading-relaxed">
             PandaDuck Fix는 게이밍 컨트롤러 수리와 커스터마이징에 대한 열정으로 시작되었습니다.
-            비록 이제 막 첫걸음을 내딛었지만, 우리는 모든 작업에 최선을 다하고 있습니다.
+            비록 이제 막 첫걸음을 내딛었지만, 모든 작업에 최선을 다하고 있습니다.
           </p>
           <p className="text-sm text-[#86868B] leading-relaxed">
-            단순한 수리를 넘어, 게이머 여러분께 최고의 게이밍 경험을 선사하는 것이 우리의 목표입니다.
+            단순한 수리를 넘어, 게이머 여러분께 최고의 게이밍 경험을 선사하는 것이 목표입니다.
             한 대 한 대 정성을 다해 작업하며, 고객 만족을 최우선으로 생각합니다.
           </p>
           <p className="text-sm text-[#86868B] leading-relaxed">
@@ -88,7 +88,7 @@ export function AboutPage() {
       {/* Values */}
       <section className="max-w-md mx-auto px-6 pb-8">
         <h2 className="text-2xl mb-6" style={{ fontWeight: 700 }}>
-          우리의 가치
+          PandaDuck Fix의 가치
         </h2>
         <div className="grid grid-cols-2 gap-3">
           <div ref={setRef(3)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-3" style={{ transitionDelay: '0s' }}>
@@ -145,7 +145,7 @@ export function AboutPage() {
       <section className="max-w-md mx-auto px-6 pb-8">
         <div ref={setRef(7)} className="slide-up bg-[#000000] text-white rounded-[28px] p-8" style={{ transitionDelay: '0s' }}>
           <h2 className="text-2xl mb-6 text-center" style={{ fontWeight: 700 }}>
-            우리의 약속
+            PandaDuck Fix의 약속
           </h2>
           <div className="space-y-6">
             <div className="text-center">

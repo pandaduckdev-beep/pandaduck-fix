@@ -382,13 +382,13 @@ export function RepairForm() {
           </div>
         </div>
 
-        {/* Shipping Method Section */}
+        {/* Shipping Method Section - 일시 숨김 */}
+        {/*
         <div ref={setRef(2)} className="slide-up space-y-4" style={{ transitionDelay: '0.2s' }}>
           <h3 className="text-lg pl-4" style={{ fontWeight: 600 }}>
             발송 방법
           </h3>
 
-          {/* Company Address Info */}
           <div className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4">
             <div className="flex items-start gap-3">
               <MapPin className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
@@ -427,7 +427,6 @@ export function RepairForm() {
             </div>
           </div>
 
-          {/* Convenience Store Delivery Button */}
           <button
             type="button"
             onClick={() => setShowConvenienceModal(true)}
@@ -446,6 +445,7 @@ export function RepairForm() {
             접수 후 영업일 기준 1-3일 내 수리가 완료됩니다.
           </p>
         </div>
+        */}
 
         {/* Error Message */}
         {error && (
@@ -453,6 +453,25 @@ export function RepairForm() {
             <p className="text-sm text-[#FF3B30] text-center">{error}</p>
           </div>
         )}
+
+        {/* Submit Notice */}
+        <div className="bg-[#E8F4FF] border border-[#007AFF]/20 rounded-[20px] p-5 space-y-2">
+          <div className="flex items-start gap-3">
+            <div className="w-5 h-5 rounded-full bg-[#007AFF] flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-white text-xs" style={{ fontWeight: 700 }}>!</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium mb-1" style={{ color: '#007AFF' }}>
+                발송 안내
+              </p>
+              <p className="text-sm text-[#86868B] leading-relaxed">
+                수리 신청을 하시면 별도로 연락을 드리며,
+                <br />
+                안내해드리는 주소로 패드를 보내주시면 됩니다.
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Submit Button */}
         <button
@@ -730,12 +749,12 @@ export function RepairForm() {
 
             {/* Title */}
             <h2 className="text-2xl text-center mb-3" style={{ fontWeight: 700 }}>
-              신청이 완료되었습니다!
+              수리 신청이 접수되었습니다!
             </h2>
 
             {/* Description */}
             <p className="text-center text-[#86868B] mb-6 leading-relaxed">
-              수리 신청이 정상적으로 접수되었습니다.
+              신청해주셔서 감사합니다.
               <br />
               빠른 시일 내에 연락드리겠습니다.
             </p>
@@ -774,8 +793,9 @@ export function RepairForm() {
                   발송 안내
                 </span>
               </div>
-              <div className="text-xs text-[#86868B] leading-relaxed">
-                아래 주소로 컨트롤러를 보내주세요
+              <div className="text-xs text-[#86868B] leading-relaxed space-y-1">
+                <p>아래 주소로 컨트롤러를 보내주세요</p>
+                <p>연락처로 발송 안내 메시지를 추가로 보내드리겠습니다</p>
               </div>
               <div className="bg-white/60 rounded-[16px] p-3 space-y-2 text-sm">
                 <div>
@@ -783,14 +803,14 @@ export function RepairForm() {
                   <p style={{ fontWeight: 600 }}>
                     경기도 광주시 태전동
                     <br />
-                    PandaDuck Fix (우편번호: 06234)
+                    판다덕 픽스 (우편번호: 06234)
                   </p>
                 </div>
                 <div className="h-px bg-[rgba(0,0,0,0.1)]"></div>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[#86868B] text-xs mb-1">받는 사람</p>
-                    <p style={{ fontWeight: 600 }}>PandaDuck Fix</p>
+                    <p style={{ fontWeight: 600 }}>판다덕 픽스</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[#86868B] text-xs mb-1">연락처</p>

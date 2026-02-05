@@ -274,9 +274,6 @@ export function ReviewPage() {
             <br />
             더 나은 서비스로 보답하겠습니다.
           </p>
-          <p className="text-sm text-gray-500">
-            리뷰는 관리자 승인 후 웹사이트에 게시됩니다.
-          </p>
         </div>
       </div>
     )

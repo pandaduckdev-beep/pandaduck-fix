@@ -68,7 +68,7 @@ export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
               className="w-full text-left px-6 py-4 rounded-[20px] hover:bg-[#F5F5F7] transition-colors"
               style={{ fontWeight: 600 }}
             >
-              회사소개
+              소개
             </button>
           </nav>
 
@@ -98,7 +98,7 @@ export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
 
                 {/* KakaoTalk */}
                 <a
-                  href="https://pf.kakao.com/_hwPhX/chat"
+                  href="https://open.kakao.com/o/sWidj5ei"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full p-3 bg-[#FEE500] hover:bg-[#FDD835] rounded-[16px] transition-all hover:scale-[0.98] active:scale-[0.96]"
