@@ -1,7 +1,13 @@
 import { ImageResponse } from '@vercel/og'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 
 export const runtime = 'edge'
+
+// Supabase 클라이언트 초기화
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.VITE_SUPABASE_ANON_KEY!
+)
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)

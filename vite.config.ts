@@ -58,4 +58,6 @@ export default defineConfig({
     port: 3000,
     host: '0.0.0.0',
   },
+  // Vercel Edge Functions용 publicDir 설정
+  publicDir: 'public',
 })
