@@ -1,6 +1,5 @@
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { HelmetProvider } from 'react-helmet-async'
 import App from './app/App.tsx'
 import { HomeScreen } from './app/components/HomeScreen'
 import { ControllerSelection } from './app/components/ControllerSelection'
@@ -32,24 +31,22 @@ import './test-supabase'
 // }
 
 createRoot(document.getElementById('root')!).render(
-  <HelmetProvider>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />}>
-          <Route index element={<HomeScreen />} />
-          <Route path="controllers" element={<ControllerSelection />} />
-          <Route path="services" element={<ServiceSelection />} />
-          <Route path="repair/condition" element={<ControllerCondition />} />
-          <Route path="repair/form" element={<RepairForm />} />
-          <Route path="services/list" element={<ServicesPage />} />
-          <Route path="reviews" element={<ReviewsPage />} />
-          <Route path="repair-logs" element={<RepairLogsPage />} />
-          <Route path="about" element={<AboutPage />} />
-        </Route>
-        <Route path="/review/:token" element={<ReviewPage />} />
-        <Route path="/admin/*" element={<AdminApp />} />
-        <Route path="/admin-mobile/*" element={<AdminMobileApp />} />
-      </Routes>
-    </BrowserRouter>
-  </HelmetProvider>
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<App />}>
+        <Route index element={<HomeScreen />} />
+        <Route path="controllers" element={<ControllerSelection />} />
+        <Route path="services" element={<ServiceSelection />} />
+        <Route path="repair/condition" element={<ControllerCondition />} />
+        <Route path="repair/form" element={<RepairForm />} />
+        <Route path="services/list" element={<ServicesPage />} />
+        <Route path="reviews" element={<ReviewsPage />} />
+        <Route path="repair-logs" element={<RepairLogsPage />} />
+        <Route path="about" element={<AboutPage />} />
+      </Route>
+      <Route path="/review/:token" element={<ReviewPage />} />
+      <Route path="/admin/*" element={<AdminApp />} />
+      <Route path="/admin-mobile/*" element={<AdminMobileApp />} />
+    </Routes>
+  </BrowserRouter>
 )
