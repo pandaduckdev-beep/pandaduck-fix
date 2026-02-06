@@ -84,18 +84,21 @@ export function RepairLogsPage() {
 
     const url = `${window.location.origin}/repair-logs?log=${selectedLog.id}`
     const title = selectedLog.title
+    const text = `[PandaDuck Fix] "${title}"\n\n컨트롤러 수리 작업 후기를 공유합니다.`
 
     try {
       // 웹 공유 API 지원 여부 확인 (모바일)
-      if (navigator.share && navigator.canShare && navigator.canShare({ title, url })) {
+      if (navigator.share && navigator.canShare && navigator.canShare({ title, url, text })) {
         await navigator.share({
           title,
+          text,
           url,
         })
         toast.success('공유되었습니다.')
       } else {
         // 지원하지 않는 경우 클립보드에 복사
-        await navigator.clipboard.writeText(url)
+        const shareText = `${text}\n\n${url}`
+        await navigator.clipboard.writeText(shareText)
         toast.success('링크가 클립보드에 복사되었습니다.')
       }
     } catch (error) {
