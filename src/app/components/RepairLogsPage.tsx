@@ -334,10 +334,10 @@ export function RepairLogsPage() {
             <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
               <button
                 onClick={closeDetail}
-                className="text-base"
-                style={{ fontWeight: 600 }}
+                className="p-2 hover:bg-[#F5F5F7] rounded-full transition-colors"
+                aria-label="뒤로가기"
               >
-                ← 뒤로
+                ←
               </button>
               <button
                 onClick={handleShare}
