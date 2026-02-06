@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useSlideUp } from '@/hooks/useSlideUp'
 import type { RepairLog } from '@/types/database'
 import { toast } from 'sonner'
+import { Helmet } from 'react-helmet-async'
 
 export function RepairLogsPage() {
   const navigate = useNavigate()
@@ -106,6 +107,15 @@ export function RepairLogsPage() {
       }
     }
   }
+
+  // URL 파라미터가 변경될 때 스크롤 잠금/해제
+  useEffect(() => {
+    if (selectedLogId) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+  }, [selectedLogId])
 
   // 초기 로드
   useEffect(() => {
@@ -317,6 +327,28 @@ export function RepairLogsPage() {
           className="fixed inset-0 z-50 bg-white overflow-y-auto"
           style={{ paddingTop: 'env(safe-area-inset-top)' }}
         >
+          {/* Dynamic Meta Tags for Sharing */}
+          <Helmet>
+            <title>{selectedLog.title} - PandaDuck Fix 수리 작업기</title>
+            <meta name="description" content={selectedLog.content.replace(/<[^>]+>/g, '').slice(0, 160)} />
+
+            {/* Open Graph */}
+            <meta property="og:title" content={selectedLog.title} />
+            <meta property="og:description" content={selectedLog.content.replace(/<[^>]+>/g, '').slice(0, 160)} />
+            <meta property="og:image" content={selectedLog.thumbnail_url || 'https://fix.pandaduck.kr/og-image.png'} />
+            <meta property="og:url" content={`https://fix.pandaduck.kr/repair-logs?log=${selectedLog.id}`} />
+
+            {/* Twitter Card */}
+            <meta name="twitter:title" content={selectedLog.title} />
+            <meta name="twitter:description" content={selectedLog.content.replace(/<[^>]+>/g, '').slice(0, 160)} />
+            <meta name="twitter:image" content={selectedLog.thumbnail_url || 'https://fix.pandaduck.kr/og-image.png'} />
+
+            {/* Kakao */}
+            <meta property="kakao:title" content={selectedLog.title} />
+            <meta property="kakao:description" content={selectedLog.content.replace(/<[^>]+>/g, '').slice(0, 160)} />
+            <meta property="kakao:image" content={selectedLog.thumbnail_url || 'https://fix.pandaduck.kr/og-image.png'} />
+          </Helmet>
+
           {/* Modal Header */}
           <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)]">
             <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
