@@ -220,7 +220,7 @@ export function ReviewPage() {
         content: comment.trim(),
         service_name: serviceName,
         image_urls: imageUrls,
-        is_public: false,
+        is_public: true,
       })
 
       if (error) {

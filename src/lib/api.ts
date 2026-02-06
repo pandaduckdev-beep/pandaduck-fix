@@ -232,7 +232,7 @@ export async function submitReview(params: SubmitReviewParams): Promise<Review> 
       content: params.content,
       service_name: params.serviceName,
       image_url: params.imageUrl,
-      is_public: false,
+      is_public: true,
     })
     .select()
     .single()

@@ -1,23 +1,28 @@
-import { Menu, Loader2, ChevronRight, Calendar, Gamepad2 } from 'lucide-react'
+import { Menu, Loader2, ChevronRight, Calendar, Gamepad2, Share2 } from 'lucide-react'
 import { Footer } from '@/app/components/Footer'
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
 import { supabase } from '@/lib/supabase'
 import { useSlideUp } from '@/hooks/useSlideUp'
 import type { RepairLog } from '@/types/database'
+import { toast } from 'sonner'
 
 export function RepairLogsPage() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [logs, setLogs] = useState<RepairLog[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
-  const [selectedLog, setSelectedLog] = useState<RepairLog | null>(null)
   const PAGE_SIZE = 10
   const { setRef } = useSlideUp(logs.length + 4)
+
+  // URL 파라미터에서 선택된 로그 ID 가져오기
+  const selectedLogId = searchParams.get('log')
+  const selectedLog = logs.find(log => log.id === selectedLogId) || null
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -73,6 +78,35 @@ export function RepairLogsPage() {
     }
   }
 
+  // 공유하기
+  const handleShare = async () => {
+    if (!selectedLog) return
+
+    const url = `${window.location.origin}/repair-logs?log=${selectedLog.id}`
+    const title = selectedLog.title
+
+    try {
+      // 웹 공유 API 지원 여부 확인 (모바일)
+      if (navigator.share && navigator.canShare && navigator.canShare({ title, url })) {
+        await navigator.share({
+          title,
+          url,
+        })
+        toast.success('공유되었습니다.')
+      } else {
+        // 지원하지 않는 경우 클립보드에 복사
+        await navigator.clipboard.writeText(url)
+        toast.success('링크가 클립보드에 복사되었습니다.')
+      }
+    } catch (error) {
+      console.error('Failed to share:', error)
+      // 사용자가 공유를 취소한 경우 무시
+      if (error instanceof Error && error.name !== 'AbortError') {
+        toast.error('공유에 실패했습니다.')
+      }
+    }
+  }
+
   // 초기 로드
   useEffect(() => {
     loadLogs(0)
@@ -84,7 +118,7 @@ export function RepairLogsPage() {
       const scrollPosition = window.innerHeight + window.scrollY
       const pageHeight = document.documentElement.scrollHeight
 
-      if (scrollPosition >= pageHeight - 500 && !loadingMore && hasMore && !selectedLog) {
+      if (scrollPosition >= pageHeight - 500 && !loadingMore && hasMore && !selectedLogId) {
         const nextPage = page + 1
         setPage(nextPage)
         loadLogs(nextPage)
@@ -93,20 +127,29 @@ export function RepairLogsPage() {
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [page, loadingMore, hasMore, selectedLog])
+  }, [page, loadingMore, hasMore, selectedLogId])
 
   // 상세 보기 열기
   const openDetail = (log: RepairLog) => {
-    setSelectedLog(log)
+    setSearchParams({ log: log.id })
     incrementViewCount(log.id)
     document.body.style.overflow = 'hidden'
   }
 
   // 상세 보기 닫기
   const closeDetail = () => {
-    setSelectedLog(null)
+    setSearchParams({})
     document.body.style.overflow = ''
   }
+
+  // 브라우저 뒤로가기/앞으로가기 처리
+  useEffect(() => {
+    if (selectedLogId) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+  }, [selectedLogId])
 
   return (
     <div className="min-h-screen bg-white">
@@ -179,6 +222,7 @@ export function RepairLogsPage() {
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
+                      {/* Title */}
                       <h3
                         className="text-base sm:text-lg mb-1 line-clamp-2"
                         style={{ fontWeight: 600 }}
@@ -186,24 +230,24 @@ export function RepairLogsPage() {
                         {log.title}
                       </h3>
 
-                      {log.summary && (
-                        <p className="text-sm text-[#86868B] mb-2 line-clamp-1">{log.summary}</p>
-                      )}
-
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {log.controller_model && (
+                      {/* Controller Model */}
+                      {log.controller_model && (
+                        <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs px-2 py-1 bg-white rounded-full">
                             {log.controller_model}
                           </span>
-                        )}
-                        {log.repair_type && (
-                          <span className="text-xs px-2 py-1 bg-white rounded-full">
-                            {log.repair_type}
-                          </span>
-                        )}
-                      </div>
+                        </div>
+                      )}
 
-                      <div className="flex items-center gap-2 mt-2 text-xs text-[#86868B]">
+                      {/* Content Preview */}
+                      {log.content && (
+                        <p className="text-sm text-[#86868B] mb-2 line-clamp-2">
+                          {log.content.replace(/<[^>]+>/g, '').slice(0, 100)}
+                        </p>
+                      )}
+
+                      {/* Date */}
+                      <div className="flex items-center gap-2 text-xs text-[#86868B]">
                         <Calendar className="w-3 h-3" />
                         <span>{new Date(log.created_at).toLocaleDateString('ko-KR')}</span>
                       </div>
@@ -283,46 +327,67 @@ export function RepairLogsPage() {
               >
                 ← 뒤로
               </button>
+              <button
+                onClick={handleShare}
+                className="p-2 hover:bg-[#F5F5F7] rounded-full transition-colors"
+                title="공유하기"
+              >
+                <Share2 className="w-5 h-5 text-gray-700" />
+              </button>
             </div>
           </div>
 
           {/* Modal Content */}
-          <div className="max-w-md mx-auto px-6 py-6 sm:py-8">
+          <div key={selectedLog.id} className="max-w-md mx-auto px-6 py-6 sm:py-8">
             {/* Title */}
-            <h1 className="text-2xl sm:text-3xl mb-4" style={{ fontWeight: 700 }}>
+            <h1
+              className="text-2xl sm:text-3xl mb-4 slide-up"
+              style={{ fontWeight: 700, animationDelay: '0s' }}
+            >
               {selectedLog.title}
             </h1>
 
             {/* Meta */}
-            <div className="flex items-center gap-3 flex-wrap mb-6">
+            <div
+              className="space-y-3 mb-6 slide-up"
+              style={{ animationDelay: '0.1s' }}
+            >
+              {/* Controller Model */}
               {selectedLog.controller_model && (
-                <span className="text-sm px-3 py-1.5 bg-[#F5F5F7] rounded-full">
-                  {selectedLog.controller_model}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs px-2 py-1 bg-black text-white rounded-full font-semibold">
+                    기종
+                  </span>
+                  <span className="text-sm px-3 py-1.5 bg-[#F5F5F7] rounded-full font-medium">
+                    {selectedLog.controller_model}
+                  </span>
+                </div>
               )}
+
+              {/* Repair Type */}
               {selectedLog.repair_type && (
-                <span className="text-sm px-3 py-1.5 bg-[#F5F5F7] rounded-full">
-                  {selectedLog.repair_type}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs px-2 py-1 bg-black text-white rounded-full font-semibold">
+                    서비스
+                  </span>
+                  <span className="text-sm px-3 py-1.5 bg-[#F5F5F7] rounded-full font-medium">
+                    {selectedLog.repair_type}
+                  </span>
+                </div>
               )}
-              <span className="text-sm text-[#86868B]">
-                {new Date(selectedLog.created_at).toLocaleDateString('ko-KR')}
-              </span>
+
+              {/* Date */}
+              <div className="flex items-center gap-2 text-xs text-[#86868B]">
+                <Calendar className="w-3 h-3" />
+                <span>{new Date(selectedLog.created_at).toLocaleDateString('ko-KR')}</span>
+              </div>
             </div>
 
-            {/* Thumbnail */}
-            {selectedLog.thumbnail_url && (
-              <div className="mb-6">
-                <img
-                  src={selectedLog.thumbnail_url}
-                  alt={selectedLog.title}
-                  className="w-full rounded-2xl"
-                />
-              </div>
-            )}
-
             {/* Content */}
-            <div className="prose prose-sm sm:prose max-w-none">
+            <div
+              className="prose prose-sm sm:prose max-w-none slide-up"
+              style={{ animationDelay: '0.2s' }}
+            >
               <div
                 className="text-[#1d1d1f] leading-relaxed whitespace-pre-wrap"
                 dangerouslySetInnerHTML={{ __html: selectedLog.content.replace(/\n/g, '<br/>') }}
@@ -331,7 +396,10 @@ export function RepairLogsPage() {
 
             {/* Images */}
             {selectedLog.image_urls && selectedLog.image_urls.length > 0 && (
-              <div className="mt-6 space-y-4">
+              <div
+                className="mt-6 space-y-4 slide-up"
+                style={{ animationDelay: '0.3s' }}
+              >
                 {selectedLog.image_urls.map((url, index) => (
                   <img
                     key={index}
@@ -343,8 +411,26 @@ export function RepairLogsPage() {
               </div>
             )}
 
+            {/* Signature */}
+            <div
+              className="mt-8 p-4 bg-[#F5F5F7] rounded-2xl slide-up"
+              style={{ animationDelay: '0.5s' }}
+            >
+              <div className="text-center">
+                <p className="text-xs font-medium text-gray-900 mb-1">
+                  PandaDuck Fix
+                </p>
+                <p className="text-xs text-[#86868B]">
+                  게임의 즐거움을 되찾는 순간까지
+                </p>
+              </div>
+            </div>
+
             {/* CTA */}
-            <div className="mt-8 pt-6 border-t border-[rgba(0,0,0,0.1)]">
+            <div
+              className="mt-6 pt-6 border-t border-[rgba(0,0,0,0.1)] slide-up"
+              style={{ animationDelay: '0.6s' }}
+            >
               <button
                 onClick={() => {
                   closeDetail()
