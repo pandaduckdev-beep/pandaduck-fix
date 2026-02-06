@@ -335,18 +335,20 @@ export function RepairLogsPage() {
             {/* Open Graph */}
             <meta property="og:title" content={selectedLog.title} />
             <meta property="og:description" content={selectedLog.content.replace(/<[^>]+>/g, '').slice(0, 160)} />
-            <meta property="og:image" content={selectedLog.thumbnail_url || 'https://fix.pandaduck.kr/og-image.png'} />
+            <meta property="og:image" content={`https://fix.pandaduck.kr/api/og/${selectedLog.id}`} />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
             <meta property="og:url" content={`https://fix.pandaduck.kr/repair-logs?log=${selectedLog.id}`} />
 
             {/* Twitter Card */}
             <meta name="twitter:title" content={selectedLog.title} />
             <meta name="twitter:description" content={selectedLog.content.replace(/<[^>]+>/g, '').slice(0, 160)} />
-            <meta name="twitter:image" content={selectedLog.thumbnail_url || 'https://fix.pandaduck.kr/og-image.png'} />
+            <meta name="twitter:image" content={`https://fix.pandaduck.kr/api/og/${selectedLog.id}`} />
 
             {/* Kakao */}
             <meta property="kakao:title" content={selectedLog.title} />
             <meta property="kakao:description" content={selectedLog.content.replace(/<[^>]+>/g, '').slice(0, 160)} />
-            <meta property="kakao:image" content={selectedLog.thumbnail_url || 'https://fix.pandaduck.kr/og-image.png'} />
+            <meta property="kakao:image" content={`https://fix.pandaduck.kr/api/og/${selectedLog.id}`} />
           </Helmet>
 
           {/* Modal Header */}
