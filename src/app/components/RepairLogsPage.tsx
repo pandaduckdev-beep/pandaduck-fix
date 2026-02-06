@@ -354,6 +354,7 @@ export function RepairLogsPage() {
             {/* Title */}
             <h1
               className="text-2xl sm:text-3xl mb-4 slide-up"
+              data-animate
               style={{ fontWeight: 700, animationDelay: '0s' }}
             >
               {selectedLog.title}
@@ -362,6 +363,7 @@ export function RepairLogsPage() {
             {/* Meta */}
             <div
               className="space-y-3 mb-6 slide-up"
+              data-animate
               style={{ animationDelay: '0.1s' }}
             >
               {/* Controller Model */}
@@ -398,6 +400,7 @@ export function RepairLogsPage() {
             {/* Content */}
             <div
               className="prose prose-sm sm:prose max-w-none slide-up"
+              data-animate
               style={{ animationDelay: '0.2s' }}
             >
               <div
@@ -410,6 +413,7 @@ export function RepairLogsPage() {
             {selectedLog.image_urls && selectedLog.image_urls.length > 0 && (
               <div
                 className="mt-6 space-y-4 slide-up"
+                data-animate
                 style={{ animationDelay: '0.3s' }}
               >
                 {selectedLog.image_urls.map((url, index) => (
@@ -426,6 +430,7 @@ export function RepairLogsPage() {
             {/* Signature */}
             <div
               className="mt-8 p-4 bg-[#F5F5F7] rounded-2xl slide-up"
+              data-animate
               style={{ animationDelay: '0.5s' }}
             >
               <div className="text-center">
@@ -441,6 +446,7 @@ export function RepairLogsPage() {
             {/* CTA */}
             <div
               className="mt-6 pt-6 border-t border-[rgba(0,0,0,0.1)] slide-up"
+              data-animate
               style={{ animationDelay: '0.6s' }}
             >
               <button
