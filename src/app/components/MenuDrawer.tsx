@@ -64,6 +64,13 @@ export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
               후기
             </button>
             <button
+              onClick={() => handleNavigate('/repair-logs')}
+              className="w-full text-left px-6 py-4 rounded-[20px] hover:bg-[#F5F5F7] transition-colors"
+              style={{ fontWeight: 600 }}
+            >
+              수리 작업기
+            </button>
+            <button
               onClick={() => handleNavigate('/about')}
               className="w-full text-left px-6 py-4 rounded-[20px] hover:bg-[#F5F5F7] transition-colors"
               style={{ fontWeight: 600 }}

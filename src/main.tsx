@@ -8,6 +8,7 @@ import { RepairForm } from './app/components/RepairForm'
 import { ControllerCondition } from './app/components/ControllerCondition'
 import { ServicesPage } from './app/components/ServicesPage'
 import { ReviewsPage } from './app/components/ReviewsPage'
+import { RepairLogsPage } from './app/components/RepairLogsPage'
 import { AboutPage } from './app/components/AboutPage'
 import { ReviewPage } from './pages/ReviewPage'
 import { AdminApp } from './admin/AdminApp.tsx'
@@ -40,6 +41,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="repair/form" element={<RepairForm />} />
         <Route path="services/list" element={<ServicesPage />} />
         <Route path="reviews" element={<ReviewsPage />} />
+        <Route path="repair-logs" element={<RepairLogsPage />} />
         <Route path="about" element={<AboutPage />} />
       </Route>
       <Route path="/review/:token" element={<ReviewPage />} />

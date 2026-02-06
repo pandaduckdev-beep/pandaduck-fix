@@ -452,6 +452,56 @@ export interface Database {
           created_at?: string
         }
       }
+      repair_logs: {
+        Row: {
+          id: string
+          title: string
+          content: string
+          summary: string | null
+          thumbnail_url: string | null
+          image_urls: string[]
+          controller_model: string | null
+          repair_type: string | null
+          is_public: boolean
+          view_count: number
+          naver_blog_url: string | null
+          naver_synced_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          content: string
+          summary?: string | null
+          thumbnail_url?: string | null
+          image_urls?: string[]
+          controller_model?: string | null
+          repair_type?: string | null
+          is_public?: boolean
+          view_count?: number
+          naver_blog_url?: string | null
+          naver_synced_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          content?: string
+          summary?: string | null
+          thumbnail_url?: string | null
+          image_urls?: string[]
+          controller_model?: string | null
+          repair_type?: string | null
+          is_public?: boolean
+          view_count?: number
+          naver_blog_url?: string | null
+          naver_synced_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       service_combos: {
         Row: {
           id: string
@@ -515,6 +565,7 @@ export type ControllerOptionPricing =
   Database['public']['Tables']['controller_option_pricing']['Row']
 export type AdminUser = Database['public']['Tables']['admin_users']['Row']
 export type AdminLoginLog = Database['public']['Tables']['admin_login_logs']['Row']
+export type RepairLog = Database['public']['Tables']['repair_logs']['Row']
 
 export interface ControllerServiceWithOptions extends ControllerService {
   options?: ControllerServiceOption[]

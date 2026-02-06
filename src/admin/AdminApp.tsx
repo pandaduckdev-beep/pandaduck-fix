@@ -10,6 +10,7 @@ import { ReviewsPage } from './pages/ReviewsPage'
 import { RevenuePage } from './pages/RevenuePage'
 import { ExpensesPage } from './pages/ExpensesPage'
 import { DiscountsPage } from './pages/DiscountsPage'
+import { RepairLogsPage } from './pages/RepairLogsPage'
 
 function AdminContent() {
   const { isAuthenticated, loading } = useAuth()
@@ -40,6 +41,7 @@ function AdminContent() {
         <Route path="discounts" element={<DiscountsPage />} />
         <Route path="repairs" element={<RepairsPage />} />
         <Route path="reviews" element={<ReviewsPage />} />
+        <Route path="repair-logs" element={<RepairLogsPage />} />
       </Routes>
     </AdminLayout>
   )
