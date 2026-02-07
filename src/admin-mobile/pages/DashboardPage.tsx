@@ -3,6 +3,7 @@ import { MobileFooterNav } from '../components/MobileFooterNav'
 import { DashboardCard } from '../components/DashboardCard'
 import { StatusCard } from '../components/StatusCard'
 import { RepairRequestCard } from '../components/RepairRequestCard'
+import { ReviewCard } from '../components/ReviewCard'
 import { useEffect, useState } from 'react'
 import { RepairRequest } from '@/types/database'
 import { supabase } from '@/lib/supabase'
@@ -11,6 +12,17 @@ interface RecentRepair extends RepairRequest {
   controller_models?: {
     model_name: string
   }
+}
+
+interface RecentReview {
+  id: string
+  customer_name: string
+  rating: number
+  content: string
+  service_name: string
+  created_at: string
+  is_public: boolean
+  image_urls?: string[]
 }
 
 interface Stats {
@@ -42,6 +54,7 @@ export default function DashboardPage() {
     totalReviews: 0,
   })
   const [recentRepairs, setRecentRepairs] = useState<RecentRepair[]>([])
+  const [recentReviews, setRecentReviews] = useState<RecentReview[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -170,6 +183,15 @@ export default function DashboardPage() {
       })
 
       setRecentRepairs(recentRepairsWithReviews)
+
+      // Recent reviews
+      const { data: recentReviewsData } = await supabase
+        .from('reviews')
+        .select('id, customer_name, rating, content, service_name, created_at, is_public, image_urls')
+        .order('created_at', { ascending: false })
+        .limit(4)
+
+      setRecentReviews(recentReviewsData || [])
     } catch (error) {
       console.error('Error loading stats:', error)
     } finally {
@@ -255,6 +277,36 @@ export default function DashboardPage() {
                     hasReview={request.has_review}
                   />
                 ))}
+              </div>
+            </section>
+
+            {/* Recent Reviews */}
+            <section>
+              <div className="flex justify-between items-end mb-3">
+                <h3 className="text-lg text-[#1D1D1F]" style={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
+                  최근 리뷰
+                </h3>
+              </div>
+              <div className="bg-white rounded-xl overflow-hidden px-4">
+                {recentReviews.length > 0 ? (
+                  recentReviews.map((review) => (
+                    <ReviewCard
+                      key={review.id}
+                      reviewId={review.id}
+                      customerName={review.customer_name}
+                      rating={review.rating}
+                      serviceName={review.service_name}
+                      content={review.content}
+                      date={formatTime(review.created_at)}
+                      isPublic={review.is_public}
+                      imageUrls={review.image_urls}
+                    />
+                  ))
+                ) : (
+                  <div className="py-8 text-center text-[#86868B] text-sm">
+                    아직 리뷰가 없습니다.
+                  </div>
+                )}
               </div>
             </section>
           </main>

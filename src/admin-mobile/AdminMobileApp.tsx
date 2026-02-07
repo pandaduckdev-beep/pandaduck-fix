@@ -5,11 +5,13 @@ import DashboardPage from './pages/DashboardPage'
 import RepairRequestsPage from './pages/RepairRequestsPage'
 import RepairRequestDetailPage from './pages/RepairRequestDetailPage'
 import ReviewsPage from './pages/ReviewsPage'
+import ReviewDetailPage from './pages/ReviewDetailPage'
 import SettingsPage from './pages/SettingsPage'
 import ControllerModelsPage from './pages/ControllerModelsPage'
 import ServicesPage from './pages/ServicesPage'
 import EditServicePage from './pages/EditServicePage'
 import ServiceOptionsPage from './pages/ServiceOptionsPage'
+import RepairLogsPage from './pages/RepairLogsPage'
 
 // Placeholders for new pages
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -48,7 +50,7 @@ function AdminMobileContent() {
       <Route path="repairs" element={<RepairRequestsPage />} />
       <Route path="repairs/:id" element={<RepairRequestDetailPage />} />
       <Route path="reviews" element={<ReviewsPage />} />
-      <Route path="reviews/:id" element={<PlaceholderPage title="리뷰 상세" />} />
+      <Route path="reviews/:id" element={<ReviewDetailPage />} />
       <Route path="revenue" element={<PlaceholderPage title="매출 통계" />} />
       <Route path="expenses" element={<PlaceholderPage title="지출 관리" />} />
       <Route path="controllers" element={<ControllerModelsPage />} />
@@ -56,6 +58,7 @@ function AdminMobileContent() {
       <Route path="services/:id/edit" element={<EditServicePage />} />
       <Route path="services/:id/options" element={<ServiceOptionsPage />} />
       <Route path="discounts" element={<PlaceholderPage title="할인 설정" />} />
+      <Route path="repair-logs" element={<RepairLogsPage />} />
       <Route path="settings" element={<SettingsPage />} />
     </Routes>
   )
