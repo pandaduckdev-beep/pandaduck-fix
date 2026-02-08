@@ -447,7 +447,7 @@ export function RepairLogsPage() {
                 </div>
               </>
             ) : (
-              <>
+              <div className="animate-fade-in">
                 {/* Title */}
                 <h1
                   className="text-2xl sm:text-3xl mb-4 slide-up"
