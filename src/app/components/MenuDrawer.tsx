@@ -85,11 +85,10 @@ export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
               href="https://open.kakao.com/o/sWidj5ei"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full p-4 bg-black hover:bg-gray-800 text-white rounded-[20px] transition-all hover:scale-[0.98] active:scale-[0.96]"
+              className="flex items-center justify-center w-full p-4 bg-black hover:bg-gray-800 text-white rounded-[20px] transition-all hover:scale-[0.98] active:scale-[0.96]"
               style={{ fontWeight: 600 }}
             >
-              <MessageCircle className="w-5 h-5" />
-              <span>수리 시작하기</span>
+              수리 시작하기
             </a>
           </div>
 
