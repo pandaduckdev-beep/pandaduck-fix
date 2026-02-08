@@ -59,14 +59,21 @@
 
 /* TipTap content styling for proper spacing */
 .repair-log-content p {
-  margin-bottom: 0.75em;
+  margin-top: 0;
+  margin-bottom: 1em;
+  line-height: 1.6;
 }
 
 .repair-log-content p:empty {
-  height: 1em;
-  margin: 0.5em 0;
+  min-height: 1.6em;
+  margin-top: 0;
+  margin-bottom: 1em;
 }
 
 .repair-log-content p:last-child {
   margin-bottom: 0;
+}
+
+.repair-log-content br {
+  display: none;
 }
