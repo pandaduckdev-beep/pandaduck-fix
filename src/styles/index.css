@@ -59,18 +59,24 @@
 
 /* TipTap content styling for proper spacing */
 .repair-log-content {
-  line-height: 1.75;
+  line-height: 1.75 !important;
 }
 
-.repair-log-content > p {
-  margin-top: 0;
-  margin-bottom: 1em;
+.repair-log-content > * {
+  margin-top: 0 !important;
+  margin-bottom: 1em !important;
 }
 
-.repair-log-content > p:empty {
-  min-height: 1.75em;
+.repair-log-content > *:empty {
+  min-height: 1.75em !important;
+  height: 1.75em !important;
 }
 
-.repair-log-content > p:last-child {
-  margin-bottom: 0;
+.repair-log-content > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* 연속된 빈 줄이 있을 때도 일정한 간격 유지 */
+.repair-log-content > p:empty + p:empty {
+  margin-top: 0 !important;
 }
