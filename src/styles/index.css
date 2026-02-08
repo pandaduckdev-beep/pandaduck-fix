@@ -49,3 +49,10 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Prose content styling for better line breaks */
+.prose-content br + br {
+  content: "";
+  display: block;
+  margin-top: 0.75em;
+}

@@ -406,9 +406,7 @@ export function RepairLogsPage() {
               <div
                 className="text-[#1d1d1f] leading-relaxed"
                 dangerouslySetInnerHTML={{
-                  __html: selectedLog.content
-                    .replace(/\n\n/g, '<br/><br/>')
-                    .replace(/\n/g, '<br/>')
+                  __html: selectedLog.content.replace(/\n/g, '<br/>')
                 }}
               />
             </div>
