@@ -47,12 +47,14 @@ export function RepairLogsPage() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
+  const [detailLog, setDetailLog] = useState<RepairLog | null>(null)
+  const [loadingDetail, setLoadingDetail] = useState(false)
   const PAGE_SIZE = 10
   const { setRef } = useSlideUp(logs.length + 4)
 
   // URL 파라미터에서 선택된 로그 ID 가져오기
   const selectedLogId = searchParams.get('log')
-  const selectedLog = logs.find(log => log.id === selectedLogId) || null
+  const selectedLog = detailLog || logs.find(log => log.id === selectedLogId) || null
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -102,6 +104,7 @@ export function RepairLogsPage() {
   // 상세 조회 시 전체 데이터 가져오기
   const loadLogDetail = async (logId: string) => {
     try {
+      setLoadingDetail(true)
       const { data, error } = await supabase
         .from('repair_logs')
         .select('*')
@@ -112,13 +115,17 @@ export function RepairLogsPage() {
       if (error) throw error
 
       if (data) {
-        // 기존 로그 배열에서 해당 로그만 업데이트
+        setDetailLog(data)
+        // 기존 로그 배열에서 해당 로그도 업데이트
         setLogs((prev) =>
-          prev.map((log) => (log.id === logId ? { ...log, content: data.content, image_urls: data.image_urls } : log))
+          prev.map((log) => (log.id === logId ? data : log))
         )
       }
     } catch (error) {
       console.error('Failed to load log detail:', error)
+      toast.error('작업기를 불러오는데 실패했습니다.')
+    } finally {
+      setLoadingDetail(false)
     }
   }
 
@@ -168,13 +175,20 @@ export function RepairLogsPage() {
   useEffect(() => {
     if (selectedLogId) {
       document.body.style.overflow = 'hidden'
-      // 상세 데이터가 없으면 로드
-      const selectedLog = logs.find(log => log.id === selectedLogId)
-      if (selectedLog && !selectedLog.content) {
+
+      // 먼저 현재 리스트에서 찾기
+      const foundInList = logs.find(log => log.id === selectedLogId)
+
+      // 리스트에 없거나 content가 없으면 상세 조회
+      if (!foundInList || !foundInList.content) {
         loadLogDetail(selectedLogId)
+      } else if (foundInList.content) {
+        // content가 있으면 detailLog로 설정
+        setDetailLog(foundInList)
       }
     } else {
       document.body.style.overflow = ''
+      setDetailLog(null)
     }
   }, [selectedLogId])
 
