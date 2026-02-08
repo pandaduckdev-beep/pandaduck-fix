@@ -560,62 +560,8 @@ export function RepairLogsPage() {
                     <span>수리 문의하기</span>
                   </a>
                 </div>
-              </>
-            )}
-          </div>
-
-            {/* Images */}
-            {selectedLog.image_urls && selectedLog.image_urls.length > 0 && (
-              <div
-                className="mt-6 space-y-4 slide-up"
-                data-animate
-                style={{ animationDelay: '0.3s' }}
-              >
-                {selectedLog.image_urls.map((url, index) => (
-                  <img
-                    key={index}
-                    src={getOptimizedThumbnailUrl(url, 1200) || url}
-                    alt={`${selectedLog.title} 이미지 ${index + 1}`}
-                    className="w-full rounded-2xl"
-                    loading="lazy"
-                  />
-                ))}
               </div>
             )}
-
-            {/* Signature */}
-            <div
-              className="mt-8 p-4 bg-[#F5F5F7] rounded-2xl slide-up"
-              data-animate
-              style={{ animationDelay: '0.5s' }}
-            >
-              <div className="text-center">
-                <p className="text-xs font-medium text-gray-900 mb-1">
-                  PandaDuck Fix
-                </p>
-                <p className="text-xs text-[#86868B]">
-                  게임의 즐거움을 되찾는 순간까지
-                </p>
-              </div>
-            </div>
-
-            {/* CTA */}
-            <div
-              className="mt-6 pt-6 border-t border-[rgba(0,0,0,0.1)] slide-up"
-              data-animate
-              style={{ animationDelay: '0.6s' }}
-            >
-              <button
-                onClick={() => {
-                  closeDetail()
-                  navigate('/controllers')
-                }}
-                className="w-full bg-black text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
-                style={{ fontWeight: 600 }}
-              >
-                나도 수리 신청하기
-              </button>
-            </div>
           </div>
         </div>
       )}
