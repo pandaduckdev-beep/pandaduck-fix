@@ -312,9 +312,9 @@ export function RepairLogsPage() {
                       )}
 
                       {/* Content Preview */}
-                      {log.content && (
+                      {log.summary && (
                         <p className="text-sm text-[#86868B] mb-2 line-clamp-2">
-                          {log.content.replace(/<[^>]+>/g, '').slice(0, 100)}
+                          {log.summary}
                         </p>
                       )}
 
