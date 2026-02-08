@@ -209,8 +209,28 @@ export function ReviewsPage() {
       {/* Reviews List */}
       <section className="max-w-md mx-auto px-6 pb-6 sm:pb-8">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-black" />
+          // Skeleton UI
+          <div className="space-y-3 sm:space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-6 space-y-3 sm:space-y-4 animate-pulse">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="h-5 bg-white rounded w-1/3"></div>
+                    <div className="h-4 bg-white rounded w-1/4"></div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <div className="h-7 bg-white rounded-full w-20"></div>
+                  <div className="h-7 bg-white rounded-full w-24"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-white rounded w-full"></div>
+                  <div className="h-4 bg-white rounded w-5/6"></div>
+                  <div className="h-4 bg-white rounded w-4/6"></div>
+                </div>
+                <div className="h-32 bg-white rounded-lg"></div>
+              </div>
+            ))}
           </div>
         ) : (
           <>
@@ -220,7 +240,7 @@ export function ReviewsPage() {
                   key={review.id}
                   ref={setRef(index + 2)}
                   className="slide-up bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-6 space-y-3 sm:space-y-4"
-                  style={{ transitionDelay: `${Math.min(index * 0.1, 0.5)}s` }}
+                  style={{ transitionDelay: `${Math.min(index * 0.05, 0.3)}s` }}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
