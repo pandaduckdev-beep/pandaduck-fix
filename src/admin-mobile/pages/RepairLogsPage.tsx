@@ -8,13 +8,13 @@ import {
   EyeOff,
   Trash2,
   Edit,
-  X,
   Image as ImageIcon,
   ExternalLink,
   Search,
 } from 'lucide-react'
 import { useToast } from '@/hooks/useToast.tsx'
 import type { RepairLog } from '@/types/database'
+import { RichTextEditor } from '@/components/common/RichTextEditor'
 
 type LogStatus = 'all' | 'public' | 'private'
 
@@ -477,12 +477,10 @@ export default function RepairLogsPage() {
                 <label className="block text-sm font-semibold text-[#1D1D1F] mb-2">
                   내용 <span className="text-[#FF3B30]">*</span>
                 </label>
-                <textarea
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#F5F5F7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#007AFF]/20 min-h-[200px] resize-y"
+                <RichTextEditor
+                  content={formData.content}
+                  onChange={(content) => setFormData({ ...formData, content })}
                   placeholder="수리 과정을 상세히 작성해주세요..."
-                  required
                 />
               </div>
 
