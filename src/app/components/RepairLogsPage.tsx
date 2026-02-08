@@ -404,8 +404,12 @@ export function RepairLogsPage() {
               style={{ animationDelay: '0.2s' }}
             >
               <div
-                className="text-[#1d1d1f] leading-relaxed whitespace-pre-wrap"
-                dangerouslySetInnerHTML={{ __html: selectedLog.content.replace(/\n/g, '<br/>') }}
+                className="text-[#1d1d1f] leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: selectedLog.content
+                    .replace(/\n\n/g, '<br/><br/>')
+                    .replace(/\n/g, '<br/>')
+                }}
               />
             </div>
 
