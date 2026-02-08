@@ -70,9 +70,6 @@ export async function getOptionPricingByController(
 export async function getServicesWithPricing(
   controllerModelId: string
 ): Promise<ControllerServiceWithPricing[]> {
-  console.log('getServicesWithPricing called with controllerModelId:', controllerModelId)
-  console.log('Type of controllerModelId:', typeof controllerModelId)
-
   // If controllerModelId looks like a model_id (e.g., 'dualsense'), convert it to UUID first
   let modelUuid = controllerModelId
 
@@ -82,7 +79,6 @@ export async function getServicesWithPricing(
     const model = await getControllerModelById(controllerModelId)
     if (model) {
       modelUuid = model.id
-      console.log('Converted model_id to UUID:', modelUuid)
     }
   }
 
@@ -92,9 +88,6 @@ export async function getServicesWithPricing(
     .eq('controller_model_id', modelUuid)
     .eq('is_active', true)
     .order('display_order')
-
-  console.log('Supabase query result - services:', services)
-  console.log('Supabase query result - error:', servicesError)
 
   if (servicesError) {
     console.error('Error fetching controller services:', servicesError)
@@ -108,7 +101,6 @@ export async function getServicesWithPricing(
     })
   )
 
-  console.log('Final services with pricing:', servicesWithPricing)
   return servicesWithPricing
 }
 

@@ -43,9 +43,6 @@ const setupAdminPWA = () => {
     // Service Worker 등록
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/admin-sw.js')
-        .then((registration) => {
-          console.log('Admin Service Worker registered:', registration.scope)
-        })
         .catch((error) => {
           console.error('Admin Service Worker registration failed:', error)
         })

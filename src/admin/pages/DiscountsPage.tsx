@@ -45,8 +45,6 @@ export function DiscountsPage() {
         throw controllersError
       }
 
-      console.log('Loaded controllers:', controllersData)
-
       setCombos(combosData || [])
       setControllers(controllersData || [])
     } catch (error) {
@@ -265,9 +263,6 @@ interface ComboModalProps {
 }
 
 function ComboModal({ combo, controllers, onClose, onSuccess }: ComboModalProps) {
-  console.log('ComboModal - controllers:', controllers)
-  console.log('ComboModal - controllers length:', controllers.length)
-
   const [formData, setFormData] = useState({
     combo_name: combo?.combo_name || '',
     description: combo?.description || '',
