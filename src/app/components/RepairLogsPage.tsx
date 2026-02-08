@@ -30,7 +30,8 @@ const getOptimizedThumbnailUrl = (url: string | null, size: number = 200): strin
 }
 
 // HTML content 내 이미지 최적화
-const optimizeContentImages = (html: string): string => {
+const optimizeContentImages = (html: string | undefined | null): string => {
+  if (!html) return ''
   // HTML 내의 img 태그 src를 최적화
   return html.replace(/<img[^>]+src=["']([^"']+)["']/g, (match, src) => {
     const optimizedSrc = getOptimizedThumbnailUrl(src, 1200) || src
@@ -480,7 +481,7 @@ export function RepairLogsPage() {
               <div
                 className="text-[#1d1d1f] repair-log-content"
                 dangerouslySetInnerHTML={{
-                  __html: optimizeContentImages(selectedLog.content)
+                  __html: optimizeContentImages(selectedLog.content || '')
                 }}
               />
             </div>
