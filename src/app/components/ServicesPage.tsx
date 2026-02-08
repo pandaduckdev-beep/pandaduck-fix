@@ -242,21 +242,36 @@ export function ServicesPage() {
 
       {/* Services Grid */}
       <section className="max-w-md mx-auto px-6 pb-8">
-        {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block w-8 h-8 border-4 border-[#86868B] border-t-black rounded-full animate-spin"></div>
-            <p className="mt-4 text-[#86868B]">서비스 정보를 불러오는 중...</p>
+        {loading ? (
+          // Skeleton UI
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4 animate-pulse">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-white rounded-full flex-shrink-0"></div>
+                  <div className="flex-1 space-y-3">
+                    <div className="h-6 bg-white rounded w-1/3"></div>
+                    <div className="h-4 bg-white rounded w-full"></div>
+                    <div className="h-4 bg-white rounded w-2/3"></div>
+                    <div className="h-8 bg-white rounded w-1/4 mt-4"></div>
+                    <div className="h-px bg-[rgba(0,0,0,0.1)] mt-4"></div>
+                    <div className="h-5 bg-white rounded w-1/4 mt-4"></div>
+                    <div className="h-16 bg-white rounded-lg mt-2"></div>
+                  </div>
+                </div>
+                <div className="h-12 bg-white rounded-full mt-4"></div>
+              </div>
+            ))}
           </div>
-        )}
-
-        {!loading && (
+        ) : (
+          // Actual Content
           <div className="space-y-4">
             {services.map((service, index) => (
               <div
                 key={service.id}
                 ref={setRef(index + 1)}
                 className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4"
-                style={{ transitionDelay: `${index * 0.1}s` }}
+                style={{ transitionDelay: `${index * 0.05}s` }}
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
