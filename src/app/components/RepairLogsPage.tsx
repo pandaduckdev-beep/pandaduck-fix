@@ -406,7 +406,10 @@ export function RepairLogsPage() {
               <div
                 className="text-[#1d1d1f] leading-relaxed"
                 dangerouslySetInnerHTML={{
-                  __html: selectedLog.content.replace(/\n/g, '<br/>')
+                  __html: selectedLog.content
+                    .split('\n\n')
+                    .map(para => `<p style="margin-bottom: 1em;">${para.replace(/\n/g, '<br/>')}</p>`)
+                    .join('')
                 }}
               />
             </div>
