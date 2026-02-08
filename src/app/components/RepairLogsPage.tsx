@@ -16,10 +16,19 @@ const getOptimizedThumbnailUrl = (url: string | null, size: number = 200): strin
   if (url.includes('/storage/v1/object/public/')) {
     try {
       const urlObj = new URL(url)
+
+      // 기존 파라미터 제거 (중복 방지)
+      urlObj.searchParams.delete('width')
+      urlObj.searchParams.delete('quality')
+      urlObj.searchParams.delete('resize')
+      urlObj.searchParams.delete('format')
+
       // 이미지 변환 파라미터 추가
       urlObj.searchParams.set('width', size.toString())
       urlObj.searchParams.set('quality', '80')
       urlObj.searchParams.set('resize', 'cover')
+      urlObj.searchParams.set('format', 'webp')
+
       return urlObj.toString()
     } catch {
       return url

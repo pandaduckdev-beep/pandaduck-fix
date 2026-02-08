@@ -15,7 +15,6 @@ import { AdminApp } from './admin/AdminApp.tsx'
 import AdminMobileApp from './admin-mobile/AdminMobileApp'
 import './styles/index.css'
 import './styles/accessibility.css'
-import './test-supabase'
 
 // Admin PWA 설정
 const setupAdminPWA = () => {
@@ -40,13 +39,12 @@ const setupAdminPWA = () => {
       appleTitle.setAttribute('content', 'PD Admin')
     }
 
-    // Service Worker 등록
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/admin-sw.js')
-        .catch((error) => {
-          console.error('Admin Service Worker registration failed:', error)
-        })
-    }
+    // Service Worker 등록 (일시 비활성화)
+    // if ('serviceWorker' in navigator) {
+    //   navigator.serviceWorker.register('/admin-sw.js').catch((error) => {
+    //     console.error('Admin Service Worker registration failed:', error)
+    //   })
+    // }
   }
 }
 
