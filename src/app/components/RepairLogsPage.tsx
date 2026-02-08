@@ -179,18 +179,18 @@ export function RepairLogsPage() {
       // 먼저 현재 리스트에서 찾기
       const foundInList = logs.find(log => log.id === selectedLogId)
 
-      // 리스트에 없거나 content가 없으면 상세 조회
-      if (!foundInList || !foundInList.content) {
-        loadLogDetail(selectedLogId)
-      } else if (foundInList.content) {
-        // content가 있으면 detailLog로 설정
+      // 리스트에 있고 content가 있으면 detailLog로 설정
+      if (foundInList && foundInList.content) {
         setDetailLog(foundInList)
+      } else {
+        // 리스트에 없거나 content가 없으면 상세 조회
+        loadLogDetail(selectedLogId)
       }
     } else {
       document.body.style.overflow = ''
       setDetailLog(null)
     }
-  }, [selectedLogId])
+  }, [selectedLogId, logs])
 
   // 초기 로드
   useEffect(() => {
