@@ -68,27 +68,17 @@
   margin-bottom: 0;
 }
 
-.repair-log-content > *:not(:empty):not(:last-child) {
-  margin-bottom: 1.75em;
-}
-
 .repair-log-content > *:empty {
   min-height: 1.75em;
   height: 1.75em;
 }
 
-.repair-log-content br {
-  display: block;
-  margin-bottom: 0.75em;
-  content: "";
-}
-
-.repair-log-content br + br {
-  margin-top: 0;
-}
-
 .repair-log-content > *:last-child {
   margin-bottom: 0;
+}
+
+.repair-log-content br {
+  display: none;
 }
 
 .repair-log-content h1,
@@ -105,11 +95,10 @@
 .repair-log-content ul,
 .repair-log-content ol {
   padding-left: 1.5em;
-  margin-bottom: 1.75em;
 }
 
 .repair-log-content li {
-  margin-bottom: 0.4375em;
+  margin-bottom: 0;
 }
 
 .repair-log-content img {
