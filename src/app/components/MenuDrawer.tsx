@@ -79,19 +79,6 @@ export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
             </button>
           </nav>
 
-          {/* CTA Button */}
-          <div className="px-6 pb-6">
-            <a
-              href="https://open.kakao.com/o/sWidj5ei"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center w-full p-4 bg-black hover:bg-gray-800 text-white rounded-[20px] transition-all hover:scale-[0.98] active:scale-[0.96]"
-              style={{ fontWeight: 600 }}
-            >
-              수리 시작하기
-            </a>
-          </div>
-
           {/* Footer in Menu */}
           <div className="border-t border-[rgba(0,0,0,0.05)]">
             <div className="px-6 py-5">
