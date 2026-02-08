@@ -59,24 +59,61 @@
 
 /* TipTap content styling for proper spacing */
 .repair-log-content {
-  line-height: 1.75 !important;
+  line-height: 1.75;
+  font-size: 1rem;
 }
 
 .repair-log-content > * {
-  margin-top: 0 !important;
-  margin-bottom: 1em !important;
+  margin-top: 0;
+  margin-bottom: 1em;
 }
 
 .repair-log-content > *:empty {
-  min-height: 1.75em !important;
-  height: 1.75em !important;
+  min-height: 1.75em;
+  height: 1.75em;
 }
 
 .repair-log-content > *:last-child {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
 }
 
-/* 연속된 빈 줄이 있을 때도 일정한 간격 유지 */
-.repair-log-content > p:empty + p:empty {
-  margin-top: 0 !important;
+.repair-log-content h1,
+.repair-log-content h2,
+.repair-log-content h3,
+.repair-log-content h4,
+.repair-log-content h5,
+.repair-log-content h6 {
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.repair-log-content ul,
+.repair-log-content ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.repair-log-content li {
+  margin-bottom: 0.25em;
+}
+
+.repair-log-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1em 0;
+}
+
+.repair-log-content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.repair-log-content strong {
+  font-weight: 700;
+}
+
+.repair-log-content em {
+  font-style: italic;
 }

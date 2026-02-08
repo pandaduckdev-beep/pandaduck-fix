@@ -399,12 +399,12 @@ export function RepairLogsPage() {
 
             {/* Content */}
             <div
-              className="prose prose-sm sm:prose max-w-none slide-up"
+              className="slide-up"
               data-animate
               style={{ animationDelay: '0.2s' }}
             >
               <div
-                className="text-[#1d1d1f] leading-relaxed repair-log-content"
+                className="text-[#1d1d1f] repair-log-content"
                 dangerouslySetInnerHTML={{
                   __html: selectedLog.content
                 }}
