@@ -436,7 +436,7 @@ export function RepairLogsPage() {
           {/* Modal Content */}
           <div key={selectedLog.id} className="max-w-md mx-auto px-6 py-6 sm:py-8">
             {loadingDetail ? (
-              <>
+              <div className="animate-fade-in">
                 {/* Title Skeleton */}
                 <div className="h-8 sm:h-10 bg-[#F5F5F7] rounded mb-4 animate-pulse"></div>
 
@@ -454,7 +454,7 @@ export function RepairLogsPage() {
                   <div className="h-4 bg-[#F5F5F7] rounded animate-pulse"></div>
                   <div className="h-4 bg-[#F5F5F7] rounded animate-pulse w-5/6"></div>
                 </div>
-              </>
+              </div>
             ) : (
               <div className="animate-fade-in">
                 {/* Title */}

@@ -210,9 +210,9 @@ export function ReviewsPage() {
       <section className="max-w-md mx-auto px-6 pb-6 sm:pb-8">
         {loading ? (
           // Skeleton UI
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-3 sm:space-y-4 animate-fade-in">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-6 space-y-3 sm:space-y-4 animate-pulse">
+              <div key={i} className="bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-6 space-y-3 sm:space-y-4 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0 space-y-2">
                     <div className="h-5 bg-white rounded w-1/3"></div>
