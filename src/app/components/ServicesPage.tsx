@@ -243,25 +243,9 @@ export function ServicesPage() {
       {/* Services Grid */}
       <section className="max-w-md mx-auto px-6 pb-8">
         {loading ? (
-          // Skeleton UI
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4 animate-pulse slide-up" data-animate style={{ animationDelay: `${i * 0.1}s, ${i * 0.1}s` }}>
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-white rounded-full flex-shrink-0"></div>
-                  <div className="flex-1 space-y-3">
-                    <div className="h-6 bg-white rounded w-1/3"></div>
-                    <div className="h-4 bg-white rounded w-full"></div>
-                    <div className="h-4 bg-white rounded w-2/3"></div>
-                    <div className="h-8 bg-white rounded w-1/4 mt-4"></div>
-                    <div className="h-px bg-[rgba(0,0,0,0.1)] mt-4"></div>
-                    <div className="h-5 bg-white rounded w-1/4 mt-4"></div>
-                    <div className="h-16 bg-white rounded-lg mt-2"></div>
-                  </div>
-                </div>
-                <div className="h-12 bg-white rounded-full mt-4"></div>
-              </div>
-            ))}
+          // Loading Spinner
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-black" />
           </div>
         ) : (
           // Actual Content
