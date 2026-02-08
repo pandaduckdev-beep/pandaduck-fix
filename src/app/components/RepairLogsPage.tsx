@@ -404,8 +404,7 @@ export function RepairLogsPage() {
               style={{ animationDelay: '0.2s' }}
             >
               <div
-                className="text-[#1d1d1f] leading-relaxed"
-                style={{ whiteSpace: 'pre-line' }}
+                className="text-[#1d1d1f] leading-relaxed repair-log-content"
                 dangerouslySetInnerHTML={{
                   __html: selectedLog.content
                 }}

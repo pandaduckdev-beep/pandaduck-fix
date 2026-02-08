@@ -56,3 +56,17 @@
   display: block;
   margin-top: 0.75em;
 }
+
+/* TipTap content styling for proper spacing */
+.repair-log-content p {
+  margin-bottom: 0.75em;
+}
+
+.repair-log-content p:empty {
+  height: 1em;
+  margin: 0.5em 0;
+}
+
+.repair-log-content p:last-child {
+  margin-bottom: 0;
+}
