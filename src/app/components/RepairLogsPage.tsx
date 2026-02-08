@@ -59,7 +59,7 @@ export function RepairLogsPage() {
   const [page, setPage] = useState(0)
   const [detailLog, setDetailLog] = useState<RepairLog | null>(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
-  const PAGE_SIZE = 10
+  const PAGE_SIZE = 12
   const { setRef } = useSlideUp(logs.length + 4)
 
   // URL 파라미터에서 선택된 로그 ID 가져오기
