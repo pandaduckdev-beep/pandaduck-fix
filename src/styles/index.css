@@ -58,22 +58,19 @@
 }
 
 /* TipTap content styling for proper spacing */
-.repair-log-content p {
-  margin-top: 0;
-  margin-bottom: 1em;
-  line-height: 1.6;
+.repair-log-content {
+  line-height: 1.75;
 }
 
-.repair-log-content p:empty {
-  min-height: 1.6em;
+.repair-log-content > p {
   margin-top: 0;
   margin-bottom: 1em;
 }
 
-.repair-log-content p:last-child {
+.repair-log-content > p:empty {
+  min-height: 1.75em;
+}
+
+.repair-log-content > p:last-child {
   margin-bottom: 0;
-}
-
-.repair-log-content br {
-  display: none;
 }
