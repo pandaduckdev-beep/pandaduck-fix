@@ -288,9 +288,9 @@ export function RepairLogsPage() {
       <section className="max-w-md mx-auto px-6 pb-6 sm:pb-8">
         {loading ? (
           // Skeleton UI
-          <div className="space-y-3 sm:space-y-4 animate-fade-in">
+          <div className="space-y-3 sm:space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="w-full bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-5 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}>
+              <div key={i} className="w-full bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-5 animate-pulse slide-up" data-animate style={{ animationDelay: `${i * 0.1}s, ${i * 0.1}s` }}>
                 <div className="flex gap-4">
                   {/* Thumbnail Skeleton */}
                   <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#E5E5E5] rounded-xl flex-shrink-0"></div>

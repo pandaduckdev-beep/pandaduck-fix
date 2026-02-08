@@ -244,9 +244,9 @@ export function ServicesPage() {
       <section className="max-w-md mx-auto px-6 pb-8">
         {loading ? (
           // Skeleton UI
-          <div className="space-y-4 animate-fade-in">
+          <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}>
+              <div key={i} className="bg-[#F5F5F7] rounded-[28px] p-6 space-y-4 animate-pulse slide-up" data-animate style={{ animationDelay: `${i * 0.1}s, ${i * 0.1}s` }}>
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-white rounded-full flex-shrink-0"></div>
                   <div className="flex-1 space-y-3">
