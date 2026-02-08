@@ -1,4 +1,4 @@
-import { Menu, Loader2, ChevronRight, Calendar, Gamepad2, Share2 } from 'lucide-react'
+import { Menu, Loader2, ChevronRight, Calendar, Gamepad2, Share2, MessageCircle } from 'lucide-react'
 import { Footer } from '@/app/components/Footer'
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
