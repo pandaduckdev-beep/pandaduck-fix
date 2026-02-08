@@ -1,4 +1,4 @@
-import { Menu } from 'lucide-react'
+import { Menu, Loader2 } from 'lucide-react'
 import {
   Gamepad2,
   Cpu,
