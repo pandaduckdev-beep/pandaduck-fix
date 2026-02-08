@@ -2,7 +2,7 @@ import { MobileHeader } from '../components/MobileHeader'
 import { MobileFooterNav } from '../components/MobileFooterNav'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/admin/contexts/AuthContext'
-import { User, LogOut, ChevronRight, Moon, Sun } from 'lucide-react'
+import { User, LogOut, ChevronRight, FileText, Gamepad2, Tag } from 'lucide-react'
 
 export default function SettingsPage() {
   const navigate = useNavigate()
@@ -14,6 +14,27 @@ export default function SettingsPage() {
       description: '관리자 계정 정보 수정',
       icon: User,
       action: () => navigate('/admin-mobile/profile'),
+    },
+  ]
+
+  const managementMenuItems = [
+    {
+      title: '수리 작업기',
+      description: '수리 작업 블로그 관리',
+      icon: FileText,
+      action: () => navigate('/admin-mobile/repair-logs'),
+    },
+    {
+      title: '컨트롤러 모델',
+      description: '컨트롤러 모델 관리',
+      icon: Gamepad2,
+      action: () => navigate('/admin-mobile/controllers'),
+    },
+    {
+      title: '할인 설정',
+      description: '할인 및 프로모션 관리',
+      icon: Tag,
+      action: () => navigate('/admin-mobile/discounts'),
     },
   ]
 
@@ -45,29 +66,64 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Menu Items */}
-        <div className="bg-white rounded-2xl overflow-hidden">
-          {menuItems.map((item, index) => {
-            const Icon = item.icon
-            return (
-              <button
-                key={index}
-                onClick={item.action}
-                className="w-full flex items-center gap-3 px-5 py-4 hover:bg-[#F5F5F7] transition-ios btn-press border-b border-[rgba(0,0,0,0.06)] last:border-0"
-              >
-                <Icon className="w-5 h-5 text-[#86868B]" strokeWidth={2} />
-                <div className="flex-1 text-left">
-                  <p className="text-sm text-[#1D1D1F]" style={{ fontWeight: 600 }}>
-                    {item.title}
-                  </p>
-                  <p className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>
-                    {item.description}
-                  </p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-[#86868B]" strokeWidth={2} />
-              </button>
-            )
-          })}
+        {/* Management Menu */}
+        <div>
+          <h3 className="text-xs text-[#86868B] px-4 mb-2" style={{ fontWeight: 600 }}>
+            관리 메뉴
+          </h3>
+          <div className="bg-white rounded-2xl overflow-hidden">
+            {managementMenuItems.map((item, index) => {
+              const Icon = item.icon
+              return (
+                <button
+                  key={index}
+                  onClick={item.action}
+                  className="w-full flex items-center gap-3 px-5 py-4 hover:bg-[#F5F5F7] transition-ios btn-press border-b border-[rgba(0,0,0,0.06)] last:border-0"
+                >
+                  <Icon className="w-5 h-5 text-[#007AFF]" strokeWidth={2} />
+                  <div className="flex-1 text-left">
+                    <p className="text-sm text-[#1D1D1F]" style={{ fontWeight: 600 }}>
+                      {item.title}
+                    </p>
+                    <p className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>
+                      {item.description}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[#86868B]" strokeWidth={2} />
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Account Menu */}
+        <div>
+          <h3 className="text-xs text-[#86868B] px-4 mb-2" style={{ fontWeight: 600 }}>
+            계정
+          </h3>
+          <div className="bg-white rounded-2xl overflow-hidden">
+            {menuItems.map((item, index) => {
+              const Icon = item.icon
+              return (
+                <button
+                  key={index}
+                  onClick={item.action}
+                  className="w-full flex items-center gap-3 px-5 py-4 hover:bg-[#F5F5F7] transition-ios btn-press border-b border-[rgba(0,0,0,0.06)] last:border-0"
+                >
+                  <Icon className="w-5 h-5 text-[#86868B]" strokeWidth={2} />
+                  <div className="flex-1 text-left">
+                    <p className="text-sm text-[#1D1D1F]" style={{ fontWeight: 600 }}>
+                      {item.title}
+                    </p>
+                    <p className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>
+                      {item.description}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[#86868B]" strokeWidth={2} />
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         {/* Logout Button */}
