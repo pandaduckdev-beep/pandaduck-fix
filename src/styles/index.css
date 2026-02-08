@@ -65,12 +65,26 @@
 
 .repair-log-content > * {
   margin-top: 0;
-  margin-bottom: 1em;
+  margin-bottom: 0;
+}
+
+.repair-log-content > *:not(:empty):not(:last-child) {
+  margin-bottom: 1.75em;
 }
 
 .repair-log-content > *:empty {
   min-height: 1.75em;
   height: 1.75em;
+}
+
+.repair-log-content br {
+  display: block;
+  margin-bottom: 0.75em;
+  content: "";
+}
+
+.repair-log-content br + br {
+  margin-top: 0;
 }
 
 .repair-log-content > *:last-child {
@@ -84,25 +98,25 @@
 .repair-log-content h5,
 .repair-log-content h6 {
   font-weight: 700;
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
+  margin-top: 1.75em;
+  margin-bottom: 0.875em;
 }
 
 .repair-log-content ul,
 .repair-log-content ol {
   padding-left: 1.5em;
-  margin-bottom: 1em;
+  margin-bottom: 1.75em;
 }
 
 .repair-log-content li {
-  margin-bottom: 0.25em;
+  margin-bottom: 0.4375em;
 }
 
 .repair-log-content img {
   max-width: 100%;
   height: auto;
   border-radius: 0.5rem;
-  margin: 1em 0;
+  margin: 1.75em 0;
 }
 
 .repair-log-content a {
