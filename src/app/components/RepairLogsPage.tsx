@@ -8,6 +8,36 @@ import { useSlideUp } from '@/hooks/useSlideUp'
 import type { RepairLog } from '@/types/database'
 import { toast } from 'sonner'
 
+// 썸네일 URL 최적화 함수
+const getOptimizedThumbnailUrl = (url: string | null, size: number = 200): string | null => {
+  if (!url) return null
+
+  // Supabase Storage URL인지 확인
+  if (url.includes('/storage/v1/object/public/')) {
+    try {
+      const urlObj = new URL(url)
+      // 이미지 변환 파라미터 추가
+      urlObj.searchParams.set('width', size.toString())
+      urlObj.searchParams.set('quality', '80')
+      urlObj.searchParams.set('resize', 'cover')
+      return urlObj.toString()
+    } catch {
+      return url
+    }
+  }
+
+  return url
+}
+
+// HTML content 내 이미지 최적화
+const optimizeContentImages = (html: string): string => {
+  // HTML 내의 img 태그 src를 최적화
+  return html.replace(/<img[^>]+src=["']([^"']+)["']/g, (match, src) => {
+    const optimizedSrc = getOptimizedThumbnailUrl(src, 1200) || src
+    return match.replace(src, optimizedSrc)
+  })
+}
+
 export function RepairLogsPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -40,9 +70,10 @@ export function RepairLogsPage() {
       const from = pageNum * PAGE_SIZE
       const to = from + PAGE_SIZE - 1
 
+      // 쿼리 최적화: 리스트에 필요한 컬럼만 선택
       const { data, error } = await supabase
         .from('repair_logs')
-        .select('*')
+        .select('id, title, summary, thumbnail_url, controller_model, repair_type, created_at, view_count')
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .range(from, to)
@@ -65,6 +96,29 @@ export function RepairLogsPage() {
     } finally {
       setLoading(false)
       setLoadingMore(false)
+    }
+  }
+
+  // 상세 조회 시 전체 데이터 가져오기
+  const loadLogDetail = async (logId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('repair_logs')
+        .select('*')
+        .eq('id', logId)
+        .eq('is_public', true)
+        .single()
+
+      if (error) throw error
+
+      if (data) {
+        // 기존 로그 배열에서 해당 로그만 업데이트
+        setLogs((prev) =>
+          prev.map((log) => (log.id === logId ? { ...log, content: data.content, image_urls: data.image_urls } : log))
+        )
+      }
+    } catch (error) {
+      console.error('Failed to load log detail:', error)
     }
   }
 
@@ -110,10 +164,15 @@ export function RepairLogsPage() {
     }
   }
 
-  // URL 파라미터가 변경될 때 스크롤 잠금/해제
+  // URL 파라미터가 변경될 때 스크롤 잠금/해제 및 상세 데이터 로드
   useEffect(() => {
     if (selectedLogId) {
       document.body.style.overflow = 'hidden'
+      // 상세 데이터가 없으면 로드
+      const selectedLog = logs.find(log => log.id === selectedLogId)
+      if (selectedLog && !selectedLog.content) {
+        loadLogDetail(selectedLogId)
+      }
     } else {
       document.body.style.overflow = ''
     }
@@ -222,9 +281,10 @@ export function RepairLogsPage() {
                     {/* Thumbnail */}
                     {log.thumbnail_url ? (
                       <img
-                        src={log.thumbnail_url}
+                        src={getOptimizedThumbnailUrl(log.thumbnail_url, 200) || log.thumbnail_url}
                         alt={log.title}
-                        className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl flex-shrink-0"
+                        className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl flex-shrink-0 bg-gray-100"
+                        loading="lazy"
                       />
                     ) : (
                       <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#E5E5E5] rounded-xl flex-shrink-0 flex items-center justify-center">
@@ -406,7 +466,7 @@ export function RepairLogsPage() {
               <div
                 className="text-[#1d1d1f] repair-log-content"
                 dangerouslySetInnerHTML={{
-                  __html: selectedLog.content
+                  __html: optimizeContentImages(selectedLog.content)
                 }}
               />
             </div>
@@ -421,9 +481,10 @@ export function RepairLogsPage() {
                 {selectedLog.image_urls.map((url, index) => (
                   <img
                     key={index}
-                    src={url}
+                    src={getOptimizedThumbnailUrl(url, 1200) || url}
                     alt={`${selectedLog.title} 이미지 ${index + 1}`}
                     className="w-full rounded-2xl"
+                    loading="lazy"
                   />
                 ))}
               </div>
