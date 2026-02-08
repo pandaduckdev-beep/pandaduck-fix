@@ -17,18 +17,44 @@ import './styles/index.css'
 import './styles/accessibility.css'
 import './test-supabase'
 
-// Service Worker 등록 (개발 중에는 비활성화)
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker.register('/sw.js')
-//       .then((registration) => {
-//         console.log('Service Worker registered: ', registration)
-//       })
-//       .catch((registrationError) => {
-//         console.log('Service Worker registration failed: ', registrationError)
-//       })
-//   })
-// }
+// Admin PWA 설정
+const setupAdminPWA = () => {
+  const isAdminMobile = window.location.pathname.startsWith('/admin-mobile')
+
+  if (isAdminMobile) {
+    // manifest 변경
+    const manifestLink = document.querySelector('link[rel="manifest"]')
+    if (manifestLink) {
+      manifestLink.setAttribute('href', '/admin-manifest.json')
+    }
+
+    // theme-color 변경
+    const themeColor = document.querySelector('meta[name="theme-color"]')
+    if (themeColor) {
+      themeColor.setAttribute('content', '#007AFF')
+    }
+
+    // apple-mobile-web-app-title 변경
+    const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]')
+    if (appleTitle) {
+      appleTitle.setAttribute('content', 'PD Admin')
+    }
+
+    // Service Worker 등록
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/admin-sw.js')
+        .then((registration) => {
+          console.log('Admin Service Worker registered:', registration.scope)
+        })
+        .catch((error) => {
+          console.error('Admin Service Worker registration failed:', error)
+        })
+    }
+  }
+}
+
+// PWA 설정 실행
+setupAdminPWA()
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
