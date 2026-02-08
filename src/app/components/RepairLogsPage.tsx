@@ -426,65 +426,143 @@ export function RepairLogsPage() {
 
           {/* Modal Content */}
           <div key={selectedLog.id} className="max-w-md mx-auto px-6 py-6 sm:py-8">
-            {/* Title */}
-            <h1
-              className="text-2xl sm:text-3xl mb-4 slide-up"
-              data-animate
-              style={{ fontWeight: 700, animationDelay: '0s' }}
-            >
-              {selectedLog.title}
-            </h1>
+            {loadingDetail ? (
+              <>
+                {/* Title Skeleton */}
+                <div className="h-8 sm:h-10 bg-[#F5F5F7] rounded mb-4 animate-pulse"></div>
 
-            {/* Meta */}
-            <div
-              className="space-y-3 mb-6 slide-up"
-              data-animate
-              style={{ animationDelay: '0.1s' }}
-            >
-              {/* Controller Model */}
-              {selectedLog.controller_model && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs px-2 py-1 bg-black text-white rounded-full font-semibold">
-                    기종
-                  </span>
-                  <span className="text-sm px-3 py-1.5 bg-[#F5F5F7] rounded-full font-medium">
-                    {selectedLog.controller_model}
-                  </span>
+                {/* Meta Skeleton */}
+                <div className="space-y-3 mb-6">
+                  <div className="h-8 bg-[#F5F5F7] rounded-full w-24 animate-pulse"></div>
+                  <div className="h-8 bg-[#F5F5F7] rounded-full w-20 animate-pulse"></div>
                 </div>
-              )}
 
-              {/* Repair Type */}
-              {selectedLog.repair_type && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs px-2 py-1 bg-black text-white rounded-full font-semibold">
-                    서비스
-                  </span>
-                  <span className="text-sm px-3 py-1.5 bg-[#F5F5F7] rounded-full font-medium">
-                    {selectedLog.repair_type}
-                  </span>
+                {/* Content Skeleton */}
+                <div className="space-y-3">
+                  <div className="h-4 bg-[#F5F5F7] rounded animate-pulse"></div>
+                  <div className="h-4 bg-[#F5F5F7] rounded animate-pulse w-3/4"></div>
+                  <div className="h-4 bg-[#F5F5F7] rounded animate-pulse w-1/2"></div>
+                  <div className="h-4 bg-[#F5F5F7] rounded animate-pulse"></div>
+                  <div className="h-4 bg-[#F5F5F7] rounded animate-pulse w-5/6"></div>
                 </div>
-              )}
+              </>
+            ) : (
+              <>
+                {/* Title */}
+                <h1
+                  className="text-2xl sm:text-3xl mb-4 slide-up"
+                  data-animate
+                  style={{ fontWeight: 700, animationDelay: '0s' }}
+                >
+                  {selectedLog.title}
+                </h1>
 
-              {/* Date */}
-              <div className="flex items-center gap-2 text-xs text-[#86868B]">
-                <Calendar className="w-3 h-3" />
-                <span>{new Date(selectedLog.created_at).toLocaleDateString('ko-KR')}</span>
-              </div>
-            </div>
+                {/* Meta */}
+                <div
+                  className="space-y-3 mb-6 slide-up"
+                  data-animate
+                  style={{ animationDelay: '0.1s' }}
+                >
+                  {/* Controller Model */}
+                  {selectedLog.controller_model && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs px-2 py-1 bg-black text-white rounded-full font-semibold">
+                        기종
+                      </span>
+                      <span className="text-sm px-3 py-1.5 bg-[#F5F5F7] rounded-full font-medium">
+                        {selectedLog.controller_model}
+                      </span>
+                    </div>
+                  )}
 
-            {/* Content */}
-            <div
-              className="slide-up"
-              data-animate
-              style={{ animationDelay: '0.2s' }}
-            >
-              <div
-                className="text-[#1d1d1f] repair-log-content"
-                dangerouslySetInnerHTML={{
-                  __html: optimizeContentImages(selectedLog.content || '')
-                }}
-              />
-            </div>
+                  {/* Repair Type */}
+                  {selectedLog.repair_type && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs px-2 py-1 bg-black text-white rounded-full font-semibold">
+                        서비스
+                      </span>
+                      <span className="text-sm px-3 py-1.5 bg-[#F5F5F7] rounded-full font-medium">
+                        {selectedLog.repair_type}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Date */}
+                  <div className="flex items-center gap-2 text-xs text-[#86868B]">
+                    <Calendar className="w-3 h-3" />
+                    <span>{new Date(selectedLog.created_at).toLocaleDateString('ko-KR')}</span>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div
+                  className="slide-up"
+                  data-animate
+                  style={{ animationDelay: '0.2s' }}
+                >
+                  <div
+                    className="text-[#1d1d1f] repair-log-content"
+                    dangerouslySetInnerHTML={{
+                      __html: optimizeContentImages(selectedLog.content || '')
+                    }}
+                  />
+                </div>
+
+                {/* Images */}
+                {selectedLog.image_urls && selectedLog.image_urls.length > 0 && (
+                  <div
+                    className="mt-6 space-y-4 slide-up"
+                    data-animate
+                    style={{ animationDelay: '0.3s' }}
+                  >
+                    {selectedLog.image_urls.map((url, index) => (
+                      <img
+                        key={index}
+                        src={getOptimizedThumbnailUrl(url, 1200) || url}
+                        alt={`${selectedLog.title} 이미지 ${index + 1}`}
+                        className="w-full rounded-2xl"
+                        loading="lazy"
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Signature */}
+                <div
+                  className="mt-8 p-4 bg-[#F5F5F7] rounded-2xl slide-up"
+                  data-animate
+                  style={{ animationDelay: '0.5s' }}
+                >
+                  <div className="text-center">
+                    <p className="text-xs font-medium text-gray-900 mb-1">
+                      PandaDuck Fix
+                    </p>
+                    <p className="text-xs text-[#86868B]">
+                      게임의 즐거움을 되찾는 순간까지
+                    </p>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div
+                  className="mt-6 pt-6 border-t border-[rgba(0,0,0,0.1)] slide-up"
+                  data-animate
+                  style={{ animationDelay: '0.6s' }}
+                >
+                  <a
+                    href="https://open.kakao.com/o/sWidj5ei"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full p-4 bg-[#FEE500] hover:bg-[#FDD835] rounded-[20px] transition-all hover:scale-[0.98] active:scale-[0.96]"
+                    style={{ fontWeight: 600 }}
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    <span>수리 문의하기</span>
+                  </a>
+                </div>
+              </>
+            )}
+          </div>
 
             {/* Images */}
             {selectedLog.image_urls && selectedLog.image_urls.length > 0 && (
