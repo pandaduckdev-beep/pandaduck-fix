@@ -59,7 +59,7 @@ export function RepairLogsPage() {
   const [page, setPage] = useState(0)
   const [detailLog, setDetailLog] = useState<RepairLog | null>(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
-  const PAGE_SIZE = 12
+  const PAGE_SIZE = 10
   const { setRef } = useSlideUp(logs.length + 4)
 
   // URL 파라미터에서 선택된 로그 ID 가져오기
@@ -213,7 +213,7 @@ export function RepairLogsPage() {
       const scrollPosition = window.innerHeight + window.scrollY
       const pageHeight = document.documentElement.scrollHeight
 
-      if (scrollPosition >= pageHeight - 500 && !loadingMore && hasMore && !selectedLogId) {
+      if (scrollPosition >= pageHeight - 1000 && !loadingMore && hasMore && !selectedLogId) {
         const nextPage = page + 1
         setPage(nextPage)
         loadLogs(nextPage)
