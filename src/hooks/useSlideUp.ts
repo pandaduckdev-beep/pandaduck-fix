@@ -52,6 +52,21 @@ export function useSlideUp(_count: number) {
             observerRef.current?.observe(el);
           }
         });
+
+        // 페이지 로드 시 뷰포트 안에 있지만 rootMargin 때문에 트리거되지 않은 요소들 처리
+        // 짧은 딜레이 후 뷰포트 내 요소들을 강제로 표시
+        setTimeout(() => {
+          refs.current.forEach((el, idx) => {
+            if (el && !triggered.current.has(idx)) {
+              const rect = el.getBoundingClientRect();
+              // 요소가 뷰포트 안에 있으면 표시
+              if (rect.top < window.innerHeight && rect.bottom > 0) {
+                triggered.current.add(idx);
+                el.classList.add("in-view");
+              }
+            }
+          });
+        }, 300);
       });
     });
 
