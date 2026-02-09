@@ -578,16 +578,43 @@ export function RepairLogsPage() {
                   data-animate
                   style={{ animationDelay: '0.6s' }}
                 >
-                  <button
-                    onClick={() => {
-                      closeDetail()
-                      navigate('/controllers')
-                    }}
-                    className="w-full bg-black text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
-                    style={{ fontWeight: 600 }}
-                  >
-                    나도 수리 신청하기
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        closeDetail()
+                        navigate('/controllers')
+                      }}
+                      className="flex-1 bg-black text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
+                      style={{ fontWeight: 600 }}
+                    >
+                      나도 수리 신청하기
+                    </button>
+                    <a
+                      href="https://open.kakao.com/o/sWidj5ei"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-1 px-4 py-4 bg-[#FEE500] hover:bg-[#FDD835] rounded-full transition-all hover:scale-[0.98] active:scale-[0.96] relative"
+                      style={{ fontWeight: 600 }}
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <svg width="0" height="0">
+                        <defs>
+                          <filter id="kakao-tooltip" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur"/>
+                            <feOffset in="blur" dx="0" dy="2" result="offsetBlur"/>
+                            <feComponentTransfer>
+                              <feFuncA type="linear" slope="0.3"/>
+                            </feComponentTransfer>
+                            <feMerge>
+                              <feMergeNode in="offsetBlur"/>
+                              <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                          </filter>
+                        </defs>
+                      </svg>
+                      <span className="relative" style={{ filter: 'url(#kakao-tooltip)' }}>문의</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             )}
