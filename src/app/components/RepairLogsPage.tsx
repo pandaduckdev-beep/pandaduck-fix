@@ -578,16 +578,16 @@ export function RepairLogsPage() {
                   data-animate
                   style={{ animationDelay: '0.6s' }}
                 >
-                  <a
-                    href="https://open.kakao.com/o/sWidj5ei"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full p-4 bg-[#FEE500] hover:bg-[#FDD835] rounded-[20px] transition-all hover:scale-[0.98] active:scale-[0.96]"
+                  <button
+                    onClick={() => {
+                      closeDetail()
+                      navigate('/controllers')
+                    }}
+                    className="w-full bg-black text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
                     style={{ fontWeight: 600 }}
                   >
-                    <MessageCircle className="w-5 h-5" />
-                    <span>수리 문의하기</span>
-                  </a>
+                    나도 수리 신청하기
+                  </button>
                 </div>
               </div>
             )}
