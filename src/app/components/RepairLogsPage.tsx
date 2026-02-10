@@ -2,6 +2,7 @@ import { Menu, Loader2, ChevronRight, Calendar, Gamepad2, Share2, MessageCircle 
 import { Footer } from '@/app/components/Footer'
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
 import { supabase } from '@/lib/supabase'
 import { useSlideUp } from '@/hooks/useSlideUp'
@@ -48,95 +49,82 @@ const optimizeContentImages = (html: string | undefined | null): string => {
   })
 }
 
+// React Query fetcher for infinite scroll
+const fetchRepairLogs = async ({ pageParam = 0 }: { pageParam?: number }) => {
+  const PAGE_SIZE = 10
+  const from = pageParam * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
+
+  const { data, error } = await supabase
+    .from('repair_logs')
+    .select('id, title, summary, thumbnail_url, controller_model, repair_type, created_at, view_count')
+    .eq('is_public', true)
+    .order('created_at', { ascending: false })
+    .range(from, to)
+
+  if (error) throw error
+
+  return {
+    data: data || [],
+    nextPage: data && data.length === PAGE_SIZE ? pageParam + 1 : undefined,
+  }
+}
+
+// React Query fetcher for log detail
+const fetchLogDetail = async (logId: string) => {
+  const { data, error } = await supabase
+    .from('repair_logs')
+    .select('*')
+    .eq('id', logId)
+    .eq('is_public', true)
+    .single()
+
+  if (error) throw error
+
+  return data
+}
+
 export function RepairLogsPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [logs, setLogs] = useState<RepairLog[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [hasMore, setHasMore] = useState(true)
-  const [page, setPage] = useState(0)
   const [detailLog, setDetailLog] = useState<RepairLog | null>(null)
-  const [loadingDetail, setLoadingDetail] = useState(false)
-  const PAGE_SIZE = 10
-  const { setRef } = useSlideUp(logs.length + 4)
+  const { setRef } = useSlideUp(100) // 충분히 큰 값
 
   // URL 파라미터에서 선택된 로그 ID 가져오기
   const selectedLogId = searchParams.get('log')
-  const selectedLog = detailLog || logs.find(log => log.id === selectedLogId) || null
+
+  // 무한 스크롤 쿼리
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['repairLogs'],
+    queryFn: fetchRepairLogs,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+  })
+
+  // 모든 로그 데이터를 평탄화
+  const logs = data?.pages.flatMap((page) => page.data) || []
+
+  // 상세 조회 쿼리
+  const { data: detailData, isLoading: isLoadingDetail } = useQuery({
+    queryKey: ['repairLogDetail', selectedLogId],
+    queryFn: () => fetchLogDetail(selectedLogId!),
+    enabled: !!selectedLogId && !logs.find(l => l.id === selectedLogId && l.content),
+    staleTime: 1000 * 60 * 5, // 5분
+  })
+
+  // selectedLog 계산
+  const selectedLog = detailLog || detailData || logs.find(log => log.id === selectedLogId) || null
 
   useEffect(() => {
     window.scrollTo(0, 0)
-  }, [])
-
-  // 작업기 데이터 로드 (페이징)
-  const loadLogs = useCallback(async (pageNum: number) => {
-    try {
-      if (pageNum === 0) {
-        setLoading(true)
-      } else {
-        setLoadingMore(true)
-      }
-
-      const from = pageNum * PAGE_SIZE
-      const to = from + PAGE_SIZE - 1
-
-      // 쿼리 최적화: 리스트에 필요한 컬럼만 선택
-      const { data, error } = await supabase
-        .from('repair_logs')
-        .select('id, title, summary, thumbnail_url, controller_model, repair_type, created_at, view_count')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .range(from, to)
-
-      if (error) throw error
-
-      if (data) {
-        if (pageNum === 0) {
-          setLogs(data)
-        } else {
-          setLogs((prev) => [...prev, ...data])
-        }
-
-        if (data.length < PAGE_SIZE) {
-          setHasMore(false)
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load repair logs:', error)
-    } finally {
-      setLoading(false)
-      setLoadingMore(false)
-    }
-  }, [])
-
-  // 상세 조회 시 전체 데이터 가져오기
-  const loadLogDetail = useCallback(async (logId: string) => {
-    try {
-      setLoadingDetail(true)
-      const { data, error } = await supabase
-        .from('repair_logs')
-        .select('*')
-        .eq('id', logId)
-        .eq('is_public', true)
-        .single()
-
-      if (error) throw error
-
-      if (data) {
-        setDetailLog(data)
-        // 기존 로그 배열에서 해당 로그도 업데이트
-        setLogs((prev) =>
-          prev.map((log) => (log.id === logId ? data : log))
-        )
-      }
-    } catch (error) {
-      console.error('Failed to load log detail:', error)
-      toast.error('작업기를 불러오는데 실패했습니다.')
-    } finally {
-      setLoadingDetail(false)
-    }
   }, [])
 
   // 조회수 증가
@@ -181,7 +169,7 @@ export function RepairLogsPage() {
     }
   }, [selectedLog])
 
-  // URL 파라미터가 변경될 때 스크롤 잠금/해제 및 상세 데이터 로드
+  // URL 파라미터가 변경될 때 스크롤 잠금/해제
   useEffect(() => {
     if (selectedLogId) {
       document.body.style.overflow = 'hidden'
@@ -192,20 +180,12 @@ export function RepairLogsPage() {
       // 리스트에 있고 content가 있으면 detailLog로 설정
       if (foundInList && foundInList.content) {
         setDetailLog(foundInList)
-      } else {
-        // 리스트에 없거나 content가 없으면 상세 조회
-        loadLogDetail(selectedLogId)
       }
     } else {
       document.body.style.overflow = ''
       setDetailLog(null)
     }
-  }, [selectedLogId, logs, loadLogDetail])
-
-  // 초기 로드
-  useEffect(() => {
-    loadLogs(0)
-  }, [])
+  }, [selectedLogId, logs])
 
   // 무한 스크롤 처리
   useEffect(() => {
@@ -213,16 +193,14 @@ export function RepairLogsPage() {
       const scrollPosition = window.innerHeight + window.scrollY
       const pageHeight = document.documentElement.scrollHeight
 
-      if (scrollPosition >= pageHeight - 1000 && !loading && !loadingMore && hasMore && !selectedLogId) {
-        const nextPage = page + 1
-        setPage(nextPage)
-        loadLogs(nextPage)
+      if (scrollPosition >= pageHeight - 1000 && hasNextPage && !isFetching && !isFetchingNextPage && !selectedLogId) {
+        fetchNextPage()
       }
     }
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [page, loading, loadingMore, hasMore, selectedLogId, loadLogs])
+  }, [hasNextPage, isFetching, isFetchingNextPage, selectedLogId, fetchNextPage])
 
   // 상세 보기 열기
   const openDetail = useCallback((log: RepairLog) => {
@@ -286,8 +264,8 @@ export function RepairLogsPage() {
 
       {/* Logs List */}
       <section className="max-w-md mx-auto px-6 pb-6 sm:pb-8">
-        {loading ? (
-          // Skeleton UI
+        {isFetching && !isFetchingNextPage ? (
+          // Skeleton UI (초기 로딩만)
           <div className="space-y-3 sm:space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="w-full bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-5 animate-pulse slide-up" data-animate style={{ animationDelay: `${i * 0.1}s, ${i * 0.1}s` }}>
@@ -375,13 +353,13 @@ export function RepairLogsPage() {
               ))}
             </div>
 
-            {loadingMore && (
+            {isFetchingNextPage && (
               <div className="flex items-center justify-center py-6 sm:py-8">
                 <Loader2 className="w-6 h-6 animate-spin text-black" />
               </div>
             )}
 
-            {!hasMore && logs.length > 0 && (
+            {!hasNextPage && logs.length > 0 && (
               <div className="text-center py-6 sm:py-8 text-[#86868B] text-xs sm:text-sm">
                 모든 작업기를 불러왔습니다
               </div>
@@ -389,7 +367,7 @@ export function RepairLogsPage() {
           </>
         )}
 
-        {!loading && logs.length === 0 && (
+        {!isFetching && logs.length === 0 && (
           <div className="text-center py-12 text-[#86868B] text-sm">
             등록된 수리 작업기가 없습니다.
           </div>
@@ -455,7 +433,7 @@ export function RepairLogsPage() {
 
           {/* Modal Content */}
           <div key={selectedLog.id} className="max-w-md mx-auto px-6 py-6 sm:py-8">
-            {loadingDetail ? (
+            {isLoadingDetail ? (
               <div className="animate-fade-in">
                 {/* Title Skeleton */}
                 <div className="h-8 sm:h-10 bg-[#F5F5F7] rounded mb-4 animate-pulse"></div>

@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './app/App.tsx'
 import { HomeScreen } from './app/components/HomeScreen'
 import { ControllerSelection } from './app/components/ControllerSelection'
@@ -15,6 +16,18 @@ import { AdminApp } from './admin/AdminApp.tsx'
 import AdminMobileApp from './admin-mobile/AdminMobileApp'
 import './styles/index.css'
 import './styles/accessibility.css'
+
+// React Query 클라이언트 설정
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5분
+      gcTime: 1000 * 60 * 30, // 30분 (이전 cacheTime)
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+})
 
 // Admin PWA 설정
 const setupAdminPWA = () => {
@@ -52,22 +65,24 @@ const setupAdminPWA = () => {
 setupAdminPWA()
 
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<App />}>
-        <Route index element={<HomeScreen />} />
-        <Route path="controllers" element={<ControllerSelection />} />
-        <Route path="services" element={<ServiceSelection />} />
-        <Route path="repair/condition" element={<ControllerCondition />} />
-        <Route path="repair/form" element={<RepairForm />} />
-        <Route path="services/list" element={<ServicesPage />} />
-        <Route path="reviews" element={<ReviewsPage />} />
-        <Route path="repair-logs" element={<RepairLogsPage />} />
-        <Route path="about" element={<AboutPage />} />
-      </Route>
-      <Route path="/review/:token" element={<ReviewPage />} />
-      <Route path="/admin/*" element={<AdminApp />} />
-      <Route path="/admin-mobile/*" element={<AdminMobileApp />} />
-    </Routes>
-  </BrowserRouter>
+  <QueryClientProvider client={queryClient}>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<App />}>
+          <Route index element={<HomeScreen />} />
+          <Route path="controllers" element={<ControllerSelection />} />
+          <Route path="services" element={<ServiceSelection />} />
+          <Route path="repair/condition" element={<ControllerCondition />} />
+          <Route path="repair/form" element={<RepairForm />} />
+          <Route path="services/list" element={<ServicesPage />} />
+          <Route path="reviews" element={<ReviewsPage />} />
+          <Route path="repair-logs" element={<RepairLogsPage />} />
+          <Route path="about" element={<AboutPage />} />
+        </Route>
+        <Route path="/review/:token" element={<ReviewPage />} />
+        <Route path="/admin/*" element={<AdminApp />} />
+        <Route path="/admin-mobile/*" element={<AdminMobileApp />} />
+      </Routes>
+    </BrowserRouter>
+  </QueryClientProvider>
 )
