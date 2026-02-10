@@ -103,6 +103,8 @@ export function HomeScreen() {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [loadingReviews, setLoadingReviews] = useState(true)
+  const [loadingLogs, setLoadingLogs] = useState(true)
+  const [logs, setLogs] = useState<any[]>([])
   const [reviews, setReviews] = useState<any[]>([
     {
       name: '김*민',
@@ -136,7 +138,29 @@ export function HomeScreen() {
   useEffect(() => {
     window.scrollTo(0, 0)
     fetchReviews()
+    fetchLogs()
   }, [])
+
+  const fetchLogs = async () => {
+    try {
+      setLoadingLogs(true)
+
+      const { data, error } = await supabase
+        .from('repair_logs')
+        .select('id, title, summary, thumbnail_url, controller_model, created_at')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(3)
+
+      if (error) throw error
+
+      setLogs(data || [])
+    } catch (error) {
+      console.error('Failed to fetch logs:', error)
+    } finally {
+      setLoadingLogs(false)
+    }
+  }
 
   const fetchReviews = async () => {
     try {
@@ -317,9 +341,79 @@ export function HomeScreen() {
         </div>
       </section>
 
+      {/* Repair Logs Section */}
+      <section className="max-w-md mx-auto px-6 pb-20">
+        <div ref={setRef(18)} className="slide-up mb-6" style={{ transitionDelay: '0s' }}>
+          <h2 className="text-3xl mb-2" style={{ fontWeight: 700 }}>
+            수리 작업기
+          </h2>
+          <p className="text-lg text-[#86868B]">꼼꼼한 수리 과정을 확인하세요</p>
+        </div>
+        <div className="space-y-4">
+          {loadingLogs ? (
+            <>
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </>
+          ) : logs.length > 0 ? (
+            logs.map((log, index) => (
+              <div
+                key={log.id}
+                ref={setRef(19 + index)}
+                onClick={() => navigate(`/repair-logs?log=${log.id}`)}
+                className="slide-up bg-[#F5F5F7] rounded-[28px] p-5 cursor-pointer hover:bg-[#EBEBED] transition-colors"
+                style={{ transitionDelay: `${index * 0.05}s` }}
+              >
+                <div className="flex gap-4">
+                  {log.thumbnail_url ? (
+                    <img
+                      src={log.thumbnail_url}
+                      alt={log.title}
+                      className="w-20 h-20 object-cover rounded-xl flex-shrink-0 bg-gray-100"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 bg-[#E5E5E5] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Gamepad2 className="w-8 h-8 text-[#86868B]" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base mb-1 line-clamp-2" style={{ fontWeight: 600 }}>
+                      {log.title}
+                    </h3>
+                    {log.summary && (
+                      <p className="text-sm text-[#86868B] mb-2 line-clamp-2">
+                        {log.summary}
+                      </p>
+                    )}
+                    {log.controller_model && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs px-2 py-1 bg-white rounded-full">
+                          {log.controller_model}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : null}
+        </div>
+        <div ref={setRef(22)} className="slide-up mt-6" style={{ transitionDelay: '0s' }}>
+          <button
+            onClick={() => navigate('/repair-logs')}
+            className="w-full bg-[#000000] text-white py-3 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
+            style={{ fontWeight: 600 }}
+          >
+            더 많은 작업기 보기
+          </button>
+        </div>
+      </section>
+
       {/* Reviews Section */}
       <section className="max-w-md mx-auto px-6 pb-20 bg-white">
-        <div ref={setRef(18)} className="slide-up mb-6" style={{ transitionDelay: '0s' }}>
+        <div ref={setRef(23)} className="slide-up mb-6" style={{ transitionDelay: '0s' }}>
           <h2 className="text-3xl mb-2" style={{ fontWeight: 700 }}>
             고객 후기
           </h2>
@@ -388,7 +482,7 @@ export function HomeScreen() {
             ))
           )}
         </div>
-        <div ref={setRef(22)} className="slide-up mt-6" style={{ transitionDelay: '0s' }}>
+        <div ref={setRef(25)} className="slide-up mt-6" style={{ transitionDelay: '0s' }}>
           <button
             onClick={() => navigate('/reviews')}
             className="w-full bg-[#000000] text-white py-3 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
@@ -403,7 +497,7 @@ export function HomeScreen() {
       {/* CTA Section */}
       <section className="max-w-md mx-auto px-6 pb-20">
         <div
-          ref={setRef(23)}
+          ref={setRef(26)}
           className="slide-up bg-[#000000] text-white rounded-[32px] p-8"
           style={{ transitionDelay: '0s' }}
         >
@@ -430,7 +524,7 @@ export function HomeScreen() {
       </section>
 
       {/* Footer */}
-      <div ref={setRef(24)} className="slide-up" style={{ transitionDelay: '0s' }}>
+      <div ref={setRef(27)} className="slide-up" style={{ transitionDelay: '0s' }}>
         <Footer />
       </div>
     </div>
