@@ -1,6 +1,6 @@
 import { Menu, Loader2, ChevronRight, Calendar, Gamepad2, Share2, MessageCircle } from 'lucide-react'
 import { Footer } from '@/app/components/Footer'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
 import { supabase } from '@/lib/supabase'
@@ -9,7 +9,7 @@ import type { RepairLog } from '@/types/database'
 import { toast } from 'sonner'
 
 // 썸네일 URL 최적화 함수
-const getOptimizedThumbnailUrl = (url: string | null, size: number = 200): string | null => {
+const getOptimizedThumbnailUrl = (url: string | null, size: number = 150): string | null => {
   if (!url) return null
 
   // Supabase Storage URL인지 확인
@@ -23,9 +23,9 @@ const getOptimizedThumbnailUrl = (url: string | null, size: number = 200): strin
       urlObj.searchParams.delete('resize')
       urlObj.searchParams.delete('format')
 
-      // 이미지 변환 파라미터 추가
+      // 이미지 변환 파라미터 추가 (최적화)
       urlObj.searchParams.set('width', size.toString())
-      urlObj.searchParams.set('quality', '80')
+      urlObj.searchParams.set('quality', '75')
       urlObj.searchParams.set('resize', 'cover')
       urlObj.searchParams.set('format', 'webp')
 
@@ -71,7 +71,7 @@ export function RepairLogsPage() {
   }, [])
 
   // 작업기 데이터 로드 (페이징)
-  const loadLogs = async (pageNum: number) => {
+  const loadLogs = useCallback(async (pageNum: number) => {
     try {
       if (pageNum === 0) {
         setLoading(true)
@@ -109,10 +109,10 @@ export function RepairLogsPage() {
       setLoading(false)
       setLoadingMore(false)
     }
-  }
+  }, [])
 
   // 상세 조회 시 전체 데이터 가져오기
-  const loadLogDetail = async (logId: string) => {
+  const loadLogDetail = useCallback(async (logId: string) => {
     try {
       setLoadingDetail(true)
       const { data, error } = await supabase
@@ -137,20 +137,20 @@ export function RepairLogsPage() {
     } finally {
       setLoadingDetail(false)
     }
-  }
+  }, [])
 
   // 조회수 증가
-  const incrementViewCount = async (logId: string) => {
+  const incrementViewCount = useCallback(async (logId: string) => {
     try {
       await supabase.rpc('increment_repair_log_view', { log_id: logId })
     } catch (error) {
       // 조회수 증가 실패는 무시
       console.error('Failed to increment view count:', error)
     }
-  }
+  }, [])
 
   // 공유하기
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     if (!selectedLog) return
 
     const url = `${window.location.origin}/repair-logs?log=${selectedLog.id}`
@@ -179,7 +179,7 @@ export function RepairLogsPage() {
         toast.error('공유에 실패했습니다.')
       }
     }
-  }
+  }, [selectedLog])
 
   // URL 파라미터가 변경될 때 스크롤 잠금/해제 및 상세 데이터 로드
   useEffect(() => {
@@ -200,7 +200,7 @@ export function RepairLogsPage() {
       document.body.style.overflow = ''
       setDetailLog(null)
     }
-  }, [selectedLogId, logs])
+  }, [selectedLogId, logs, loadLogDetail])
 
   // 초기 로드
   useEffect(() => {
@@ -222,20 +222,20 @@ export function RepairLogsPage() {
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [page, loading, loadingMore, hasMore, selectedLogId])
+  }, [page, loading, loadingMore, hasMore, selectedLogId, loadLogs])
 
   // 상세 보기 열기
-  const openDetail = (log: RepairLog) => {
+  const openDetail = useCallback((log: RepairLog) => {
     setSearchParams({ log: log.id })
     incrementViewCount(log.id)
     document.body.style.overflow = 'hidden'
-  }
+  }, [setSearchParams, incrementViewCount])
 
   // 상세 보기 닫기
-  const closeDetail = () => {
+  const closeDetail = useCallback(() => {
     setSearchParams({})
     document.body.style.overflow = ''
-  }
+  }, [setSearchParams])
 
   // 브라우저 뒤로가기/앞으로가기 처리
   useEffect(() => {
