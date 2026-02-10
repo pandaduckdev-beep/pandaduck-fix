@@ -51,7 +51,7 @@ const optimizeContentImages = (html: string | undefined | null): string => {
 
 // React Query fetcher for infinite scroll
 const fetchRepairLogs = async ({ pageParam = 0 }: { pageParam?: number }) => {
-  const PAGE_SIZE = 10
+  const PAGE_SIZE = 20 // 10개에서 20개로 증가
   const from = pageParam * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 
@@ -193,7 +193,7 @@ export function RepairLogsPage() {
       const scrollPosition = window.innerHeight + window.scrollY
       const pageHeight = document.documentElement.scrollHeight
 
-      if (scrollPosition >= pageHeight - 1000 && hasNextPage && !isFetching && !isFetchingNextPage && !selectedLogId) {
+      if (scrollPosition >= pageHeight - 500 && hasNextPage && !isFetching && !isFetchingNextPage && !selectedLogId) {
         fetchNextPage()
       }
     }

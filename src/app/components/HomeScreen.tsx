@@ -18,6 +18,29 @@ import { useSlideUp } from '@/hooks/useSlideUp'
 import { createClient } from '@supabase/supabase-js'
 import { SkeletonCard } from '@/components/common/Skeleton'
 
+// 썸네일 URL 최적화 함수 (RepairLogsPage와 동일)
+const getOptimizedThumbnailUrl = (url: string | null, size: number = 150): string | null => {
+  if (!url) return null
+
+  if (url.includes('/storage/v1/object/public/')) {
+    try {
+      const urlObj = new URL(url)
+      urlObj.searchParams.delete('width')
+      urlObj.searchParams.delete('quality')
+      urlObj.searchParams.delete('resize')
+      urlObj.searchParams.delete('format')
+      urlObj.searchParams.set('width', size.toString())
+      urlObj.searchParams.set('quality', '75')
+      urlObj.searchParams.set('resize', 'cover')
+      urlObj.searchParams.set('format', 'webp')
+      return urlObj.toString()
+    } catch {
+      return url
+    }
+  }
+  return url
+}
+
 const services = [
   {
     icon: <Zap className="w-6 h-6" />,
@@ -368,7 +391,7 @@ export function HomeScreen() {
                 <div className="flex gap-4">
                   {log.thumbnail_url ? (
                     <img
-                      src={log.thumbnail_url}
+                      src={getOptimizedThumbnailUrl(log.thumbnail_url, 150) || log.thumbnail_url}
                       alt={log.title}
                       className="w-20 h-20 object-cover rounded-xl flex-shrink-0 bg-gray-100"
                       loading="lazy"
