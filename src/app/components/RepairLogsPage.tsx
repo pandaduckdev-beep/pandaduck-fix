@@ -213,7 +213,7 @@ export function RepairLogsPage() {
       const scrollPosition = window.innerHeight + window.scrollY
       const pageHeight = document.documentElement.scrollHeight
 
-      if (scrollPosition >= pageHeight - 1000 && !loadingMore && hasMore && !selectedLogId) {
+      if (scrollPosition >= pageHeight - 1000 && !loading && !loadingMore && hasMore && !selectedLogId) {
         const nextPage = page + 1
         setPage(nextPage)
         loadLogs(nextPage)
@@ -222,7 +222,7 @@ export function RepairLogsPage() {
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [page, loadingMore, hasMore, selectedLogId])
+  }, [page, loading, loadingMore, hasMore, selectedLogId])
 
   // 상세 보기 열기
   const openDetail = (log: RepairLog) => {
