@@ -265,31 +265,7 @@ export function RepairLogsPage() {
 
       {/* Logs List */}
       <section className="max-w-md mx-auto px-6 pb-6 sm:pb-8">
-        {isFetching && !isFetchingNextPage ? (
-          // Skeleton UI (초기 로딩만)
-          <div className="space-y-3 sm:space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="w-full bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-5 animate-pulse slide-up" data-animate style={{ animationDelay: `${i * 0.1}s, ${i * 0.1}s` }}>
-                <div className="flex gap-4">
-                  {/* Thumbnail Skeleton */}
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#E5E5E5] rounded-xl flex-shrink-0"></div>
-
-                  {/* Content Skeleton */}
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <div className="h-5 bg-[#E5E5E5] rounded w-3/4"></div>
-                    <div className="h-7 bg-[#E5E5E5] rounded-full w-20"></div>
-                    <div className="h-4 bg-[#E5E5E5] rounded w-full"></div>
-                    <div className="h-4 bg-[#E5E5E5] rounded w-2/3"></div>
-                    <div className="h-4 bg-[#E5E5E5] rounded w-16 mt-2"></div>
-                  </div>
-
-                  {/* Chevron Skeleton */}
-                  <div className="w-5 h-5 bg-[#E5E5E5] rounded flex-shrink-0 self-center"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : logs.length > 0 ? (
+        {logs.length > 0 ? (
           <>
             <div className="space-y-3 sm:space-y-4">
               {logs.map((log, index) => (
@@ -301,13 +277,14 @@ export function RepairLogsPage() {
                   style={{ transitionDelay: `${Math.min(index * 0.05, 0.3)}s` }}
                 >
                   <div className="flex gap-4">
-                    {/* Thumbnail */}
+                    {/* Thumbnail - 지연 로딩 */}
                     {log.thumbnail_url ? (
                       <img
                         src={getOptimizedThumbnailUrl(log.thumbnail_url, 200) || log.thumbnail_url}
                         alt={log.title}
                         className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl flex-shrink-0 bg-gray-100"
                         loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#E5E5E5] rounded-xl flex-shrink-0 flex items-center justify-center">
@@ -315,7 +292,7 @@ export function RepairLogsPage() {
                       </div>
                     )}
 
-                    {/* Content */}
+                    {/* Content - 즉시 표시 */}
                     <div className="flex-1 min-w-0">
                       {/* Title */}
                       <h3
@@ -366,9 +343,27 @@ export function RepairLogsPage() {
               </div>
             )}
           </>
-        ) : null}
-
-        {!isFetching && logs.length === 0 && (
+        ) : isFetching ? (
+          // 최초 로딩時에만 스켈레톤 표시
+          <div className="space-y-3 sm:space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="w-full bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-5 animate-pulse slide-up" data-animate style={{ animationDelay: `${i * 0.1}s, ${i * 0.1}s` }}>
+                <div className="flex gap-4">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#E5E5E5] rounded-xl flex-shrink-0"></div>
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="h-5 bg-[#E5E5E5] rounded w-3/4"></div>
+                    <div className="h-7 bg-[#E5E5E5] rounded-full w-20"></div>
+                    <div className="h-4 bg-[#E5E5E5] rounded w-full"></div>
+                    <div className="h-4 bg-[#E5E5E5] rounded w-2/3"></div>
+                    <div className="h-4 bg-[#E5E5E5] rounded w-16 mt-2"></div>
+                  </div>
+                  <div className="w-5 h-5 bg-[#E5E5E5] rounded flex-shrink-0 self-center"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // 데이터가 없을 때
           <div className="text-center py-12 text-[#86868B] text-sm">
             등록된 수리 작업기가 없습니다.
           </div>
