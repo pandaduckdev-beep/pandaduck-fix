@@ -89,7 +89,7 @@ export function RepairLogsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [detailLog, setDetailLog] = useState<RepairLog | null>(null)
-  const { setRef } = useSlideUp(logs.length + 4)
+  const { setRef } = useSlideUp(100) // 충분히 큰 값
 
   // URL 파라미터에서 선택된 로그 ID 가져오기
   const selectedLogId = searchParams.get('log')
