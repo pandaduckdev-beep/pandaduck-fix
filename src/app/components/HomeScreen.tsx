@@ -14,7 +14,6 @@ import { Footer } from '@/app/components/Footer'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
-import { ProcessGuideModal } from '@/app/components/ProcessGuideModal'
 import { useSlideUp } from '@/hooks/useSlideUp'
 import { createClient } from '@supabase/supabase-js'
 import { SkeletonCard } from '@/components/common/Skeleton'
@@ -126,7 +125,6 @@ const processSteps = [
 export function HomeScreen() {
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isProcessGuideOpen, setIsProcessGuideOpen] = useState(false)
   const [loadingReviews, setLoadingReviews] = useState(true)
   const [loadingLogs, setLoadingLogs] = useState(true)
   const [logs, setLogs] = useState<any[]>([])
@@ -272,7 +270,7 @@ export function HomeScreen() {
           </div>
           <div ref={setRef(3)} className="slide-up" style={{ transitionDelay: '0.3s' }}>
             <button
-              onClick={() => setIsProcessGuideOpen(true)}
+              onClick={() => navigate('/controllers')}
               className="w-full bg-[#000000] text-white py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
               style={{ fontWeight: 600 }}
               aria-label="컨트롤러 수리 신청 시작하기"
@@ -538,7 +536,7 @@ export function HomeScreen() {
               </p>
             </div>
             <button
-              onClick={() => setIsProcessGuideOpen(true)}
+              onClick={() => navigate('/controllers')}
               className="w-full bg-white text-black py-4 rounded-full transition-transform hover:scale-[0.98] active:scale-[0.96]"
               style={{ fontWeight: 600 }}
             >
@@ -552,16 +550,6 @@ export function HomeScreen() {
       <div ref={setRef(27)} className="slide-up" style={{ transitionDelay: '0s' }}>
         <Footer />
       </div>
-
-      {/* Process Guide Modal */}
-      <ProcessGuideModal
-        isOpen={isProcessGuideOpen}
-        onClose={() => setIsProcessGuideOpen(false)}
-        onStartRepair={() => {
-          setIsProcessGuideOpen(false)
-          navigate('/controllers')
-        }}
-      />
     </div>
   )
 }

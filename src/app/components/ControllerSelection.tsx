@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useSlideUp } from '@/hooks/useSlideUp'
-import { ProcessInfoBanner } from './ProcessInfoBanner'
 
 export function ControllerSelection() {
   const navigate = useNavigate()
@@ -176,7 +175,7 @@ export function ControllerSelection() {
       </div>
 
       {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-t border-[rgba(0,0,0,0.05)] pb-20">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 py-6">
           <button
             onClick={handleContinue}
@@ -192,9 +191,6 @@ export function ControllerSelection() {
           </button>
         </div>
       </div>
-
-      {/* Process Info Banner */}
-      <ProcessInfoBanner />
     </div>
   )
 }
