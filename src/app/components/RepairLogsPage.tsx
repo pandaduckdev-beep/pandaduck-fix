@@ -1,11 +1,14 @@
-import { Menu, Loader2, ChevronRight, Calendar, Gamepad2, Share2, MessageCircle } from 'lucide-react'
+import { Menu, Loader2, Share2, MessageCircle } from 'lucide-react'
 import { Footer } from '@/app/components/Footer'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
 import { supabase } from '@/lib/supabase'
 import { useSlideUp } from '@/hooks/useSlideUp'
+import { RepairLogCard } from '@/components/repair/RepairLogCard'
+import { LazyImage } from '@/components/common/LazyImage'
 import type { RepairLog } from '@/types/database'
 import { toast } from 'sonner'
 
@@ -89,7 +92,8 @@ export function RepairLogsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [detailLog, setDetailLog] = useState<RepairLog | null>(null)
-  const { setRef } = useSlideUp(100) // 충분히 큰 값
+  const { setRef } = useSlideUp(10) // Hero와 Footer용
+  const listContainerRef = useRef<HTMLDivElement>(null)
 
   // URL 파라미터에서 선택된 로그 ID 가져오기
   const selectedLogId = searchParams.get('log')
@@ -111,6 +115,36 @@ export function RepairLogsPage() {
 
   // 모든 로그 데이터를 평탄화
   const logs = data?.pages.flatMap((page) => page.data) || []
+
+  // 가상화 리스트 설정
+  const virtualizer = useVirtualizer({
+    count: logs.length,
+    getScrollElement: () => listContainerRef.current,
+    estimateSize: () => 140, // 아이템 예상 높이 (padding + gap 포함)
+    overscan: 5, // 화면 밖 5개 추가 렌더링
+  })
+
+  // 가상화 스크롤 시 무한 스크롤 트리거
+  useEffect(() => {
+    const [lastItem] = [...virtualizer.getVirtualItems()].reverse()
+    if (!lastItem) return
+
+    if (
+      lastItem.index >= logs.length - 3 &&
+      hasNextPage &&
+      !isFetching &&
+      !isFetchingNextPage
+    ) {
+      fetchNextPage()
+    }
+  }, [
+    virtualizer.getVirtualItems(),
+    logs.length,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+  ])
 
   // 상세 조회 쿼리
   const { data: detailData, isLoading: isLoadingDetail } = useQuery({
@@ -187,20 +221,6 @@ export function RepairLogsPage() {
     }
   }, [selectedLogId, logs])
 
-  // 무한 스크롤 처리
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.innerHeight + window.scrollY
-      const pageHeight = document.documentElement.scrollHeight
-
-      if (scrollPosition >= pageHeight - 1000 && hasNextPage && !isFetching && !isFetchingNextPage && !selectedLogId) {
-        fetchNextPage()
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [hasNextPage, isFetching, isFetchingNextPage, selectedLogId, fetchNextPage])
 
   // 상세 보기 열기
   const openDetail = useCallback((log: RepairLog) => {
@@ -262,13 +282,13 @@ export function RepairLogsPage() {
         </div>
       </section>
 
-      {/* Logs List */}
+      {/* Logs List - Virtualized */}
       <section className="max-w-md mx-auto px-6 pb-6 sm:pb-8">
         {isFetching && !isFetchingNextPage ? (
           // Skeleton UI (초기 로딩만)
           <div className="space-y-3 sm:space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="w-full bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-5 animate-pulse slide-up" data-animate style={{ animationDelay: `${i * 0.1}s, ${i * 0.1}s` }}>
+              <div key={i} className="w-full bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-5 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}>
                 <div className="flex gap-4">
                   {/* Thumbnail Skeleton */}
                   <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#E5E5E5] rounded-xl flex-shrink-0"></div>
@@ -288,69 +308,44 @@ export function RepairLogsPage() {
               </div>
             ))}
           </div>
-        ) : (
+        ) : logs.length > 0 ? (
           <>
-            <div className="space-y-3 sm:space-y-4">
-              {logs.map((log, index) => (
-                <button
-                  key={log.id}
-                  ref={setRef(index + 1)}
-                  onClick={() => openDetail(log)}
-                  className="slide-up w-full bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-5 text-left hover:bg-[#EBEBED] transition-colors"
-                  style={{ transitionDelay: `${Math.min(index * 0.05, 0.3)}s` }}
-                >
-                  <div className="flex gap-4">
-                    {/* Thumbnail */}
-                    {log.thumbnail_url ? (
-                      <img
-                        src={getOptimizedThumbnailUrl(log.thumbnail_url, 200) || log.thumbnail_url}
-                        alt={log.title}
-                        className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl flex-shrink-0 bg-gray-100"
-                        loading="lazy"
+            {/* Virtualized List Container */}
+            <div
+              ref={listContainerRef}
+              className="max-h-[calc(100vh-280px)] overflow-auto scrollbar-hide"
+              style={{ contain: 'strict' }}
+            >
+              <div
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                }}
+              >
+                {virtualizer.getVirtualItems().map((virtualRow) => {
+                  const log = logs[virtualRow.index]
+                  return (
+                    <div
+                      key={log.id}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: `${virtualRow.size}px`,
+                        transform: `translateY(${virtualRow.start}px)`,
+                        paddingBottom: '12px',
+                      }}
+                    >
+                      <RepairLogCard
+                        log={log}
+                        onClick={() => openDetail(log)}
                       />
-                    ) : (
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#E5E5E5] rounded-xl flex-shrink-0 flex items-center justify-center">
-                        <Gamepad2 className="w-8 h-8 text-[#86868B]" />
-                      </div>
-                    )}
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      {/* Title */}
-                      <h3
-                        className="text-base sm:text-lg mb-1 line-clamp-2"
-                        style={{ fontWeight: 600 }}
-                      >
-                        {log.title}
-                      </h3>
-
-                      {/* Controller Model */}
-                      {log.controller_model && (
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs px-2 py-1 bg-white rounded-full">
-                            {log.controller_model}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Content Preview */}
-                      {log.summary && (
-                        <p className="text-sm text-[#86868B] mb-2 line-clamp-2">
-                          {log.summary}
-                        </p>
-                      )}
-
-                      {/* Date */}
-                      <div className="flex items-center gap-2 text-xs text-[#86868B]">
-                        <Calendar className="w-3 h-3" />
-                        <span>{new Date(log.created_at).toLocaleDateString('ko-KR')}</span>
-                      </div>
                     </div>
-
-                    <ChevronRight className="w-5 h-5 text-[#86868B] flex-shrink-0 self-center" />
-                  </div>
-                </button>
-              ))}
+                  )
+                })}
+              </div>
             </div>
 
             {isFetchingNextPage && (
@@ -365,7 +360,7 @@ export function RepairLogsPage() {
               </div>
             )}
           </>
-        )}
+        ) : null}
 
         {!isFetching && logs.length === 0 && (
           <div className="text-center py-12 text-[#86868B] text-sm">
@@ -377,7 +372,7 @@ export function RepairLogsPage() {
       {/* CTA Section */}
       <section className="max-w-md mx-auto px-6 pb-8 sm:pb-12">
         <div
-          ref={setRef(logs.length + 1)}
+          ref={setRef(1)}
           className="slide-up"
           style={{ transitionDelay: '0s' }}
         >
@@ -401,7 +396,7 @@ export function RepairLogsPage() {
         </div>
       </section>
 
-      <div ref={setRef(logs.length + 2)} className="slide-up" style={{ transitionDelay: '0s' }}>
+      <div ref={setRef(2)} className="slide-up" style={{ transitionDelay: '0s' }}>
         <Footer />
       </div>
 
