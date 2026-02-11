@@ -245,25 +245,32 @@ export function RepairForm() {
                 </div>
               )}
 
-              {/* 선택한 서비스 목록 */}
+              {/* 선택한 서비스 목록 - 카드형 */}
               {selectionData.services.map((service) => (
-                <div key={service.id}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#86868B]">{service.name}</span>
-                    <span style={{ fontWeight: 600 }}>₩{service.price.toLocaleString()}</span>
-                  </div>
-                  {service.selectedOption && (
-                    <div className="flex items-center justify-between mt-1 pl-4">
-                      <span className="text-xs text-[#86868B]">
-                        ㄴ {service.selectedOption.name}
-                      </span>
-                      <span className="text-xs" style={{ fontWeight: 600 }}>
-                        {service.selectedOption.price === 0
-                          ? '기본'
-                          : `+₩${service.selectedOption.price.toLocaleString()}`}
-                      </span>
+                <div
+                  key={service.id}
+                  className="bg-white rounded-[12px] p-3 border border-[rgba(0,0,0,0.06)]"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    {/* 서비스명 및 옵션 */}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm mb-1">{service.name}</div>
+                      {service.selectedOption && (
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-1 h-1 rounded-full bg-[#86868B]"></div>
+                          <span className="text-xs text-[#86868B]">
+                            {service.selectedOption.name}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  )}
+                    {/* 금액 */}
+                    <div className="text-right">
+                      <div className="font-semibold text-sm">
+                        ₩{(service.price + (service.selectedOption?.price || 0)).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
 
@@ -560,62 +567,70 @@ export function RepairForm() {
           ></div>
 
           {/* Modal Content */}
-          <div className="relative bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-white rounded-[28px] p-5 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
             {/* Title */}
             <h2 className="text-2xl text-center mb-3" style={{ fontWeight: 700 }}>
               신청 정보 확인
             </h2>
 
             {/* Description */}
-            <p className="text-center text-[#86868B] mb-6">입력하신 정보가 맞는지 확인해주세요</p>
+            <p className="text-center text-[#86868B] mb-4">입력하신 정보가 맞는지 확인해주세요</p>
 
             {/* Order Details */}
-            <div className="space-y-4 mb-6">
+            <div className="space-y-3 mb-4">
               {/* Controller Model */}
               {controllerModel && (
-                <div className="bg-[#F5F5F7] rounded-[20px] p-4">
+                <div className="bg-[#F5F5F7] rounded-[16px] p-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <Gamepad2 className="w-4 h-4 text-[#86868B]" />
+                    <Gamepad2 className="w-3.5 h-3.5 text-[#86868B]" />
                     <span className="text-sm" style={{ fontWeight: 600 }}>
                       컨트롤러 모델
                     </span>
                   </div>
-                  <p className="text-sm pl-6">{getControllerModelName(controllerModel)}</p>
+                  <p className="text-sm pl-5">{getControllerModelName(controllerModel)}</p>
                 </div>
               )}
 
               {/* Services */}
               {selectionData && (
-                <div className="bg-[#F5F5F7] rounded-[20px] p-4">
+                <div className="bg-[#F5F5F7] rounded-[16px] p-3">
                   <div className="flex items-center gap-2 mb-3">
-                    <Package className="w-4 h-4 text-[#86868B]" />
+                    <Package className="w-3.5 h-3.5 text-[#86868B]" />
                     <span className="text-sm" style={{ fontWeight: 600 }}>
                       선택한 서비스
                     </span>
                   </div>
-                  <div className="space-y-2 pl-6">
+                  <div className="space-y-2">
                     {selectionData.services.map((service) => (
-                      <div key={service.id}>
-                        <div className="flex items-center justify-between text-sm">
-                          <span>{service.name}</span>
-                          <span style={{ fontWeight: 600 }}>₩{service.price.toLocaleString()}</span>
-                        </div>
-                        {service.selectedOption && (
-                          <div className="flex items-center justify-between text-xs text-[#86868B] mt-1 pl-2">
-                            <span>ㄴ {service.selectedOption.name}</span>
-                            <span>
-                              {service.selectedOption.price === 0
-                                ? '기본'
-                                : `+₩${service.selectedOption.price.toLocaleString()}`}
-                            </span>
+                      <div
+                        key={service.id}
+                        className="bg-white rounded-[12px] p-2.5 border border-[rgba(0,0,0,0.06)]"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm mb-0.5">{service.name}</div>
+                            {service.selectedOption && (
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-1 h-1 rounded-full bg-[#86868B]"></div>
+                                <span className="text-xs text-[#86868B]">
+                                  {service.selectedOption.name}
+                                </span>
+                              </div>
+                            )}
                           </div>
-                        )}
+                          <div className="text-right">
+                            <div className="font-semibold text-sm">
+                              ₩{(service.price + (service.selectedOption?.price || 0)).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     ))}
+
                     {selectionData.discount > 0 && (
                       <>
                         <div className="h-px bg-[rgba(0,0,0,0.1)] my-2"></div>
-                        <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center justify-between text-sm px-1">
                           <span className="text-[#FF3B30]">할인</span>
                           <span className="text-[#FF3B30]" style={{ fontWeight: 600 }}>
                             -₩{selectionData.discount.toLocaleString()}
@@ -623,8 +638,9 @@ export function RepairForm() {
                         </div>
                       </>
                     )}
+
                     <div className="h-px bg-[rgba(0,0,0,0.1)] my-2"></div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between px-1">
                       <span style={{ fontWeight: 600 }}>총 금액</span>
                       <span className="text-lg" style={{ fontWeight: 700 }}>
                         ₩{selectionData.total.toLocaleString()}
@@ -636,14 +652,14 @@ export function RepairForm() {
 
               {/* Condition Info */}
               {conditionData && (
-                <div className="bg-[#F5F5F7] rounded-[20px] p-4">
+                <div className="bg-[#F5F5F7] rounded-[16px] p-3">
                   <div className="flex items-center gap-2 mb-3">
-                    <Gamepad2 className="w-4 h-4 text-[#86868B]" />
+                    <Gamepad2 className="w-3.5 h-3.5 text-[#86868B]" />
                     <span className="text-sm" style={{ fontWeight: 600 }}>
                       컨트롤러 상태
                     </span>
                   </div>
-                  <div className="space-y-2 pl-6 text-sm">
+                  <div className="space-y-2 pl-5 text-sm">
                     <div className="flex flex-wrap gap-1.5">
                       {conditionData.conditions.map((c) => (
                         <span
@@ -666,14 +682,14 @@ export function RepairForm() {
               )}
 
               {/* Customer Info */}
-              <div className="bg-[#F5F5F7] rounded-[20px] p-4">
+              <div className="bg-[#F5F5F7] rounded-[16px] p-3">
                 <div className="flex items-center gap-2 mb-3">
-                  <User className="w-4 h-4 text-[#86868B]" />
+                  <User className="w-3.5 h-3.5 text-[#86868B]" />
                   <span className="text-sm" style={{ fontWeight: 600 }}>
                     고객 정보
                   </span>
                 </div>
-                <div className="space-y-2 pl-6 text-sm">
+                <div className="space-y-2 pl-5 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-[#86868B]">이름</span>
                     <span style={{ fontWeight: 600 }}>{formData.name}</span>
