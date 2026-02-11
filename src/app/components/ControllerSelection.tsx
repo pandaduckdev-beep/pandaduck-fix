@@ -1,4 +1,4 @@
-import { ChevronLeft, Gamepad2, Check, Loader2 } from 'lucide-react'
+import { ChevronLeft, Gamepad2, Check, Loader2, Info } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
@@ -55,7 +55,7 @@ export function ControllerSelection() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-32">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.05)]">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
@@ -176,7 +176,19 @@ export function ControllerSelection() {
 
       {/* Sticky Bottom Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-[rgba(0,0,0,0.05)]">
-        <div className="max-w-md mx-auto px-6 py-6">
+        <div className="max-w-md mx-auto px-6 py-4">
+          {/* Info Message */}
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <div className="flex-shrink-0">
+              <Info className="w-4 h-4 text-[#86868B]" />
+            </div>
+            <p className="text-xs text-[#86868B]">
+              <span className="font-semibold text-[#1d1d1f]">접수 안내:</span>{' '}
+              수리 신청 양식을 작성해 주시면 예상 수리 금액과 패드 발송 주소를 안내해 드립니다. 패드 도착 후 상태 확인과 테스트를 진행한 뒤 수리를 진행합니다.
+            </p>
+          </div>
+
+          {/* Continue Button */}
           <button
             onClick={handleContinue}
             disabled={!selectedModelId}

@@ -455,21 +455,14 @@ export function RepairForm() {
         )}
 
         {/* Submit Notice */}
-        <div className="bg-[#E8F4FF] border border-[#007AFF]/20 rounded-[20px] p-5 space-y-2">
+        <div className="bg-[#F5F5F7] border border-[rgba(0,0,0,0.1)] rounded-[20px] p-5">
           <div className="flex items-start gap-3">
-            <div className="w-5 h-5 rounded-full bg-[#007AFF] flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="w-5 h-5 rounded-full bg-[#86868B] flex items-center justify-center flex-shrink-0 mt-0.5">
               <span className="text-white text-xs" style={{ fontWeight: 700 }}>!</span>
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium mb-1" style={{ color: '#007AFF' }}>
-                발송 안내
-              </p>
-              <p className="text-sm text-[#86868B] leading-relaxed">
-                수리 신청을 하시면 별도로 연락을 드리며,
-                <br />
-                안내해드리는 주소로 패드를 보내주시면 됩니다.
-              </p>
-            </div>
+            <p className="text-sm text-[#86868B] leading-relaxed flex-1">
+              신청 접수 후 기재해 주신 연락처로 금액과 발송 주소를 안내해 드립니다. 안내받은 주소로 컨트롤러를 발송해 주시면 됩니다.
+            </p>
           </div>
         </div>
 

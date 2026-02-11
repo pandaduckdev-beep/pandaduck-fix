@@ -8,7 +8,6 @@ const CONDITIONS = [
   '조이스틱 오작동',
   '버튼 클릭감 이상',
   '트리거/범퍼 불량',
-  '충전 포트 문제',
   '외관 손상',
   '기타',
 ]
@@ -165,7 +164,7 @@ export function ControllerCondition() {
         {/* Additional Notes */}
         <div ref={setRef(1)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4" style={{ transitionDelay: '0.1s' }}>
           <h3 className="text-lg" style={{ fontWeight: 600 }}>
-            추가 요청사항
+            상세 설명
           </h3>
           <p className="text-sm text-[#86868B]">선택사항 - 구체적인 내용을 기술해주세요</p>
 
