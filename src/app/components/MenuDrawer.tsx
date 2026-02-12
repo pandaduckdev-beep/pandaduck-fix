@@ -87,7 +87,8 @@ export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
               </h4>
 
               <div className="space-y-3">
-                {/* Phone */}
+                {/* Phone - 일시 제거 */}
+                {/*
                 <a
                   href="tel:010-3971-9794"
                   className="flex items-center justify-between p-3 bg-[#F5F5F7] hover:bg-[#E8E8ED] rounded-[16px] transition-colors group"
@@ -102,6 +103,7 @@ export function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
                     전화하기 →
                   </div>
                 </a>
+                */}
 
                 {/* KakaoTalk */}
                 <a

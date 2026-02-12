@@ -20,6 +20,8 @@ export function Footer() {
             연락처
           </h4>
           <div className="space-y-3">
+            {/* 전화번호 - 일시 제거 */}
+            {/*
             <a
               href="tel:010-3971-9794"
               className="flex items-center gap-3 text-sm text-[#86868B] hover:text-[#007AFF] transition-colors"
@@ -28,6 +30,7 @@ export function Footer() {
               <Phone className="w-4 h-4" />
               <span>010-3971-9794</span>
             </a>
+            */}
             <a
               href="mailto:contact@pandaduck.kr"
               className="flex items-center gap-3 text-sm text-[#86868B] hover:text-[#007AFF] transition-colors"
