@@ -17,7 +17,7 @@ export function Footer() {
         {/* Contact Info */}
         <div className="space-y-4">
           <h4 className="text-sm" style={{ fontWeight: 600 }}>
-            연락처
+            문의하기
           </h4>
           <div className="space-y-3">
             {/* 전화번호 - 일시 제거 */}
