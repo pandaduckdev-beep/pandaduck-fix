@@ -91,7 +91,10 @@ export function RepairForm() {
     try {
       // Convert model_id to UUID
       let controllerModelUuid = controllerModel || 'DualSense'
-      if (controllerModel && !controllerModel.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+      if (
+        controllerModel &&
+        !controllerModel.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+      ) {
         const model = await getControllerModelById(controllerModel)
         if (model) {
           controllerModelUuid = model.id
@@ -109,9 +112,7 @@ export function RepairForm() {
         address: formData.address,
         detailAddress: formData.detailAddress,
         issueDescription: [
-          conditionData?.conditions.length
-            ? `상태: [${conditionData.conditions.join(', ')}]`
-            : '',
+          conditionData?.conditions.length ? `상태: [${conditionData.conditions.join(', ')}]` : '',
           conditionData?.notes ? `요청사항: ${conditionData.notes}` : '',
         ]
           .filter(Boolean)
@@ -144,7 +145,12 @@ export function RepairForm() {
     navigate('/')
   }
 
-  const isFormValid = formData.name && formData.phone && formData.postalCode && formData.address && formData.detailAddress
+  const isFormValid =
+    formData.name &&
+    formData.phone &&
+    formData.postalCode &&
+    formData.address &&
+    formData.detailAddress
 
   const handleAddressComplete = (data: { postalCode: string; address: string }) => {
     setFormData({
@@ -227,7 +233,11 @@ export function RepairForm() {
 
       <form onSubmit={handleSubmit} className="max-w-md mx-auto px-6 space-y-8">
         {/* Service Summary Box */}
-        <div ref={setRef(0)} className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4" style={{ transitionDelay: '0s' }}>
+        <div
+          ref={setRef(0)}
+          className="slide-up bg-[#F5F5F7] rounded-[28px] p-6 space-y-4"
+          style={{ transitionDelay: '0s' }}
+        >
           <h3 className="text-lg" style={{ fontWeight: 600 }}>
             서비스 요약
           </h3>
@@ -465,10 +475,13 @@ export function RepairForm() {
         <div className="bg-[#F5F5F7] border border-[rgba(0,0,0,0.1)] rounded-[20px] p-5">
           <div className="flex items-start gap-3">
             <div className="w-5 h-5 rounded-full bg-[#86868B] flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span className="text-white text-xs" style={{ fontWeight: 700 }}>!</span>
+              <span className="text-white text-xs" style={{ fontWeight: 700 }}>
+                !
+              </span>
             </div>
             <p className="text-sm text-[#86868B] leading-relaxed flex-1">
-              신청 접수 후 기재해 주신 연락처로 금액과 발송 주소를 안내해 드립니다. 안내받은 주소로 컨트롤러를 발송해 주시면 됩니다.
+              신청 접수 후 기재해 주신 연락처로 금액과 발송 주소를 안내해 드립니다. 안내받은 주소로
+              컨트롤러를 발송해 주시면 됩니다.
             </p>
           </div>
         </div>
@@ -620,7 +633,10 @@ export function RepairForm() {
                           </div>
                           <div className="text-right">
                             <div className="font-semibold text-sm">
-                              ₩{(service.price + (service.selectedOption?.price || 0)).toLocaleString()}
+                              ₩
+                              {(
+                                service.price + (service.selectedOption?.price || 0)
+                              ).toLocaleString()}
                             </div>
                           </div>
                         </div>
@@ -810,16 +826,16 @@ export function RepairForm() {
                 <div>
                   <p className="text-[#86868B] text-xs mb-1">보내실 주소</p>
                   <p style={{ fontWeight: 600 }}>
-                    경기도 광주시 태전동
+                    경기도 광주시 고불로 87 102동 2004호
                     <br />
-                    판다덕 픽스 (우편번호: 06234)
+                    판다덕픽스 (우편번호: 12785)
                   </p>
                 </div>
                 <div className="h-px bg-[rgba(0,0,0,0.1)]"></div>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[#86868B] text-xs mb-1">받는 사람</p>
-                    <p style={{ fontWeight: 600 }}>판다덕 픽스</p>
+                    <p style={{ fontWeight: 600 }}>판다덕픽스</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[#86868B] text-xs mb-1">연락처</p>
