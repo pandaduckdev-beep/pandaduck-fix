@@ -16,6 +16,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Session timeout: 8 hours
 const SESSION_TIMEOUT = 8 * 60 * 60 * 1000
+const SESSION_CHECK_TIMEOUT = 7000
 
 // Rate limiting: max 5 attempts per 15 minutes
 const MAX_LOGIN_ATTEMPTS = 5
@@ -32,9 +33,7 @@ function checkRateLimit(email: string): { allowed: boolean; remainingTime?: numb
   const attempts: LoginAttempt[] = attemptsData ? JSON.parse(attemptsData) : []
 
   const now = Date.now()
-  const recentAttempts = attempts.filter(
-    (attempt) => now - attempt.timestamp < RATE_LIMIT_WINDOW
-  )
+  const recentAttempts = attempts.filter((attempt) => now - attempt.timestamp < RATE_LIMIT_WINDOW)
 
   const userAttempts = recentAttempts.filter((attempt) => attempt.email === email)
 
@@ -52,9 +51,7 @@ function recordLoginAttempt(email: string) {
   const attempts: LoginAttempt[] = attemptsData ? JSON.parse(attemptsData) : []
 
   const now = Date.now()
-  const recentAttempts = attempts.filter(
-    (attempt) => now - attempt.timestamp < RATE_LIMIT_WINDOW
-  )
+  const recentAttempts = attempts.filter((attempt) => now - attempt.timestamp < RATE_LIMIT_WINDOW)
 
   recentAttempts.push({ timestamp: now, email })
   localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(recentAttempts))
@@ -147,15 +144,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkSession = async () => {
     try {
-      const {
-        data: { session: currentSession },
-      } = await supabase.auth.getSession()
+      const sessionResult = (await Promise.race([
+        supabase.auth.getSession(),
+        new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Session check timeout')), SESSION_CHECK_TIMEOUT)
+        }),
+      ])) as {
+        data: { session: Session | null }
+      }
+
+      const currentSession = sessionResult.data.session
 
       if (currentSession) {
         await handleSessionUpdate(currentSession)
       }
     } catch (error) {
       console.error('Failed to check session:', error)
+      handleSignOut()
     } finally {
       setLoading(false)
     }
@@ -241,9 +246,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider
-      value={{ isAuthenticated, login, logout, user, session, loading }}
-    >
+    <AuthContext.Provider value={{ isAuthenticated, login, logout, user, session, loading }}>
       {children}
       <Toaster position="top-right" />
     </AuthContext.Provider>

@@ -32,11 +32,9 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
   const getCustomerAddress = () => {
     // Priority 1: Use structured fields if available
     if (repair.postal_code && repair.address) {
-      const parts = [
-        `[${repair.postal_code}]`,
-        repair.address,
-        repair.detail_address
-      ].filter(Boolean)
+      const parts = [`[${repair.postal_code}]`, repair.address, repair.detail_address].filter(
+        Boolean
+      )
       return parts.join(' ')
     }
 
@@ -62,16 +60,16 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
     }
   }
 
-  const { conditions: customerConditions, notes: customerNotes } = parseIssueDescription(repair.issue_description)
+  const { conditions: customerConditions, notes: customerNotes } = parseIssueDescription(
+    repair.issue_description
+  )
 
   // 서비스 가격 합계 계산
-  const servicesTotal = repair.services?.reduce(
-    (sum, svc) => sum + svc.service_price + svc.option_price,
-    0
-  ) || 0
+  const servicesTotal =
+    repair.services?.reduce((sum, svc) => sum + svc.service_price + svc.option_price, 0) || 0
 
-  // 할인액 계산 (서비스 합계 - 총 금액)
-  const discount = servicesTotal - repair.total_amount
+  const shippingFee = Math.max(repair.total_amount - servicesTotal, 0)
+  const discount = Math.max(servicesTotal - repair.total_amount, 0)
 
   const handlePrint = () => {
     window.print()
@@ -92,10 +90,7 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
               <Printer className="w-5 h-5" />
               <span className="text-sm font-medium">프린트</span>
             </button>
-<button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition"
-            >
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -109,7 +104,10 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
             <p className="text-sm text-gray-600">게임패드 수리 서비스</p>
             <div className="mt-4 text-xs text-gray-500">
               <p>접수번호: {repair.id.slice(0, 8).toUpperCase()}</p>
-              <p>접수일시: {format(new Date(repair.created_at), 'yyyy년 MM월 dd일 HH:mm', { locale: ko })}</p>
+              <p>
+                접수일시:{' '}
+                {format(new Date(repair.created_at), 'yyyy년 MM월 dd일 HH:mm', { locale: ko })}
+              </p>
             </div>
           </div>
 
@@ -159,8 +157,12 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
               <table className="w-full">
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">항목</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">금액</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                      항목
+                    </th>
+                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
+                      금액
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -174,13 +176,13 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
                           ₩{svc.service_price.toLocaleString()}
                         </td>
                       </tr>
-                      {svc.option && svc.option_price > 0 && (
+                      {svc.option && (
                         <tr key={`option-${index}`} className="bg-gray-50">
                           <td className="px-4 py-2 pl-8">
                             <div className="text-sm text-gray-600">└ {svc.option.option_name}</div>
                           </td>
                           <td className="px-4 py-2 text-right text-sm text-gray-700">
-                            +₩{svc.option_price.toLocaleString()}
+                            {svc.option_price > 0 ? `+₩${svc.option_price.toLocaleString()}` : '-'}
                           </td>
                         </tr>
                       )}
@@ -193,6 +195,16 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
                       </td>
                       <td className="px-4 py-3 text-right font-semibold text-red-600">
                         -₩{discount.toLocaleString()}
+                      </td>
+                    </tr>
+                  )}
+                  {shippingFee > 0 && (
+                    <tr className="bg-blue-50">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-blue-700">배송비</div>
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold text-blue-700">
+                        ₩{shippingFee.toLocaleString()}
                       </td>
                     </tr>
                   )}
@@ -222,7 +234,10 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
                     <p className="text-sm font-medium text-gray-600 mb-2">현재 상태</p>
                     <div className="flex flex-wrap gap-2">
                       {customerConditions.map((c) => (
-                        <span key={c} className="inline-block bg-white border border-gray-300 rounded-full px-3 py-1 text-sm font-medium">
+                        <span
+                          key={c}
+                          className="inline-block bg-white border border-gray-300 rounded-full px-3 py-1 text-sm font-medium"
+                        >
                           {c}
                         </span>
                       ))}
@@ -250,7 +265,9 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
                 {repair.admin_notes && (
                   <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
                     <h3 className="text-sm font-semibold text-gray-900 mb-2">관리자 메모</h3>
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{repair.admin_notes}</p>
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                      {repair.admin_notes}
+                    </p>
                   </div>
                 )}
                 {repair.pre_repair_notes && (

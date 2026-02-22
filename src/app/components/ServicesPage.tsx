@@ -81,8 +81,11 @@ interface ServiceDetail {
   icon: React.ReactNode
   title: string
   subtitle: string
+  summary?: string
   description: string
   features: string[]
+  detailTags?: string[]
+  expectedResults?: string[]
   process: string[]
   price: string
   duration: string
@@ -154,8 +157,11 @@ export function ServicesPage() {
         icon: iconMap[service.icon_name || service.service_id] || <Gamepad2 className="w-6 h-6" />,
         title: service.name,
         subtitle: service.subtitle || '',
+        summary: service.summary || '',
         description: service.detailed_description || service.description,
         features: (service.features as string[]) || [],
+        detailTags: (service.detail_tags as string[]) || [],
+        expectedResults: (service.expected_results as string[]) || [],
         process: (service.process_steps as string[]) || [],
         price: `₩${service.base_price.toLocaleString()}`,
         duration: service.duration || '1일',
@@ -169,7 +175,8 @@ export function ServicesPage() {
         name: opt.option_name,
         description: opt.option_description,
         detailedDescription: opt.detailed_description || undefined,
-        price: opt.additional_price,
+        targetAudience: opt.target_audience || undefined,
+        price: opt.final_price ?? service.base_price + (opt.additional_price ?? 0),
         imageUrl: opt.image_url || undefined,
       }))
 
@@ -259,7 +266,9 @@ export function ServicesPage() {
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                    {iconMap[service.icon_name || service.service_id] || <Gamepad2 className="w-6 h-6" />}
+                    {iconMap[service.icon_name || service.service_id] || (
+                      <Gamepad2 className="w-6 h-6" />
+                    )}
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg mb-1" style={{ fontWeight: 600 }}>
@@ -267,7 +276,17 @@ export function ServicesPage() {
                     </h3>
                     <p className="text-sm text-[#86868B] mb-3">{service.description}</p>
                     <div className="text-xl mb-3" style={{ fontWeight: 700 }}>
-                      ₩{service.base_price.toLocaleString()}원
+                      ₩
+                      {service.options && service.options.length > 0
+                        ? Math.min(
+                            ...service.options.map(
+                              (option: ControllerServiceOption) =>
+                                option.final_price ??
+                                service.base_price + (option.additional_price ?? 0)
+                            )
+                          ).toLocaleString()
+                        : service.base_price.toLocaleString()}
+                      원
                     </div>
 
                     {/* Options */}
@@ -291,9 +310,10 @@ export function ServicesPage() {
                                 </div>
                               </div>
                               <div className="text-sm" style={{ fontWeight: 700 }}>
-                                {option.additional_price === 0
+                                {(option.final_price ??
+                                  service.base_price + (option.additional_price ?? 0)) === 0
                                   ? '기본'
-                                  : `+${option.additional_price.toLocaleString()}원`}
+                                  : `${(option.final_price ?? service.base_price + (option.additional_price ?? 0)).toLocaleString()}원`}
                               </div>
                             </div>
                           ))}
@@ -317,7 +337,11 @@ export function ServicesPage() {
 
       {/* CTA Section */}
       <section className="max-w-md mx-auto px-6 pb-12">
-        <div ref={setRef(services.length + 1)} className="slide-up" style={{ transitionDelay: '0s' }}>
+        <div
+          ref={setRef(services.length + 1)}
+          className="slide-up"
+          style={{ transitionDelay: '0s' }}
+        >
           <div className="bg-[#000000] text-white rounded-[28px] p-8 text-center space-y-4">
             <h3 className="text-2xl" style={{ fontWeight: 700 }}>
               지금 바로 시작하세요

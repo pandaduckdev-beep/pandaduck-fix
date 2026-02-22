@@ -19,7 +19,8 @@ interface OptionItem {
   option_name: string
   option_description: string
   detailed_description: string
-  additional_price: number
+  additional_price?: number
+  final_price: number
   image_url: string
   display_order: number
 }
@@ -29,7 +30,7 @@ interface EditingOption {
   option_name: string
   option_description: string
   detailed_description: string
-  additional_price: number
+  final_price: number
   image_url: string
 }
 
@@ -38,6 +39,7 @@ export default function ServiceOptionsPage() {
   const navigate = useNavigate()
   const { warning, error } = useToast()
   const [serviceName, setServiceName] = useState('')
+  const [serviceBasePrice, setServiceBasePrice] = useState(0)
   const [options, setOptions] = useState<OptionItem[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
@@ -53,12 +55,13 @@ export default function ServiceOptionsPage() {
     // 서비스 정보 가져오기
     const { data: serviceData } = await supabase
       .from('controller_services')
-      .select('name')
+      .select('name, base_price')
       .eq('id', id)
       .single()
 
     if (serviceData) {
       setServiceName(serviceData.name)
+      setServiceBasePrice(serviceData.base_price || 0)
     }
 
     // 옵션 목록 가져오기
@@ -85,6 +88,7 @@ export default function ServiceOptionsPage() {
         option_description: '',
         detailed_description: '',
         additional_price: 0,
+        final_price: serviceBasePrice,
         display_order: maxOrder + 1,
         is_active: true,
       })
@@ -99,7 +103,7 @@ export default function ServiceOptionsPage() {
         option_name: data.option_name,
         option_description: data.option_description || '',
         detailed_description: data.detailed_description || '',
-        additional_price: data.additional_price || 0,
+        final_price: data.final_price ?? serviceBasePrice + (data.additional_price ?? 0),
         image_url: data.image_url || '',
       })
     }
@@ -117,7 +121,8 @@ export default function ServiceOptionsPage() {
         option_name: editingData.option_name,
         option_description: editingData.option_description,
         detailed_description: editingData.detailed_description,
-        additional_price: editingData.additional_price,
+        final_price: editingData.final_price,
+        additional_price: Math.max(editingData.final_price - serviceBasePrice, 0),
         image_url: editingData.image_url,
       })
       .eq('id', editingId)
@@ -131,7 +136,7 @@ export default function ServiceOptionsPage() {
                 option_name: editingData.option_name,
                 option_description: editingData.option_description,
                 detailed_description: editingData.detailed_description,
-                additional_price: editingData.additional_price,
+                final_price: editingData.final_price,
                 image_url: editingData.image_url,
               }
             : o
@@ -145,10 +150,7 @@ export default function ServiceOptionsPage() {
   const handleDeleteOption = async (optionId: string) => {
     if (!confirm('정말 삭제하시겠습니까?')) return
 
-    const { error } = await supabase
-      .from('controller_service_options')
-      .delete()
-      .eq('id', optionId)
+    const { error } = await supabase.from('controller_service_options').delete().eq('id', optionId)
 
     if (!error) {
       setOptions(options.filter((o) => o.id !== optionId))
@@ -188,7 +190,7 @@ export default function ServiceOptionsPage() {
       option_name: option.option_name,
       option_description: option.option_description || '',
       detailed_description: option.detailed_description || '',
-      additional_price: option.additional_price || 0,
+      final_price: option.final_price ?? serviceBasePrice + (option.additional_price ?? 0),
       image_url: option.image_url || '',
     })
   }
@@ -213,10 +215,7 @@ export default function ServiceOptionsPage() {
         showBackButton
         onBack={() => navigate(-1)}
         rightAction={
-          <button
-            onClick={handleAddOption}
-            className="p-2 bg-[#007AFF] rounded-full"
-          >
+          <button onClick={handleAddOption} className="p-2 bg-[#007AFF] rounded-full">
             <Plus className="w-5 h-5 text-white" strokeWidth={2.5} />
           </button>
         }
@@ -308,18 +307,17 @@ export default function ServiceOptionsPage() {
                         />
                       </div>
 
-                      {/* 추가 가격 */}
                       <div>
                         <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">
-                          추가 가격 (원)
+                          옵션 최종 가격 (원)
                         </label>
                         <input
                           type="number"
-                          value={editingData?.additional_price || 0}
+                          value={editingData?.final_price ?? 0}
                           onChange={(e) =>
                             setEditingData({
                               ...editingData!,
-                              additional_price: Number(e.target.value) || 0,
+                              final_price: Number(e.target.value) || 0,
                             })
                           }
                           placeholder="0"
@@ -431,9 +429,9 @@ export default function ServiceOptionsPage() {
                         {/* 가격과 버튼 */}
                         <div className="flex items-center gap-3">
                           <div className="text-right">
-                            <p className="text-[10px] text-[#86868B]">추가</p>
+                            <p className="text-[10px] text-[#86868B]">최종가</p>
                             <p className="text-[15px] font-semibold text-[#1D1D1F]">
-                              ₩{option.additional_price.toLocaleString()}
+                              ₩{(option.final_price ?? 0).toLocaleString()}
                             </p>
                           </div>
                           <button

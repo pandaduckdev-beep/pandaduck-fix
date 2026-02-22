@@ -67,7 +67,10 @@ export async function fetchControllerServices(
 
       return {
         ...service,
-        options: options || [],
+        options: (options || []).map((option) => ({
+          ...option,
+          final_price: option.final_price ?? service.base_price + (option.additional_price ?? 0),
+        })),
       }
     })
   )
@@ -274,10 +277,7 @@ export async function fetchPublicReviews(limit = 20): Promise<Review[]> {
  * 평균 평점 계산
  */
 export async function fetchAverageRating(): Promise<number> {
-  const { data, error } = await supabase
-    .from('reviews')
-    .select('rating')
-    .eq('is_public', true)
+  const { data, error } = await supabase.from('reviews').select('rating').eq('is_public', true)
 
   if (error || !data || data.length === 0) {
     return 0

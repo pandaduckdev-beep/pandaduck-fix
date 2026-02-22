@@ -3,9 +3,33 @@ import { MobileFooterNav } from '../components/MobileFooterNav'
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { RepairRequest, RepairStatus, ControllerService, ControllerServiceOption } from '@/types/database'
-import { Calendar, MapPin, Phone, Mail, Package, MessageSquare, FileText, Send, Copy, CheckCircle, X, AlertCircle, Star } from 'lucide-react'
-import { generateReviewToken, getReviewUrl, copyToClipboard, openKakaoTalk } from '@/lib/reviewUtils'
+import {
+  RepairRequest,
+  RepairStatus,
+  ControllerService,
+  ControllerServiceOption,
+} from '@/types/database'
+import {
+  Calendar,
+  MapPin,
+  Phone,
+  Mail,
+  Package,
+  MessageSquare,
+  FileText,
+  Send,
+  Copy,
+  CheckCircle,
+  X,
+  AlertCircle,
+  Star,
+} from 'lucide-react'
+import {
+  generateReviewToken,
+  getReviewUrl,
+  copyToClipboard,
+  openKakaoTalk,
+} from '@/lib/reviewUtils'
 import { useToast } from '@/hooks/useToast.tsx'
 import { SkeletonCard, SkeletonText } from '@/components/common/Skeleton'
 
@@ -64,12 +88,14 @@ export default function RepairRequestDetailPage() {
       // 수리 요청 기본 정보 조회
       const { data: repairData, error: repairError } = await supabase
         .from('repair_requests')
-        .select(`
+        .select(
+          `
           *,
           controller_models!repair_requests_controller_model_fkey (
             model_name
           )
-        `)
+        `
+        )
         .eq('id', id)
         .single()
 
@@ -265,10 +291,8 @@ export default function RepairRequestDetailPage() {
   }
 
   const config = statusConfig[repair.status]
-  const servicesTotal = repair.services?.reduce(
-    (sum, svc) => sum + svc.service_price + svc.option_price,
-    0
-  ) || 0
+  const servicesTotal =
+    repair.services?.reduce((sum, svc) => sum + svc.service_price + svc.option_price, 0) || 0
   const discount = servicesTotal - repair.total_amount
 
   const shouldShowReviewButton = repair.status === 'completed' && !repair.has_review
@@ -368,103 +392,134 @@ export default function RepairRequestDetailPage() {
               </div>
             )}
 
-            {repair.issue_description && (() => {
-              const addressMatch = repair.issue_description.match(/고객 주소:\s*(.+)/)
-              const conditionsMatch = repair.issue_description.match(/상태:\s*\[(.+?)\]/)
-              const beforeConditionsMatch = repair.issue_description.match(/수리 전 특이사항:\s*\[(.*?)\]/)
-              const afterConditionsMatch = repair.issue_description.match(/수리 후 특이사항:\s*\[(.*?)\]/)
-              const notesMatch = repair.issue_description.match(/요청사항:\s*(.+?)(?:\n|$)/)
+            {repair.issue_description &&
+              (() => {
+                const addressMatch = repair.issue_description.match(/고객 주소:\s*(.+)/)
+                const conditionsMatch = repair.issue_description.match(/상태:\s*\[(.+?)\]/)
+                const beforeConditionsMatch =
+                  repair.issue_description.match(/수리 전 특이사항:\s*\[(.*?)\]/)
+                const afterConditionsMatch =
+                  repair.issue_description.match(/수리 후 특이사항:\s*\[(.*?)\]/)
+                const notesMatch = repair.issue_description.match(/요청사항:\s*(.+?)(?:\n|$)/)
 
-              const address = addressMatch ? addressMatch[1].trim() : null
-              const conditions = conditionsMatch ? conditionsMatch[1].split(',').map((s: string) => s.trim()) : null
-              const beforeConditions = beforeConditionsMatch ? beforeConditionsMatch[1].split(',').map((s: string) => s.trim()).filter(s => s) : null
-              const afterConditions = afterConditionsMatch ? afterConditionsMatch[1].split(',').map((s: string) => s.trim()).filter(s => s) : null
-              const notes = notesMatch ? notesMatch[1].trim() : null
+                const address = addressMatch ? addressMatch[1].trim() : null
+                const conditions = conditionsMatch
+                  ? conditionsMatch[1].split(',').map((s: string) => s.trim())
+                  : null
+                const beforeConditions = beforeConditionsMatch
+                  ? beforeConditionsMatch[1]
+                      .split(',')
+                      .map((s: string) => s.trim())
+                      .filter((s) => s)
+                  : null
+                const afterConditions = afterConditionsMatch
+                  ? afterConditionsMatch[1]
+                      .split(',')
+                      .map((s: string) => s.trim())
+                      .filter((s) => s)
+                  : null
+                const notes = notesMatch ? notesMatch[1].trim() : null
 
-              return (
-                <>
-                  {address && (
-                    <div className="flex items-start gap-3">
-                      <MapPin className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-xs text-[#86868B] mb-0.5">주소</p>
-                        <p className="text-sm text-[#1D1D1F]">{address}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 수리 전 특이사항 */}
-                  {beforeConditions && beforeConditions.length > 0 && (
-                    <div className="flex items-start gap-3 bg-orange-50 p-3 rounded-lg border border-orange-100">
-                      <AlertCircle className="w-5 h-5 text-[#FF9500] flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-xs text-[#FF9500] font-semibold mb-1.5">수리 전 특이사항</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {beforeConditions.map((c: string, i: number) => (
-                            <span key={i} className="bg-white px-3 py-1 rounded-full text-xs text-[#1D1D1F]" style={{ fontWeight: 500 }}>
-                              {c}
-                            </span>
-                          ))}
+                return (
+                  <>
+                    {address && (
+                      <div className="flex items-start gap-3">
+                        <MapPin className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-xs text-[#86868B] mb-0.5">주소</p>
+                          <p className="text-sm text-[#1D1D1F]">{address}</p>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* 수리 후 특이사항 */}
-                  {afterConditions && afterConditions.length > 0 && (
-                    <div className="flex items-start gap-3 bg-green-50 p-3 rounded-lg border border-green-100">
-                      <CheckCircle className="w-5 h-5 text-[#34C759] flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-xs text-[#34C759] font-semibold mb-1.5">수리 후 특이사항</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {afterConditions.map((c: string, i: number) => (
-                            <span key={i} className="bg-white px-3 py-1 rounded-full text-xs text-[#1D1D1F]" style={{ fontWeight: 500 }}>
-                              {c}
-                            </span>
-                          ))}
+                    {/* 수리 전 특이사항 */}
+                    {beforeConditions && beforeConditions.length > 0 && (
+                      <div className="flex items-start gap-3 bg-orange-50 p-3 rounded-lg border border-orange-100">
+                        <AlertCircle className="w-5 h-5 text-[#FF9500] flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-xs text-[#FF9500] font-semibold mb-1.5">
+                            수리 전 특이사항
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {beforeConditions.map((c: string, i: number) => (
+                              <span
+                                key={i}
+                                className="bg-white px-3 py-1 rounded-full text-xs text-[#1D1D1F]"
+                                style={{ fontWeight: 500 }}
+                              >
+                                {c}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {conditions && (
-                    <div className="flex items-start gap-3">
-                      <MessageSquare className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-xs text-[#86868B] mb-1.5">컨트롤러 상태</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {conditions.map((c: string) => (
-                            <span key={c} className="bg-[#F5F5F7] px-3 py-1 rounded-full text-xs text-[#1D1D1F]" style={{ fontWeight: 500 }}>
-                              {c}
-                            </span>
-                          ))}
+                    {/* 수리 후 특이사항 */}
+                    {afterConditions && afterConditions.length > 0 && (
+                      <div className="flex items-start gap-3 bg-green-50 p-3 rounded-lg border border-green-100">
+                        <CheckCircle className="w-5 h-5 text-[#34C759] flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-xs text-[#34C759] font-semibold mb-1.5">
+                            수리 후 특이사항
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {afterConditions.map((c: string, i: number) => (
+                              <span
+                                key={i}
+                                className="bg-white px-3 py-1 rounded-full text-xs text-[#1D1D1F]"
+                                style={{ fontWeight: 500 }}
+                              >
+                                {c}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                  {notes && (
-                    <div className="flex items-start gap-3">
-                      <MessageSquare className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-xs text-[#86868B] mb-0.5">추가 요청사항</p>
-                        <p className="text-sm text-[#1D1D1F] whitespace-pre-wrap">{notes}</p>
+                    )}
+
+                    {conditions && (
+                      <div className="flex items-start gap-3">
+                        <MessageSquare className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-xs text-[#86868B] mb-1.5">컨트롤러 상태</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {conditions.map((c: string) => (
+                              <span
+                                key={c}
+                                className="bg-[#F5F5F7] px-3 py-1 rounded-full text-xs text-[#1D1D1F]"
+                                style={{ fontWeight: 500 }}
+                              >
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {!address && !conditions && !notes && !beforeConditions && !afterConditions && (
-                    <div className="flex items-start gap-3">
-                      <MessageSquare className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-xs text-[#86868B] mb-0.5">문제 설명</p>
-                        <p className="text-sm text-[#1D1D1F] whitespace-pre-wrap">
-                          {repair.issue_description}
-                        </p>
+                    )}
+                    {notes && (
+                      <div className="flex items-start gap-3">
+                        <MessageSquare className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-xs text-[#86868B] mb-0.5">추가 요청사항</p>
+                          <p className="text-sm text-[#1D1D1F] whitespace-pre-wrap">{notes}</p>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </>
-              )
-            })()}
+                    )}
+                    {!address && !conditions && !notes && !beforeConditions && !afterConditions && (
+                      <div className="flex items-start gap-3">
+                        <MessageSquare className="w-5 h-5 text-[#86868B] flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-xs text-[#86868B] mb-0.5">문제 설명</p>
+                          <p className="text-sm text-[#1D1D1F] whitespace-pre-wrap">
+                            {repair.issue_description}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
           </div>
         </div>
 
@@ -476,7 +531,10 @@ export default function RepairRequestDetailPage() {
             </h3>
             <div className="space-y-3">
               {repair.services.map((svc, index) => (
-                <div key={index} className="pb-3 border-b border-[rgba(0,0,0,0.06)] last:border-0 last:pb-0">
+                <div
+                  key={index}
+                  className="pb-3 border-b border-[rgba(0,0,0,0.06)] last:border-0 last:pb-0"
+                >
                   <div className="flex justify-between items-start mb-2">
                     <p className="text-sm text-[#1D1D1F]" style={{ fontWeight: 600 }}>
                       {svc.service?.service_name || '서비스'}
@@ -488,9 +546,11 @@ export default function RepairRequestDetailPage() {
                   {svc.option && (
                     <div className="flex justify-between items-start">
                       <p className="text-xs text-[#86868B] pl-3">└ {svc.option.option_name}</p>
-                      <p className="text-xs text-[#86868B]">
-                        +₩{svc.option_price.toLocaleString()}
-                      </p>
+                      {svc.option_price > 0 && (
+                        <p className="text-xs text-[#86868B]">
+                          +₩{svc.option_price.toLocaleString()}
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -693,9 +753,7 @@ export default function RepairRequestDetailPage() {
                 <p className="text-xs text-[#1D1D1F] break-all font-mono">{reviewUrl}</p>
               </div>
 
-              <p className="text-sm text-[#86868B]">
-                고객에게 리뷰 요청을 보낼 방법을 선택하세요.
-              </p>
+              <p className="text-sm text-[#86868B]">고객에게 리뷰 요청을 보낼 방법을 선택하세요.</p>
 
               <div className="space-y-3">
                 <button

@@ -78,8 +78,11 @@ export function EditServiceModal({
     icon_name: '',
     name: '',
     description: '',
+    summary: '',
     subtitle: '',
     detailed_description: '',
+    detail_tags: '',
+    expected_results: '',
     duration: '1일',
     warranty: '1년',
     image_url: '',
@@ -132,8 +135,13 @@ export function EditServiceModal({
         icon_name: service.icon_name || service.service_id || '',
         name: service.name || '',
         description: service.description || '',
+        summary: service.summary || '',
         subtitle: service.subtitle || '',
         detailed_description: service.detailed_description || '',
+        detail_tags: Array.isArray(service.detail_tags) ? service.detail_tags.join('\n') : '',
+        expected_results: Array.isArray(service.expected_results)
+          ? service.expected_results.join('\n')
+          : '',
         duration: service.duration || '1일',
         warranty: service.warranty || '1년',
         image_url: service.image_url || '',
@@ -230,6 +238,14 @@ export function EditServiceModal({
     try {
       await onUpdate(service.id, {
         ...formData,
+        detail_tags: formData.detail_tags
+          .split('\n')
+          .map((item) => item.trim())
+          .filter(Boolean),
+        expected_results: formData.expected_results
+          .split('\n')
+          .map((item) => item.trim())
+          .filter(Boolean),
         features: features.map((f) => f.text),
         process_steps: processSteps.map((s) => s.text),
       })
@@ -391,7 +407,17 @@ export function EditServiceModal({
           </div>
 
           <div>
-            <Label htmlFor="base_price">기본 가격 *</Label>
+            <Label htmlFor="summary">한 줄 요약</Label>
+            <Input
+              id="summary"
+              value={formData.summary}
+              onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+              placeholder="선택 화면에서 보여줄 요약"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="base_price">단독 서비스 가격 (옵션 미사용 시) *</Label>
             <Input
               id="base_price"
               type="number"
@@ -423,6 +449,28 @@ export function EditServiceModal({
               onChange={(e) => setFormData({ ...formData, detailed_description: e.target.value })}
               placeholder="서비스에 대한 상세 설명"
               className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="detail_tags">상세 태그 (줄바꿈으로 구분)</Label>
+            <textarea
+              id="detail_tags"
+              value={formData.detail_tags}
+              onChange={(e) => setFormData({ ...formData, detail_tags: e.target.value })}
+              placeholder={'예: 데드존 보정\n캘리브레이션'}
+              className="w-full min-h-[72px] px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="expected_results">체감 변화 (줄바꿈으로 구분)</Label>
+            <textarea
+              id="expected_results"
+              value={formData.expected_results}
+              onChange={(e) => setFormData({ ...formData, expected_results: e.target.value })}
+              placeholder={'예: 입력 안정감 향상\n반응성 개선'}
+              className="w-full min-h-[72px] px-3 py-2 border border-gray-300 rounded-md text-sm"
             />
           </div>
 

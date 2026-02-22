@@ -10,6 +10,7 @@ import {
   Receipt,
   Tag,
   FileText,
+  CalendarDays,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -22,6 +23,7 @@ const navItems = [
   { id: 'dashboard', label: '대시보드', icon: LayoutDashboard },
   { divider: true },
   { id: 'repairs', label: '수리 신청', icon: ClipboardList },
+  { id: 'schedule', label: '일정 관리', icon: CalendarDays },
   { id: 'repair-logs', label: '수리 작업기', icon: FileText },
   { divider: true },
   { id: 'reviews', label: '리뷰 관리', icon: Star },

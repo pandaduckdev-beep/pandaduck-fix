@@ -280,11 +280,7 @@ export default function EditServicePage() {
 
   return (
     <div className="min-h-screen bg-[#F2F2F7] pb-8">
-      <MobileHeader
-        title="서비스 수정"
-        showBackButton
-        onBack={() => navigate(-1)}
-      />
+      <MobileHeader title="서비스 수정" showBackButton onBack={() => navigate(-1)} />
 
       <main className="p-5 space-y-6">
         {/* 아이콘 선택 */}
@@ -319,9 +315,7 @@ export default function EditServicePage() {
                         setShowIconSelector(false)
                       }}
                       className={`p-3 rounded-lg transition-colors ${
-                        formData.icon_name === option.name
-                          ? 'bg-[#007AFF]'
-                          : 'bg-[#F5F5F7]'
+                        formData.icon_name === option.name ? 'bg-[#007AFF]' : 'bg-[#F5F5F7]'
                       }`}
                     >
                       <IconComponent className="w-5 h-5" strokeWidth={2} />
@@ -335,9 +329,7 @@ export default function EditServicePage() {
 
         {/* 서비스명 */}
         <div>
-          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">
-            서비스명 *
-          </label>
+          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">서비스명 *</label>
           <input
             type="text"
             value={formData.name}
@@ -350,9 +342,7 @@ export default function EditServicePage() {
 
         {/* 설명 */}
         <div>
-          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">
-            설명
-          </label>
+          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">설명</label>
           <input
             type="text"
             value={formData.description}
@@ -363,10 +353,9 @@ export default function EditServicePage() {
           />
         </div>
 
-        {/* 기본 가격 */}
         <div>
           <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">
-            기본 가격 *
+            단독 서비스 가격 (옵션 미사용 시) *
           </label>
           <input
             type="number"
@@ -381,9 +370,7 @@ export default function EditServicePage() {
 
         {/* 부제목 */}
         <div>
-          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">
-            부제목
-          </label>
+          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">부제목</label>
           <input
             type="text"
             value={formData.subtitle}
@@ -396,9 +383,7 @@ export default function EditServicePage() {
 
         {/* 상세 설명 */}
         <div>
-          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">
-            상세 설명
-          </label>
+          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">상세 설명</label>
           <textarea
             value={formData.detailed_description}
             onChange={(e) => setFormData({ ...formData, detailed_description: e.target.value })}
@@ -426,9 +411,7 @@ export default function EditServicePage() {
 
         {/* 보증 기간 */}
         <div>
-          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">
-            보증 기간
-          </label>
+          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">보증 기간</label>
           <input
             type="text"
             value={formData.warranty}
@@ -441,9 +424,7 @@ export default function EditServicePage() {
 
         {/* 주요 특징 */}
         <div>
-          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">
-            주요 특징
-          </label>
+          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">주요 특징</label>
           <div className="space-y-2">
             {features.map((feature) => (
               <div key={feature.id} className="flex items-center gap-2">
@@ -466,21 +447,18 @@ export default function EditServicePage() {
                 ) : (
                   <>
                     <div className="flex-1 flex items-start gap-2 px-3 py-2 bg-white rounded-xl border border-[rgba(0,0,0,0.06)]">
-                      <Check className="w-4 h-4 text-[#34C759] flex-shrink-0 mt-0.5" strokeWidth={2.5} />
+                      <Check
+                        className="w-4 h-4 text-[#34C759] flex-shrink-0 mt-0.5"
+                        strokeWidth={2.5}
+                      />
                       <span className="text-[15px]" style={{ fontWeight: 500 }}>
                         {feature.text}
                       </span>
                     </div>
-                    <button
-                      onClick={() => toggleFeatureEdit(feature.id)}
-                      className="p-2"
-                    >
+                    <button onClick={() => toggleFeatureEdit(feature.id)} className="p-2">
                       <Pencil className="w-4 h-4 text-[#86868B]" strokeWidth={2} />
                     </button>
-                    <button
-                      onClick={() => deleteFeature(feature.id)}
-                      className="p-2"
-                    >
+                    <button onClick={() => deleteFeature(feature.id)} className="p-2">
                       <Trash2 className="w-4 h-4 text-[#FF3B30]" strokeWidth={2} />
                     </button>
                   </>
@@ -509,9 +487,7 @@ export default function EditServicePage() {
 
         {/* 작업 과정 */}
         <div>
-          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">
-            작업 과정
-          </label>
+          <label className="text-[13px] text-[#86868B] font-semibold mb-2 block">작업 과정</label>
           <div className="space-y-2">
             {processSteps.map((step, index) => (
               <div key={step.id} className="flex items-center gap-2">
@@ -541,16 +517,10 @@ export default function EditServicePage() {
                         {step.text}
                       </span>
                     </div>
-                    <button
-                      onClick={() => toggleProcessStepEdit(step.id)}
-                      className="p-2"
-                    >
+                    <button onClick={() => toggleProcessStepEdit(step.id)} className="p-2">
                       <Pencil className="w-4 h-4 text-[#86868B]" strokeWidth={2} />
                     </button>
-                    <button
-                      onClick={() => deleteProcessStep(step.id)}
-                      className="p-2"
-                    >
+                    <button onClick={() => deleteProcessStep(step.id)} className="p-2">
                       <Trash2 className="w-4 h-4 text-[#FF3B30]" strokeWidth={2} />
                     </button>
                   </>

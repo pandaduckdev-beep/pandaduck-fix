@@ -180,7 +180,8 @@ export default function ServicesPage() {
               ) : (
                 <div className="bg-[#F5F5F7] rounded-xl overflow-hidden">
                   {services.map((service, index) => {
-                    const IconComponent = iconMap[service.icon_name || service.service_id] || Gamepad2
+                    const IconComponent =
+                      iconMap[service.icon_name || service.service_id] || Gamepad2
 
                     return (
                       <div
@@ -212,7 +213,16 @@ export default function ServicesPage() {
                               {service.description || service.subtitle || '설명 없음'}
                             </p>
                             <p className="text-[17px] font-bold text-[#1D1D1F]">
-                              ₩{service.base_price.toLocaleString()}
+                              ₩
+                              {service.options && service.options.length > 0
+                                ? Math.min(
+                                    ...service.options.map(
+                                      (opt: any) =>
+                                        opt.final_price ??
+                                        service.base_price + (opt.additional_price ?? 0)
+                                    )
+                                  ).toLocaleString()
+                                : service.base_price.toLocaleString()}
                             </p>
                           </div>
 

@@ -64,6 +64,19 @@ const setupAdminPWA = () => {
 // PWA 설정 실행
 setupAdminPWA()
 
+if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .getRegistrations()
+    .then((registrations) => {
+      registrations.forEach((registration) => {
+        registration.unregister()
+      })
+    })
+    .catch((error) => {
+      console.error('Failed to unregister service workers in dev:', error)
+    })
+}
+
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>

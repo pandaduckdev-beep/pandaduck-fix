@@ -22,6 +22,7 @@ import { toast } from 'sonner'
 import type { RepairLog } from '@/types/database'
 import type { ControllerModel, ControllerServiceWithOptions } from '@/types/database'
 import { RichTextEditor } from '@/components/common/RichTextEditor'
+import { resolveRepairLogThumbnailUrl } from '@/lib/repairLogThumbnail'
 
 type LogStatus = 'all' | 'public' | 'private'
 
@@ -83,7 +84,13 @@ export function RepairLogsPage() {
 
   const loadLogs = useCallback(async () => {
     try {
-      let query = supabase.from('repair_logs').select('*').order('created_at', { ascending: false })
+      setLoading(true)
+      let query = supabase
+        .from('repair_logs')
+        .select(
+          'id,title,summary,controller_model,repair_type,is_public,view_count,naver_blog_url,created_at,updated_at'
+        )
+        .order('created_at', { ascending: false })
 
       if (statusFilter === 'private') {
         query = query.eq('is_public', false)
@@ -94,7 +101,42 @@ export function RepairLogsPage() {
       const { data, error } = await query
 
       if (error) throw error
-      setLogs(data || [])
+
+      if (statusFilter !== 'all' && (!data || data.length === 0)) {
+        const { data: allData, error: allError } = await supabase
+          .from('repair_logs')
+          .select(
+            'id,title,summary,controller_model,repair_type,is_public,view_count,naver_blog_url,created_at,updated_at'
+          )
+          .order('created_at', { ascending: false })
+
+        if (allError) throw allError
+
+        if ((allData || []).length > 0) {
+          setStatusFilter('all')
+          setLogs(
+            (allData || []).map((row) => ({
+              ...row,
+              content: '',
+              thumbnail_url: null,
+              image_urls: [],
+              naver_synced_at: null,
+            })) as RepairLog[]
+          )
+          toast.info('선택한 필터 결과가 없어 전체 작업기로 전환했습니다.')
+          return
+        }
+      }
+
+      setLogs(
+        (data || []).map((row) => ({
+          ...row,
+          content: '',
+          thumbnail_url: null,
+          image_urls: [],
+          naver_synced_at: null,
+        })) as RepairLog[]
+      )
     } catch (error) {
       console.error('Failed to load repair logs:', error)
       toast.error('수리 작업기를 불러오는데 실패했습니다.')
@@ -113,7 +155,6 @@ export function RepairLogsPage() {
     const search = searchTerm.toLowerCase()
     return (
       log.title.toLowerCase().includes(search) ||
-      log.content.toLowerCase().includes(search) ||
       (log.controller_model && log.controller_model.toLowerCase().includes(search)) ||
       (log.repair_type && log.repair_type.toLowerCase().includes(search))
     )
@@ -134,18 +175,30 @@ export function RepairLogsPage() {
   }
 
   const openEditModal = async (log: RepairLog) => {
-    setEditingLog(log)
+    try {
+      const { data, error } = await supabase
+        .from('repair_logs')
+        .select('*')
+        .eq('id', log.id)
+        .single()
 
-    setFormData({
-      title: log.title,
-      content: log.content,
-      summary: log.summary || '',
-      thumbnail_url: log.thumbnail_url || '',
-      controller_model: log.controller_model || '',
-      repair_type: log.repair_type || '',
-      is_public: log.is_public,
-    })
-    setIsModalOpen(true)
+      if (error) throw error
+
+      setEditingLog(data)
+      setFormData({
+        title: data.title,
+        content: data.content,
+        summary: data.summary || '',
+        thumbnail_url: data.thumbnail_url || '',
+        controller_model: data.controller_model || '',
+        repair_type: data.repair_type || '',
+        is_public: data.is_public,
+      })
+      setIsModalOpen(true)
+    } catch (error) {
+      console.error('Failed to load repair log detail:', error)
+      toast.error('작업기 상세를 불러오지 못했습니다.')
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -156,14 +209,17 @@ export function RepairLogsPage() {
       return
     }
 
-    // 본문에서 첫 번째 이미지 추출하여 썸네일로 사용
     const imgRegex = /<img[^>]+src=["']([^"']+)["']/i
     const match = formData.content.match(imgRegex)
-    const thumbnailUrl = match ? match[1] : null
+    const thumbnailCandidate = match ? match[1] : null
 
     try {
+      const thumbnailUrl = await resolveRepairLogThumbnailUrl(
+        thumbnailCandidate,
+        editingLog?.id || formData.title
+      )
+
       if (editingLog) {
-        // Update
         const { error } = await supabase
           .from('repair_logs')
           .update({
@@ -180,7 +236,6 @@ export function RepairLogsPage() {
         if (error) throw error
         toast.success('수리 작업기가 수정되었습니다.')
       } else {
-        // Create
         const { error } = await supabase.from('repair_logs').insert({
           title: formData.title,
           content: formData.content,
@@ -368,7 +423,10 @@ export function RepairLogsPage() {
     if (post.link) {
       try {
         await navigator.clipboard.writeText(post.link)
-        toast.success('블로그 글을 가져왔습니다. 컨트롤러 모델을 선택하고 저장해주세요.', { id: 'import-naver-post', duration: 5000 })
+        toast.success('블로그 글을 가져왔습니다. 컨트롤러 모델을 선택하고 저장해주세요.', {
+          id: 'import-naver-post',
+          duration: 5000,
+        })
       } catch (err) {
         console.error('Failed to copy link:', err)
       }
@@ -459,7 +517,9 @@ export function RepairLogsPage() {
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">썸네일</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">제목 / 내용</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                제목 / 내용
+              </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">컨트롤러</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">공개</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">조회수</th>
@@ -612,48 +672,44 @@ export function RepairLogsPage() {
               </div>
 
               {/* RSS 목록 */}
-                  {loadingNaverPosts ? (
-                    <div className="flex flex-col items-center justify-center py-12">
-                      <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin mx-auto mb-4" />
-                      <p className="text-gray-600">블로그 글을 가져오는 중...</p>
-                      <p className="text-sm text-gray-500">
-                        네이버 블로그에서 글 목록을 가져오고 있습니다.
-                      </p>
-                    </div>
-                  ) : naverPosts.length > 0 ? (
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">
-                        가져온 블로그 글 ({naverPosts.length}개)
-                      </h3>
-                      <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-300 rounded-lg p-4">
-                        {naverPosts.map((post, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => importNaverPost(post)}
-                            className="w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition"
-                          >
-                            <div className="font-semibold text-gray-900 mb-1">
-                              {post.title}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {post.pubDate
-                                ? new Date(post.pubDate).toLocaleDateString('ko-KR')
-                                : ''}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-12">
-                      <p className="text-gray-600 mb-2">가져온 블로그 글이 없습니다.</p>
-                      <p className="text-sm text-gray-500">
-                        네이버 블로그 ID를 확인하거나, 블로그의 RSS 피드 설정이 공개로
-                        되어 있는지 확인해주세요.
-                      </p>
-                    </div>
-                  )}
+              {loadingNaverPosts ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-gray-600">블로그 글을 가져오는 중...</p>
+                  <p className="text-sm text-gray-500">
+                    네이버 블로그에서 글 목록을 가져오고 있습니다.
+                  </p>
+                </div>
+              ) : naverPosts.length > 0 ? (
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">
+                    가져온 블로그 글 ({naverPosts.length}개)
+                  </h3>
+                  <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-300 rounded-lg p-4">
+                    {naverPosts.map((post, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => importNaverPost(post)}
+                        className="w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition"
+                      >
+                        <div className="font-semibold text-gray-900 mb-1">{post.title}</div>
+                        <div className="text-sm text-gray-500">
+                          {post.pubDate ? new Date(post.pubDate).toLocaleDateString('ko-KR') : ''}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <p className="text-gray-600 mb-2">가져온 블로그 글이 없습니다.</p>
+                  <p className="text-sm text-gray-500">
+                    네이버 블로그 ID를 확인하거나, 블로그의 RSS 피드 설정이 공개로 되어 있는지
+                    확인해주세요.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -704,7 +760,7 @@ export function RepairLogsPage() {
                 />
               </div>
 
-               {/* Controller Model */}
+              {/* Controller Model */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   컨트롤러 모델
@@ -737,9 +793,7 @@ export function RepairLogsPage() {
 
               {/* Repair Type */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  수리 유형
-                </label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">수리 유형</label>
                 <input
                   type="text"
                   value={formData.repair_type}

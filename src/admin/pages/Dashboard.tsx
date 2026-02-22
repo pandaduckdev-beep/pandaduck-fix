@@ -1,45 +1,46 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { TrendingUp, Users, Wrench, Star, CheckCircle, Clock, XCircle, Package, DollarSign, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+import { Star, DollarSign, ArrowRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 interface Stats {
-  totalRepairs: number;
-  pendingRepairs: number;
-  confirmedRepairs: number;
-  inProgressRepairs: number;
-  completedRepairs: number;
-  cancelledRepairs: number;
-  monthlyRevenue: number;
-  monthlyCompletedRepairs: number;
-  currentMonth: string;
-  averageRating: number;
-  totalReviews: number;
+  totalRepairs: number
+  pendingRepairs: number
+  confirmedRepairs: number
+  inProgressRepairs: number
+  completedRepairs: number
+  cancelledRepairs: number
+  monthlyRevenue: number
+  monthlyCompletedRepairs: number
+  currentMonth: string
+  averageRating: number
+  totalReviews: number
 }
 
-interface RecentRepair {
-  id: string;
-  customer_name: string;
-  controller_model: string;
+type RepairStatus = 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
+
+interface IncompleteRepairItem {
+  id: string
+  customer_name: string
+  controller_model: string
+  status: RepairStatus
+  total_amount: number
+  created_at: string
   controller_models?: {
-    model_name: string;
-  };
-  status: string;
-  created_at: string;
-  total_amount: number;
+    model_name: string
+  } | null
 }
 
-interface RecentReview {
-  id: string;
-  customer_name: string;
-  rating: number;
-  comment: string;
-  created_at: string;
-  is_public: boolean;
+interface TodayScheduleItem {
+  id: string
+  title: string
+  event_type: 'repair' | 'purchase' | 'shipping' | 'customer_support' | 'other'
+  status: 'scheduled' | 'in_progress' | 'delayed' | 'completed' | 'cancelled'
+  start_at: string
 }
 
 export function Dashboard() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const [stats, setStats] = useState<Stats>({
     totalRepairs: 0,
     pendingRepairs: 0,
@@ -52,119 +53,144 @@ export function Dashboard() {
     currentMonth: '',
     averageRating: 0,
     totalReviews: 0,
-  });
-  const [recentRepairs, setRecentRepairs] = useState<RecentRepair[]>([]);
-  const [recentReviews, setRecentReviews] = useState<RecentReview[]>([]);
-  const [loading, setLoading] = useState(true);
+  })
+  const [incompleteRepairs, setIncompleteRepairs] = useState<IncompleteRepairItem[]>([])
+  const [todaySchedules, setTodaySchedules] = useState<TodayScheduleItem[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadStats();
-  }, []);
+    loadStats()
+  }, [])
 
   const loadStats = async () => {
     try {
-      // 수리 신청 통계
-      const { count: totalRepairs } = await supabase
-        .from('repair_requests')
-        .select('*', { count: 'exact', head: true });
+      const now = new Date()
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+      const lastDayOfMonth = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        0,
+        23,
+        59,
+        59
+      ).toISOString()
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+      const endOfToday = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        23,
+        59,
+        59
+      ).toISOString()
 
-      const { count: pendingRepairs } = await supabase
-        .from('repair_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
-
-      const { count: confirmedRepairs } = await supabase
-        .from('repair_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'confirmed');
-
-      const { count: inProgressRepairs } = await supabase
-        .from('repair_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'in_progress');
-
-      const { count: completedRepairs } = await supabase
-        .from('repair_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'completed');
-
-      const { count: cancelledRepairs } = await supabase
-        .from('repair_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'cancelled');
-
-      // 현재 월 계산
-      const now = new Date();
-      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
-
-      // 이번 달 매출 계산 (완료된 수리의 총 금액)
-      const { data: monthlyCompletedRepairsData } = await supabase
-        .from('repair_requests')
-        .select('total_amount')
-        .eq('status', 'completed')
-        .gte('created_at', firstDayOfMonth)
-        .lte('created_at', lastDayOfMonth);
-
-      const monthlyRevenue = monthlyCompletedRepairsData?.reduce((sum, repair) => {
-        const price = Number(repair.total_amount);
-        return sum + (isNaN(price) ? 0 : price);
-      }, 0) || 0;
-
-      const monthlyCompletedRepairs = monthlyCompletedRepairsData?.length || 0;
-
-      // 평균 평점 및 리뷰 수 (공개된 리뷰 기준)
-      const { data: reviews } = await supabase
-        .from('reviews')
-        .select('rating')
-        .eq('is_public', true);
-
-      const averageRating = reviews && reviews.length > 0
-        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-        : 0;
-
-      // 최근 수리 신청 (최근 5개)
-      const { data: repairs } = await supabase
-        .from('repair_requests')
-        .select(`
-          *,
-          controller_models!repair_requests_controller_model_fkey (
-            model_name
+      const [
+        totalRepairsRes,
+        pendingRepairsRes,
+        confirmedRepairsRes,
+        inProgressRepairsRes,
+        completedRepairsRes,
+        cancelledRepairsRes,
+        monthlyCompletedRepairsRes,
+        reviewsRes,
+        incompleteRepairsRes,
+        todaySchedulesRes,
+      ] = await Promise.all([
+        supabase.from('repair_requests').select('*', { count: 'exact', head: true }),
+        supabase
+          .from('repair_requests')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending'),
+        supabase
+          .from('repair_requests')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'confirmed'),
+        supabase
+          .from('repair_requests')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'in_progress'),
+        supabase
+          .from('repair_requests')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'completed'),
+        supabase
+          .from('repair_requests')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'cancelled'),
+        supabase
+          .from('repair_requests')
+          .select('total_amount')
+          .eq('status', 'completed')
+          .gte('created_at', firstDayOfMonth)
+          .lte('created_at', lastDayOfMonth),
+        supabase.from('reviews').select('rating').eq('is_public', true),
+        supabase
+          .from('repair_requests')
+          .select(
+            'id, customer_name, controller_model, status, total_amount, created_at, controller_models!repair_requests_controller_model_fkey(model_name)'
           )
-        `)
-        .order('created_at', { ascending: false })
-        .limit(5);
+          .in('status', ['pending', 'confirmed', 'in_progress'])
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('schedule_events')
+          .select('id, title, event_type, status, start_at')
+          .gte('start_at', startOfToday)
+          .lte('start_at', endOfToday)
+          .order('start_at', { ascending: true })
+          .limit(5),
+      ])
 
-      // 최근 리뷰 (최근 5개)
-      const { data: recentReviewsData } = await supabase
-        .from('reviews')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5);
+      if (monthlyCompletedRepairsRes.error) throw monthlyCompletedRepairsRes.error
+      if (reviewsRes.error) throw reviewsRes.error
+      if (incompleteRepairsRes.error) throw incompleteRepairsRes.error
+
+      if (todaySchedulesRes.error) {
+        console.warn('Today schedule query failed:', todaySchedulesRes.error)
+      }
+
+      const monthlyRows = (monthlyCompletedRepairsRes.data || []) as Array<{
+        total_amount: number | string | null
+      }>
+
+      const monthlyRevenue = monthlyRows.reduce((sum, repair) => {
+        const price = Number(repair.total_amount)
+        return sum + (isNaN(price) ? 0 : price)
+      }, 0)
+
+      const monthlyCompletedRepairs = monthlyRows.length
+
+      const reviewRows = (reviewsRes.data || []) as Array<{ rating: number }>
+
+      const averageRating =
+        reviewRows.length > 0
+          ? reviewRows.reduce((sum, r) => sum + r.rating, 0) / reviewRows.length
+          : 0
+
+      setIncompleteRepairs((incompleteRepairsRes.data || []) as IncompleteRepairItem[])
+      setTodaySchedules(
+        todaySchedulesRes.error ? [] : ((todaySchedulesRes.data || []) as TodayScheduleItem[])
+      )
 
       setStats({
-        totalRepairs: totalRepairs || 0,
-        pendingRepairs: pendingRepairs || 0,
-        confirmedRepairs: confirmedRepairs || 0,
-        inProgressRepairs: inProgressRepairs || 0,
-        completedRepairs: completedRepairs || 0,
-        cancelledRepairs: cancelledRepairs || 0,
+        totalRepairs: totalRepairsRes.count || 0,
+        pendingRepairs: pendingRepairsRes.count || 0,
+        confirmedRepairs: confirmedRepairsRes.count || 0,
+        inProgressRepairs: inProgressRepairsRes.count || 0,
+        completedRepairs: completedRepairsRes.count || 0,
+        cancelledRepairs: cancelledRepairsRes.count || 0,
         monthlyRevenue,
         monthlyCompletedRepairs,
         currentMonth: `${now.getMonth() + 1}월`,
         averageRating: Math.round(averageRating * 10) / 10,
-        totalReviews: reviews?.length || 0,
-      });
-
-      setRecentRepairs(repairs || []);
-      setRecentReviews(recentReviewsData || []);
+        totalReviews: reviewRows.length,
+      })
     } catch (error) {
-      console.error('Failed to load stats:', error);
+      console.error('Failed to load stats:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const statusFlow = [
     {
@@ -192,62 +218,38 @@ export function Dashboard() {
       value: stats.cancelledRepairs,
       color: 'bg-red-50 text-red-600 border-red-200',
     },
-  ];
+  ]
 
-  const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    yellow: 'bg-yellow-50 text-yellow-600',
-    green: 'bg-green-50 text-green-600',
-    purple: 'bg-purple-50 text-purple-600',
-    red: 'bg-red-50 text-red-600',
-    orange: 'bg-orange-50 text-orange-600',
-  };
+  const scheduleTypeLabel: Record<TodayScheduleItem['event_type'], string> = {
+    repair: '수리',
+    purchase: '발주',
+    shipping: '배송',
+    customer_support: '고객응대',
+    other: '기타',
+  }
 
-  const statusBadgeClasses = {
+  const repairStatusBadgeClass: Record<RepairStatus, string> = {
     pending: 'bg-yellow-100 text-yellow-800',
     confirmed: 'bg-blue-100 text-blue-800',
     in_progress: 'bg-purple-100 text-purple-800',
     completed: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800',
-  };
+  }
 
-  const statusLabels = {
+  const repairStatusLabel: Record<RepairStatus, string> = {
     pending: '대기중',
     confirmed: '확인됨',
     in_progress: '진행중',
     completed: '완료',
     cancelled: '취소',
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInDays = Math.floor(diffInHours / 24);
-
-    if (diffInHours < 1) {
-      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-      return `${diffInMinutes}분 전`;
-    } else if (diffInHours < 24) {
-      return `${diffInHours}시간 전`;
-    } else if (diffInDays < 7) {
-      return `${diffInDays}일 전`;
-    } else {
-      return date.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    }
-  };
+  }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
       </div>
-    );
+    )
   }
 
   return (
@@ -275,7 +277,9 @@ export function Dashboard() {
             <h3 className="text-lg font-semibold">{stats.currentMonth} 예상 매출</h3>
           </div>
           <p className="text-4xl font-bold mb-1">₩{stats.monthlyRevenue.toLocaleString()}</p>
-          <p className="text-sm text-blue-100">이번 달 완료된 {stats.monthlyCompletedRepairs}건의 수리 금액</p>
+          <p className="text-sm text-blue-100">
+            이번 달 완료된 {stats.monthlyCompletedRepairs}건의 수리 금액
+          </p>
         </div>
 
         {/* 평균 평점 */}
@@ -300,7 +304,9 @@ export function Dashboard() {
         <div className="flex items-center justify-between gap-2">
           {statusFlow.map((status, index) => (
             <div key={status.label} className="flex items-center flex-1">
-              <div className={`flex-1 border-2 rounded-lg p-4 ${status.color} transition hover:shadow-md`}>
+              <div
+                className={`flex-1 border-2 rounded-lg p-4 ${status.color} transition hover:shadow-md`}
+              >
                 <p className="text-sm font-medium mb-1">{status.label}</p>
                 <p className="text-3xl font-bold">{status.value}</p>
               </div>
@@ -312,116 +318,74 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* 최근 수리 신청 및 리뷰 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 최근 수리 신청 */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-bold">최근 수리 신청</h2>
-              <p className="text-sm text-gray-500 mt-1">최근 5개 신청 건</p>
-            </div>
-            <button
-              onClick={() => navigate('/admin/repairs')}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium transition"
-            >
-              전체 보기 →
-            </button>
-          </div>
-
-          {recentRepairs.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
-              <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>수리 신청 내역이 없습니다.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentRepairs.map((repair) => (
-                <div
-                  key={repair.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 hover:shadow-sm transition cursor-pointer border border-transparent hover:border-gray-200"
-                  onClick={() => navigate('/admin/repairs')}
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <p className="font-semibold text-gray-900 truncate">{repair.customer_name}</p>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${
-                          statusBadgeClasses[repair.status as keyof typeof statusBadgeClasses]
-                        }`}
-                      >
-                        {statusLabels[repair.status as keyof typeof statusLabels]}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 truncate mb-1">
-                      {repair.controller_models?.model_name || repair.controller_model}
-                    </p>
-                    <p className="text-xs text-gray-500">{formatDate(repair.created_at)}</p>
-                  </div>
-                  <div className="text-right ml-4">
-                    <p className="text-lg font-bold text-gray-900 whitespace-nowrap">
-                      ₩{(repair.total_amount || 0).toLocaleString()}
-                    </p>
-                  </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <button
+          onClick={() => navigate('/admin/schedule')}
+          className="bg-white rounded-xl p-6 border border-gray-200 text-left hover:shadow-md transition"
+        >
+          <h2 className="text-lg font-bold mb-2">일정 관리</h2>
+          <p className="text-sm text-gray-600 mb-3">오늘 일정 {todaySchedules.length}건</p>
+          <div className="space-y-2 mb-4">
+            {todaySchedules.length === 0 ? (
+              <p className="text-xs text-gray-500">등록된 오늘 일정이 없습니다.</p>
+            ) : (
+              todaySchedules.slice(0, 3).map((event) => (
+                <div key={event.id} className="text-xs bg-gray-50 rounded px-2 py-1.5">
+                  <p className="font-medium text-gray-800 truncate">{event.title}</p>
+                  <p className="text-gray-500">
+                    {scheduleTypeLabel[event.event_type]} ·{' '}
+                    {new Date(event.start_at).toLocaleTimeString('ko-KR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    })}
+                  </p>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* 최근 리뷰 */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-bold">최근 리뷰</h2>
-              <p className="text-sm text-gray-500 mt-1">승인 대기 우선 표시</p>
-            </div>
-            <button
-              onClick={() => navigate('/admin/reviews')}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium transition"
-            >
-              전체 보기 →
-            </button>
+              ))
+            )}
           </div>
+          <span className="text-blue-600 text-sm font-medium">일정 페이지로 이동 →</span>
+        </button>
 
-          {recentReviews.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
-              <Star className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>리뷰가 없습니다.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentReviews.map((review) => (
-                <div
-                  key={review.id}
-                  className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 hover:shadow-sm transition cursor-pointer border border-transparent hover:border-gray-200"
-                  onClick={() => navigate('/admin/reviews')}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <p className="font-semibold text-gray-900 truncate">{review.customer_name}</p>
-                    </div>
-                    <div className="flex items-center gap-1 ml-2">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < review.rating
-                              ? 'fill-yellow-400 text-yellow-400'
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
-                    </div>
+        <button
+          onClick={() => navigate('/admin/repairs')}
+          className="bg-white rounded-xl p-6 border border-gray-200 text-left hover:shadow-md transition"
+        >
+          <h2 className="text-lg font-bold mb-2">수리 신청 관리</h2>
+          <p className="text-sm text-gray-600 mb-3">미완료 주문 {incompleteRepairs.length}건</p>
+          <div className="space-y-2 mb-4">
+            {incompleteRepairs.length === 0 ? (
+              <p className="text-xs text-gray-500">현재 미완료 주문이 없습니다.</p>
+            ) : (
+              incompleteRepairs.slice(0, 3).map((repair) => (
+                <div key={repair.id} className="text-xs bg-gray-50 rounded px-2 py-1.5">
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <p className="font-medium text-gray-800 truncate">{repair.customer_name}</p>
+                    <span
+                      className={`px-1.5 py-0.5 rounded-full ${repairStatusBadgeClass[repair.status]}`}
+                    >
+                      {repairStatusLabel[repair.status]}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-600 line-clamp-2 mb-2">{review.comment}</p>
-                  <p className="text-xs text-gray-500">{formatDate(review.created_at)}</p>
+                  <p className="text-gray-500 truncate">
+                    {repair.controller_models?.model_name || repair.controller_model}
+                  </p>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              ))
+            )}
+          </div>
+          <span className="text-blue-600 text-sm font-medium">수리 신청 페이지로 이동 →</span>
+        </button>
+
+        <button
+          onClick={() => navigate('/admin/reviews')}
+          className="bg-white rounded-xl p-6 border border-gray-200 text-left hover:shadow-md transition"
+        >
+          <h2 className="text-lg font-bold mb-2">리뷰 관리</h2>
+          <p className="text-sm text-gray-600 mb-4">리뷰 공개 여부와 품질 모니터링을 진행합니다.</p>
+          <span className="text-blue-600 text-sm font-medium">리뷰 페이지로 이동 →</span>
+        </button>
       </div>
     </div>
-  );
+  )
 }

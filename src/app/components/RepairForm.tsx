@@ -6,7 +6,6 @@ import {
   Package,
   Gamepad2,
   MapPin,
-  Phone,
   User,
   Search,
 } from 'lucide-react'
@@ -16,7 +15,6 @@ import type { ServiceSelectionData, ConditionData } from '@/app/App'
 import { createRepairRequest } from '@/lib/api'
 import { getControllerModelName } from '@/utils/controllerModels'
 import { getControllerModelById } from '@/services/pricingService'
-import { toast } from 'sonner'
 import { useSlideUp } from '@/hooks/useSlideUp'
 import { AddressSearchModal } from '@/app/components/AddressSearchModal'
 
@@ -43,6 +41,8 @@ const formatPhoneNumber = (value: string): string => {
   }
 }
 
+const DELIVERY_FEE = 3000
+
 export function RepairForm() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -65,6 +65,7 @@ export function RepairForm() {
   const [showConvenienceModal, setShowConvenienceModal] = useState(false)
   const [showAddressSearch, setShowAddressSearch] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const finalTotalAmount = selectionData ? selectionData.total + DELIVERY_FEE : DELIVERY_FEE
 
   // 페이지 진입 시 스크롤 위치를 최상단으로 이동
   useEffect(() => {
@@ -87,6 +88,12 @@ export function RepairForm() {
     setSubmitted(true)
     setError(null)
     setShowConfirmModal(false)
+
+    if (!selectionData || selectionData.services.length === 0) {
+      setSubmitted(false)
+      setError('선택된 서비스가 없습니다.')
+      return
+    }
 
     try {
       // Convert model_id to UUID
@@ -123,9 +130,9 @@ export function RepairForm() {
           optionId: service.selectedOption?.id,
           optionName: service.selectedOption?.name,
           servicePrice: service.price,
-          optionPrice: service.selectedOption?.price || 0,
+          optionPrice: 0,
         })),
-        totalAmount: selectionData.total,
+        totalAmount: finalTotalAmount,
       })
 
       // 성공 시 모달 표시
@@ -276,9 +283,7 @@ export function RepairForm() {
                     </div>
                     {/* 금액 */}
                     <div className="text-right">
-                      <div className="font-semibold text-sm">
-                        ₩{(service.price + (service.selectedOption?.price || 0)).toLocaleString()}
-                      </div>
+                      <div className="font-semibold text-sm">₩{service.price.toLocaleString()}</div>
                     </div>
                   </div>
                 </div>
@@ -312,10 +317,14 @@ export function RepairForm() {
               )}
 
               <div className="h-px bg-[rgba(0,0,0,0.1)]"></div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-[#86868B]">배송비</span>
+                <span style={{ fontWeight: 600 }}>₩{DELIVERY_FEE.toLocaleString()}</span>
+              </div>
               <div className="flex items-center justify-between">
                 <span style={{ fontWeight: 600 }}>총 금액</span>
                 <span className="text-xl" style={{ fontWeight: 700 }}>
-                  ₩{selectionData.total.toLocaleString()}
+                  ₩{finalTotalAmount.toLocaleString()}
                 </span>
               </div>
             </div>
@@ -480,8 +489,8 @@ export function RepairForm() {
               </span>
             </div>
             <p className="text-sm text-[#86868B] leading-relaxed flex-1">
-              신청 접수 후 기재해 주신 연락처로 금액과 발송 주소를 안내해 드립니다. 안내받은 주소로
-              컨트롤러를 발송해 주시면 됩니다.
+              신청 접수 후 연락처로 최종 금액과 발송 주소를 다시 안내해 드립니다. 수리 전 상태 점검
+              결과에 따라 필요한 항목을 투명하게 설명드린 뒤 진행합니다.
             </p>
           </div>
         </div>
@@ -633,10 +642,7 @@ export function RepairForm() {
                           </div>
                           <div className="text-right">
                             <div className="font-semibold text-sm">
-                              ₩
-                              {(
-                                service.price + (service.selectedOption?.price || 0)
-                              ).toLocaleString()}
+                              ₩{service.price.toLocaleString()}
                             </div>
                           </div>
                         </div>
@@ -656,10 +662,14 @@ export function RepairForm() {
                     )}
 
                     <div className="h-px bg-[rgba(0,0,0,0.1)] my-2"></div>
+                    <div className="flex items-center justify-between text-sm px-1">
+                      <span className="text-[#86868B]">배송비</span>
+                      <span style={{ fontWeight: 600 }}>₩{DELIVERY_FEE.toLocaleString()}</span>
+                    </div>
                     <div className="flex items-center justify-between px-1">
                       <span style={{ fontWeight: 600 }}>총 금액</span>
                       <span className="text-lg" style={{ fontWeight: 700 }}>
-                        ₩{selectionData.total.toLocaleString()}
+                        ₩{finalTotalAmount.toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -804,7 +814,7 @@ export function RepairForm() {
                 <div className="flex items-center justify-between text-sm pt-2 border-t border-[rgba(0,0,0,0.1)]">
                   <span className="text-[#86868B]">결제 예정 금액</span>
                   <span className="text-lg" style={{ fontWeight: 700 }}>
-                    ₩{selectionData.total.toLocaleString()}
+                    ₩{finalTotalAmount.toLocaleString()}
                   </span>
                 </div>
               )}

@@ -129,7 +129,18 @@ function SortableRow({ service, onToggleStatus, onEdit, onOpenOptions }: Sortabl
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 text-sm font-semibold">₩{service.base_price.toLocaleString()}</td>
+      <td className="px-6 py-4 text-sm font-semibold">
+        ₩
+        {(service.options && service.options.length > 0
+          ? Math.min(
+              ...service.options.map(
+                (option: any) =>
+                  option.final_price ?? service.base_price + (option.additional_price ?? 0)
+              )
+            )
+          : service.base_price
+        ).toLocaleString()}
+      </td>
       <td className="px-6 py-4 text-sm text-gray-600">{service.options?.length || 0}개</td>
       <td className="px-6 py-4">
         <button
@@ -318,9 +329,16 @@ export function ServicesPage() {
   }
 
   const handleAddOption = async (option: any) => {
+    const parentService = services.find((service) => service.id === selectedService?.id)
+    const basePrice = parentService?.base_price || 0
+
     const newOption = {
       ...option,
       controller_service_id: selectedService?.id,
+      additional_price:
+        typeof option.final_price === 'number'
+          ? Math.max(option.final_price - basePrice, 0)
+          : option.additional_price,
     }
     const { data, error } = await supabase
       .from('controller_service_options')
@@ -333,7 +351,17 @@ export function ServicesPage() {
   }
 
   const handleUpdateOption = async (id: string, data: any) => {
-    const { error } = await supabase.from('controller_service_options').update(data).eq('id', id)
+    const parentService = services.find((service) => service.id === selectedService?.id)
+    const basePrice = parentService?.base_price || 0
+    const payload = {
+      ...data,
+      additional_price:
+        typeof data.final_price === 'number'
+          ? Math.max(data.final_price - basePrice, 0)
+          : data.additional_price,
+    }
+
+    const { error } = await supabase.from('controller_service_options').update(payload).eq('id', id)
 
     if (error) throw error
   }
@@ -497,7 +525,7 @@ export function ServicesPage() {
                     서비스명
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    기본 가격
+                    표시 가격
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                     옵션 수

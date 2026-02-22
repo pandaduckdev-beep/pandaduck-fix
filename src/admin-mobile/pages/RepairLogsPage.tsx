@@ -15,6 +15,7 @@ import {
 import { useToast } from '@/hooks/useToast.tsx'
 import type { RepairLog } from '@/types/database'
 import { RichTextEditor } from '@/components/common/RichTextEditor'
+import { resolveRepairLogThumbnailUrl } from '@/lib/repairLogThumbnail'
 
 type LogStatus = 'all' | 'public' | 'private'
 
@@ -42,7 +43,13 @@ export default function RepairLogsPage() {
 
   const loadLogs = useCallback(async () => {
     try {
-      let query = supabase.from('repair_logs').select('*').order('created_at', { ascending: false })
+      setLoading(true)
+      let query = supabase
+        .from('repair_logs')
+        .select(
+          'id,title,summary,controller_model,repair_type,is_public,view_count,naver_blog_url,created_at,updated_at'
+        )
+        .order('created_at', { ascending: false })
 
       if (statusFilter === 'private') {
         query = query.eq('is_public', false)
@@ -53,7 +60,42 @@ export default function RepairLogsPage() {
       const { data, error } = await query
 
       if (error) throw error
-      setLogs(data || [])
+
+      if (statusFilter !== 'all' && (!data || data.length === 0)) {
+        const { data: allData, error: allError } = await supabase
+          .from('repair_logs')
+          .select(
+            'id,title,summary,controller_model,repair_type,is_public,view_count,naver_blog_url,created_at,updated_at'
+          )
+          .order('created_at', { ascending: false })
+
+        if (allError) throw allError
+
+        if ((allData || []).length > 0) {
+          setStatusFilter('all')
+          setLogs(
+            (allData || []).map((row) => ({
+              ...row,
+              content: '',
+              thumbnail_url: null,
+              image_urls: [],
+              naver_synced_at: null,
+            })) as RepairLog[]
+          )
+          success('안내', '선택한 필터 결과가 없어 전체 작업기로 전환했습니다.')
+          return
+        }
+      }
+
+      setLogs(
+        (data || []).map((row) => ({
+          ...row,
+          content: '',
+          thumbnail_url: null,
+          image_urls: [],
+          naver_synced_at: null,
+        })) as RepairLog[]
+      )
     } catch (error) {
       console.error('Failed to load repair logs:', error)
       showError('로드 실패', '수리 작업기를 불러오는데 실패했습니다.')
@@ -71,7 +113,6 @@ export default function RepairLogsPage() {
     const search = searchTerm.toLowerCase()
     return (
       log.title.toLowerCase().includes(search) ||
-      log.content.toLowerCase().includes(search) ||
       (log.controller_model && log.controller_model.toLowerCase().includes(search)) ||
       (log.repair_type && log.repair_type.toLowerCase().includes(search))
     )
@@ -91,18 +132,31 @@ export default function RepairLogsPage() {
     setIsModalOpen(true)
   }
 
-  const openEditModal = (log: RepairLog) => {
-    setEditingLog(log)
-    setFormData({
-      title: log.title,
-      content: log.content,
-      summary: log.summary || '',
-      thumbnail_url: log.thumbnail_url || '',
-      controller_model: log.controller_model || '',
-      repair_type: log.repair_type || '',
-      is_public: log.is_public,
-    })
-    setIsModalOpen(true)
+  const openEditModal = async (log: RepairLog) => {
+    try {
+      const { data, error } = await supabase
+        .from('repair_logs')
+        .select('*')
+        .eq('id', log.id)
+        .single()
+
+      if (error) throw error
+
+      setEditingLog(data)
+      setFormData({
+        title: data.title,
+        content: data.content,
+        summary: data.summary || '',
+        thumbnail_url: data.thumbnail_url || '',
+        controller_model: data.controller_model || '',
+        repair_type: data.repair_type || '',
+        is_public: data.is_public,
+      })
+      setIsModalOpen(true)
+    } catch (error) {
+      console.error('Failed to load repair log detail:', error)
+      showError('로드 실패', '작업기 상세를 불러오지 못했습니다.')
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -116,6 +170,14 @@ export default function RepairLogsPage() {
     try {
       setSubmitting(true)
 
+      const imgRegex = /<img[^>]+src=["']([^"']+)["']/i
+      const match = formData.content.match(imgRegex)
+      const thumbnailCandidate = formData.thumbnail_url || (match ? match[1] : null)
+      const thumbnailUrl = await resolveRepairLogThumbnailUrl(
+        thumbnailCandidate,
+        editingLog?.id || formData.title
+      )
+
       if (editingLog) {
         const { error } = await supabase
           .from('repair_logs')
@@ -123,7 +185,7 @@ export default function RepairLogsPage() {
             title: formData.title,
             content: formData.content,
             summary: formData.summary || null,
-            thumbnail_url: formData.thumbnail_url || null,
+            thumbnail_url: thumbnailUrl,
             controller_model: formData.controller_model || null,
             repair_type: formData.repair_type || null,
             is_public: formData.is_public,
@@ -137,7 +199,7 @@ export default function RepairLogsPage() {
           title: formData.title,
           content: formData.content,
           summary: formData.summary || null,
-          thumbnail_url: formData.thumbnail_url || null,
+          thumbnail_url: thumbnailUrl,
           controller_model: formData.controller_model || null,
           repair_type: formData.repair_type || null,
           is_public: formData.is_public,
@@ -168,7 +230,10 @@ export default function RepairLogsPage() {
 
       if (error) throw error
       await loadLogs()
-      success('완료', !currentStatus ? '작업기가 공개되었습니다.' : '작업기가 비공개로 변경되었습니다.')
+      success(
+        '완료',
+        !currentStatus ? '작업기가 공개되었습니다.' : '작업기가 비공개로 변경되었습니다.'
+      )
     } catch (error) {
       console.error('Failed to toggle public:', error)
       showError('실패', '공개 상태 변경에 실패했습니다.')
@@ -251,8 +316,7 @@ export default function RepairLogsPage() {
           onClick={openCreateModal}
           className="w-full py-4 bg-[#007AFF] text-white rounded-2xl font-semibold flex items-center justify-center gap-2 active:scale-98 transition-all"
         >
-          <Plus className="w-5 h-5" />
-          새 작업기 작성
+          <Plus className="w-5 h-5" />새 작업기 작성
         </button>
 
         {/* Logs List */}
@@ -374,10 +438,7 @@ export default function RepairLogsPage() {
           <div className="flex-1 overflow-y-auto bg-white safe-area-top">
             {/* Modal Header */}
             <div className="sticky top-0 bg-white border-b border-[rgba(0,0,0,0.06)] px-4 py-4 flex items-center justify-between z-10">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-2 -ml-2 text-[#007AFF]"
-              >
+              <button onClick={() => setIsModalOpen(false)} className="p-2 -ml-2 text-[#007AFF]">
                 취소
               </button>
               <h2 className="text-lg font-bold text-[#1D1D1F]">

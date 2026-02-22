@@ -20,6 +20,9 @@ interface AddServiceModalProps {
     name: string
     service_id: string
     description: string
+    summary: string
+    detail_tags: string[]
+    expected_results: string[]
     base_price: number
     is_active: boolean
     display_order: number
@@ -37,6 +40,9 @@ export function AddServiceModal({
     name: '',
     service_id: '',
     description: '',
+    summary: '',
+    detail_tags: '',
+    expected_results: '',
     base_price: 0,
   })
 
@@ -63,13 +69,30 @@ export function AddServiceModal({
         name: formData.name,
         service_id: formData.service_id,
         description: formData.description,
+        summary: formData.summary,
+        detail_tags: formData.detail_tags
+          .split('\n')
+          .map((item) => item.trim())
+          .filter(Boolean),
+        expected_results: formData.expected_results
+          .split('\n')
+          .map((item) => item.trim())
+          .filter(Boolean),
         base_price: Number(formData.base_price) || 0,
         is_active: true,
         display_order: 0,
         controller_model_id: controllerModelId,
       })
 
-      setFormData({ name: '', service_id: '', description: '', base_price: 0 })
+      setFormData({
+        name: '',
+        service_id: '',
+        description: '',
+        summary: '',
+        detail_tags: '',
+        expected_results: '',
+        base_price: 0,
+      })
       toast.success('서비스가 추가되었습니다.')
       onClose()
     } catch (error) {
@@ -122,7 +145,40 @@ export function AddServiceModal({
           </div>
 
           <div>
-            <Label htmlFor="base_price">기본 가격</Label>
+            <Label htmlFor="summary">한 줄 요약</Label>
+            <Input
+              id="summary"
+              value={formData.summary}
+              onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+              placeholder="선택 화면에서 보여줄 요약"
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="detail_tags">상세 태그 (줄바꿈으로 구분)</Label>
+            <textarea
+              id="detail_tags"
+              value={formData.detail_tags}
+              onChange={(e) => setFormData({ ...formData, detail_tags: e.target.value })}
+              placeholder={'예: 데드존 보정\n캘리브레이션'}
+              className="w-full min-h-[72px] px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="expected_results">체감 변화 (줄바꿈으로 구분)</Label>
+            <textarea
+              id="expected_results"
+              value={formData.expected_results}
+              onChange={(e) => setFormData({ ...formData, expected_results: e.target.value })}
+              placeholder={'예: 입력 안정감 향상\n반응성 개선'}
+              className="w-full min-h-[72px] px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="base_price">단독 서비스 가격 (옵션 미사용 시)</Label>
             <Input
               id="base_price"
               type="number"

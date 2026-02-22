@@ -15,9 +15,12 @@ export interface Database {
           description: string
           subtitle: string | null
           detailed_description: string | null
+          summary: string | null
           duration: string
           warranty: string
           features: Json
+          detail_tags: Json
+          expected_results: Json
           process_steps: Json
           image_url: string | null
           base_price: number
@@ -35,9 +38,12 @@ export interface Database {
           description: string
           subtitle?: string | null
           detailed_description?: string | null
+          summary?: string | null
           duration?: string
           warranty?: string
           features?: Json
+          detail_tags?: Json
+          expected_results?: Json
           process_steps?: Json
           image_url?: string | null
           base_price: number
@@ -55,9 +61,12 @@ export interface Database {
           description?: string
           subtitle?: string | null
           detailed_description?: string | null
+          summary?: string | null
           duration?: string
           warranty?: string
           features?: Json
+          detail_tags?: Json
+          expected_results?: Json
           process_steps?: Json
           image_url?: string | null
           base_price?: number
@@ -74,7 +83,9 @@ export interface Database {
           option_name: string
           option_description: string
           detailed_description: string | null
+          target_audience: string | null
           additional_price: number
+          final_price: number
           image_url: string | null
           display_order: number
           is_active: boolean
@@ -87,7 +98,9 @@ export interface Database {
           option_name: string
           option_description: string
           detailed_description?: string | null
+          target_audience?: string | null
           additional_price?: number
+          final_price?: number
           image_url?: string | null
           display_order?: number
           is_active?: boolean
@@ -100,7 +113,9 @@ export interface Database {
           option_name?: string
           option_description?: string
           detailed_description?: string | null
+          target_audience?: string | null
           additional_price?: number
+          final_price?: number
           image_url?: string | null
           display_order?: number
           is_active?: boolean
@@ -230,6 +245,47 @@ export interface Database {
           service_name?: string
           image_urls?: string[]
           is_public?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      schedule_events: {
+        Row: {
+          id: string
+          title: string
+          event_type: 'repair' | 'purchase' | 'shipping' | 'customer_support' | 'other'
+          status: 'scheduled' | 'in_progress' | 'delayed' | 'completed' | 'cancelled'
+          start_at: string
+          end_at: string | null
+          assignee: string | null
+          memo: string | null
+          repair_request_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          event_type: 'repair' | 'purchase' | 'shipping' | 'customer_support' | 'other'
+          status?: 'scheduled' | 'in_progress' | 'delayed' | 'completed' | 'cancelled'
+          start_at: string
+          end_at?: string | null
+          assignee?: string | null
+          memo?: string | null
+          repair_request_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          event_type?: 'repair' | 'purchase' | 'shipping' | 'customer_support' | 'other'
+          status?: 'scheduled' | 'in_progress' | 'delayed' | 'completed' | 'cancelled'
+          start_at?: string
+          end_at?: string | null
+          assignee?: string | null
+          memo?: string | null
+          repair_request_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -557,6 +613,7 @@ export type ControllerServiceOption =
 export type RepairRequest = Database['public']['Tables']['repair_requests']['Row']
 export type RepairRequestService = Database['public']['Tables']['repair_request_services']['Row']
 export type Review = Database['public']['Tables']['reviews']['Row']
+export type ScheduleEvent = Database['public']['Tables']['schedule_events']['Row']
 export type ServiceCombo = Database['public']['Tables']['service_combos']['Row']
 export type ControllerModel = Database['public']['Tables']['controller_models']['Row']
 export type ControllerServicePricing =

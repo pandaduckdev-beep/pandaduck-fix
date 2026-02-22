@@ -38,6 +38,14 @@ interface RepairRequestWithServices extends RepairRequest {
 }
 
 type RepairStatus = 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'
+type MessageStage =
+  | 'received'
+  | 'confirmed'
+  | 'in_progress'
+  | 'completed'
+  | 'shipped'
+  | 'review_request'
+type MessageChannel = 'sms' | 'kakao'
 
 const STATUS_CONFIG: Record<RepairStatus, { label: string; color: string; icon: React.ReactNode }> =
   {
@@ -47,6 +55,73 @@ const STATUS_CONFIG: Record<RepairStatus, { label: string; color: string; icon: 
     completed: { label: '완료', color: 'bg-green-100 text-green-800', icon: CheckCircle },
     cancelled: { label: '취소됨', color: 'bg-gray-100 text-gray-800', icon: XCircle },
   }
+
+const MESSAGE_STAGE_LABEL: Record<MessageStage, string> = {
+  received: '접수 안내',
+  confirmed: '확인 안내',
+  in_progress: '진행 안내',
+  completed: '수리 완료 안내',
+  shipped: '발송 안내',
+  review_request: '리뷰 요청',
+}
+
+const MESSAGE_STAGE_BY_STATUS: Record<RepairStatus, MessageStage> = {
+  pending: 'received',
+  confirmed: 'confirmed',
+  in_progress: 'in_progress',
+  completed: 'completed',
+  cancelled: 'received',
+}
+
+interface MessageTemplateContext {
+  customerName: string
+  modelName: string
+  requestCode: string
+  totalAmount: string
+  today: string
+  etaDate: string
+  reviewUrl: string
+}
+
+const MESSAGE_TEMPLATES: Record<MessageStage, Record<MessageChannel, string>> = {
+  received: {
+    sms: '[판다덕픽스] {{customerName}}님, 수리 접수가 완료되었습니다.\n접수번호: {{requestCode}}\n모델: {{modelName}}\n금액: {{totalAmount}}\n확인 후 진행 상태를 안내드리겠습니다.',
+    kakao:
+      '안녕하세요 {{customerName}}님, 판다덕픽스입니다.\n수리 접수가 정상 완료되었습니다.\n\n- 접수번호: {{requestCode}}\n- 모델: {{modelName}}\n- 금액: {{totalAmount}}\n\n진행 상태는 단계별로 바로 안내드리겠습니다. 감사합니다.',
+  },
+  confirmed: {
+    sms: '[판다덕픽스] {{customerName}}님, 접수건 확인 완료되었습니다.\n{{today}} 기준 수리 대기열에 등록되었습니다.\n예상 완료일: {{etaDate}}',
+    kakao:
+      '안녕하세요 {{customerName}}님, 판다덕픽스입니다.\n접수하신 건 확인을 마쳤고 수리 대기열에 등록되었습니다.\n\n- 접수번호: {{requestCode}}\n- 예상 완료일: {{etaDate}}\n\n변동 사항이 있으면 바로 안내드리겠습니다.',
+  },
+  in_progress: {
+    sms: '[판다덕픽스] {{customerName}}님, 현재 수리가 진행 중입니다.\n진행 상태: 수리 작업 중\n완료 후 바로 안내드리겠습니다.',
+    kakao:
+      '안녕하세요 {{customerName}}님, 판다덕픽스입니다.\n현재 고객님의 {{modelName}} 수리가 진행 중입니다.\n\n- 접수번호: {{requestCode}}\n- 진행 상태: 수리 작업 중\n\n완료 즉시 다음 안내를 드리겠습니다.',
+  },
+  completed: {
+    sms: '[판다덕픽스] {{customerName}}님, 수리가 완료되었습니다.\n검수까지 마쳤으며 발송 준비 중입니다.\n필요 시 추가 안내드리겠습니다.',
+    kakao:
+      '안녕하세요 {{customerName}}님, 판다덕픽스입니다.\n수리가 완료되어 검수까지 마쳤습니다.\n\n- 접수번호: {{requestCode}}\n- 상태: 수리 완료\n\n발송 준비 후 송장 정보도 안내드리겠습니다.',
+  },
+  shipped: {
+    sms: '[판다덕픽스] {{customerName}}님, 발송이 완료되었습니다.\n송장번호: [송장번호 입력]\n안전하게 받아보시길 바랍니다.',
+    kakao:
+      '안녕하세요 {{customerName}}님, 판다덕픽스입니다.\n수리 완료품 발송이 완료되었습니다.\n\n- 송장번호: [송장번호 입력]\n- 접수번호: {{requestCode}}\n\n수령 후 이상 있으면 언제든 편하게 연락 주세요.',
+  },
+  review_request: {
+    sms: '[판다덕픽스] {{customerName}}님, 이용해주셔서 감사합니다.\n아래 링크로 리뷰 남겨주시면 큰 도움이 됩니다.\n{{reviewUrl}}',
+    kakao:
+      '안녕하세요 {{customerName}}님 👋\n판다덕픽스를 이용해주셔서 감사합니다.\n서비스가 어떠셨는지 아래 링크로 리뷰를 남겨주시면 큰 도움이 됩니다.\n\n{{reviewUrl}}\n\n소중한 의견 반영해서 더 나은 서비스로 보답드리겠습니다 🙏',
+  },
+}
+
+const applyTemplateContext = (template: string, context: MessageTemplateContext) => {
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key: keyof MessageTemplateContext) => {
+    const value = context[key]
+    return value ?? ''
+  })
+}
 
 export function RepairsPage() {
   const [repairs, setRepairs] = useState<RepairRequestWithServices[]>([])
@@ -64,6 +139,11 @@ export function RepairsPage() {
     null
   )
   const [reviewUrl, setReviewUrl] = useState('')
+  const [showMessageModal, setShowMessageModal] = useState(false)
+  const [messageRepair, setMessageRepair] = useState<RepairRequestWithServices | null>(null)
+  const [messageStage, setMessageStage] = useState<MessageStage>('received')
+  const [messageChannel, setMessageChannel] = useState<MessageChannel>('sms')
+  const [messageReviewUrl, setMessageReviewUrl] = useState('')
   const [adminNotes, setAdminNotes] = useState('')
   const [preRepairNotes, setPreRepairNotes] = useState('')
   const [postRepairNotes, setPostRepairNotes] = useState('')
@@ -111,20 +191,16 @@ export function RepairsPage() {
                 .from('controller_services')
                 .select('*')
                 .eq('id', svc.service_id)
-                .single()
+                .maybeSingle()
 
               let option = null
               if (svc.selected_option_id) {
-                try {
-                  const { data: opt } = await supabase
-                    .from('controller_service_options')
-                    .select('*')
-                    .eq('id', svc.selected_option_id)
-                    .single()
-                  option = opt
-                } catch (err) {
-                  // Silently handle RLS error - option will remain null
-                }
+                const { data: opt } = await supabase
+                  .from('controller_service_options')
+                  .select('*')
+                  .eq('id', svc.selected_option_id)
+                  .maybeSingle()
+                option = opt
               }
 
               return {
@@ -136,17 +212,12 @@ export function RepairsPage() {
           )
 
           // Check if review exists
-          let hasReview = false
-          try {
-            const { data: review } = await supabase
-              .from('reviews')
-              .select('id')
-              .eq('repair_request_id', repair.id)
-              .single()
-            hasReview = !!review
-          } catch (err) {
-            // Silently handle RLS error - hasReview will remain false
-          }
+          const { data: review } = await supabase
+            .from('reviews')
+            .select('id')
+            .eq('repair_request_id', repair.id)
+            .maybeSingle()
+          const hasReview = !!review
 
           return {
             ...repair,
@@ -168,6 +239,23 @@ export function RepairsPage() {
   useEffect(() => {
     loadRepairs()
   }, [statusFilter, loadRepairs])
+
+  useEffect(() => {
+    const ensureReviewUrl = async () => {
+      if (!showMessageModal || !messageRepair) return
+      if (messageStage !== 'review_request') return
+      if (messageReviewUrl) return
+
+      try {
+        const token = await generateReviewToken(messageRepair.id)
+        setMessageReviewUrl(getReviewUrl(token))
+      } catch (error) {
+        console.error('Failed to generate review token on stage change:', error)
+      }
+    }
+
+    ensureReviewUrl()
+  }, [showMessageModal, messageRepair, messageStage, messageReviewUrl])
 
   const filteredRepairs = repairs.filter((repair) => {
     if (!searchTerm) return true
@@ -219,7 +307,7 @@ export function RepairsPage() {
             .from('controller_services')
             .select('*')
             .eq('id', svc.service_id)
-            .single()
+            .maybeSingle()
 
           let option = null
           if (svc.selected_option_id) {
@@ -227,7 +315,7 @@ export function RepairsPage() {
               .from('controller_service_options')
               .select('*')
               .eq('id', svc.selected_option_id)
-              .single()
+              .maybeSingle()
             option = opt
           }
 
@@ -373,6 +461,72 @@ export function RepairsPage() {
     }
   }
 
+  const getMessageTemplateContext = (repair: RepairRequestWithServices): MessageTemplateContext => {
+    const modelName = repair.controller_models?.model_name || repair.controller_model
+    const requestCode = repair.id.slice(0, 8).toUpperCase()
+    const totalAmount = `₩${repair.total_amount.toLocaleString()}`
+    const today = new Date().toLocaleDateString('ko-KR')
+    const etaDate = repair.estimated_completion_date
+      ? new Date(repair.estimated_completion_date).toLocaleDateString('ko-KR')
+      : '안내 예정'
+
+    return {
+      customerName: repair.customer_name,
+      modelName,
+      requestCode,
+      totalAmount,
+      today,
+      etaDate,
+      reviewUrl: messageReviewUrl || '[리뷰 링크 생성 필요]',
+    }
+  }
+
+  const buildCustomerMessage = (
+    repair: RepairRequestWithServices,
+    stage: MessageStage,
+    channel: MessageChannel
+  ) => {
+    const template = MESSAGE_TEMPLATES[stage][channel]
+    return applyTemplateContext(template, getMessageTemplateContext(repair))
+  }
+
+  const handleOpenMessageModal = async (repair: RepairRequestWithServices) => {
+    const initialStage = MESSAGE_STAGE_BY_STATUS[repair.status as RepairStatus] || 'received'
+    setMessageRepair(repair)
+    setMessageStage(initialStage)
+    setMessageChannel('sms')
+    setMessageReviewUrl('')
+    setShowMessageModal(true)
+
+    if (initialStage === 'review_request') {
+      try {
+        const token = await generateReviewToken(repair.id)
+        setMessageReviewUrl(getReviewUrl(token))
+      } catch (error) {
+        console.error('Failed to generate review token for message:', error)
+      }
+    }
+  }
+
+  const handleCopyCustomerMessage = async () => {
+    if (!messageRepair) return
+
+    try {
+      if (messageStage === 'review_request' && !messageReviewUrl) {
+        const token = await generateReviewToken(messageRepair.id)
+        const url = getReviewUrl(token)
+        setMessageReviewUrl(url)
+      }
+
+      const text = buildCustomerMessage(messageRepair, messageStage, messageChannel)
+      await copyToClipboard(text)
+      toast.success(`${MESSAGE_STAGE_LABEL[messageStage]} 메시지가 복사되었습니다.`)
+    } catch (error) {
+      console.error('Failed to copy customer message:', error)
+      toast.error('메시지 복사에 실패했습니다.')
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -380,6 +534,10 @@ export function RepairsPage() {
       </div>
     )
   }
+
+  const messagePreview = messageRepair
+    ? buildCustomerMessage(messageRepair, messageStage, messageChannel)
+    : ''
 
   return (
     <div>
@@ -501,27 +659,36 @@ export function RepairsPage() {
                     {new Date(repair.created_at).toLocaleDateString('ko-KR')}
                   </td>
                   <td className="px-6 py-4">
-                    <button
-                      onClick={() => {
-                        setSelectedRepairForManage(repair)
-                        // 메모 로드
-                        setAdminNotes(repair.admin_notes || '')
-                        setPreRepairNotes(repair.pre_repair_notes || '')
-                        setPostRepairNotes(repair.post_repair_notes || '')
-                        // 금액 수정 초기화
-                        setEditedTotalAmount(repair.total_amount)
-                        setEditingPrice(false)
-                        setShowManageModal(true)
-                      }}
-                      className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
-                      title="관리하기"
-                    >
-                      <Settings className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleOpenMessageModal(repair)}
+                        className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                        title="고객 안내 메시지"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedRepairForManage(repair)
+                          // 메모 로드
+                          setAdminNotes(repair.admin_notes || '')
+                          setPreRepairNotes(repair.pre_repair_notes || '')
+                          setPostRepairNotes(repair.post_repair_notes || '')
+                          // 금액 수정 초기화
+                          setEditedTotalAmount(repair.total_amount)
+                          setEditingPrice(false)
+                          setShowManageModal(true)
+                        }}
+                        className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                        title="관리하기"
+                      >
+                        <Settings className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                   <td className="px-6 py-4">
-                    {repair.status === 'completed' && (
-                      repair.has_review ? (
+                    {repair.status === 'completed' &&
+                      (repair.has_review ? (
                         <span className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-green-100 text-green-800 rounded-lg font-medium">
                           <CheckCircle className="w-4 h-4" />
                           리뷰완료
@@ -535,8 +702,7 @@ export function RepairsPage() {
                           <MessageSquare className="w-4 h-4" />
                           리뷰 요청
                         </button>
-                      )
-                    )}
+                      ))}
                   </td>
                 </tr>
               )
@@ -550,6 +716,105 @@ export function RepairsPage() {
           </div>
         )}
       </div>
+
+      {showMessageModal && messageRepair && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold">고객 안내 메시지</h2>
+                <button
+                  onClick={() => {
+                    setShowMessageModal(false)
+                    setMessageRepair(null)
+                    setMessageReviewUrl('')
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-sm text-gray-600 mb-2">수신 대상</p>
+                <p className="font-semibold">{messageRepair.customer_name}</p>
+                <p className="text-sm text-gray-600">{messageRepair.customer_phone}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">단계</label>
+                  <select
+                    value={messageStage}
+                    onChange={(e) => setMessageStage(e.target.value as MessageStage)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none"
+                  >
+                    {(Object.keys(MESSAGE_STAGE_LABEL) as MessageStage[]).map((stage) => (
+                      <option key={stage} value={stage}>
+                        {MESSAGE_STAGE_LABEL[stage]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">채널</label>
+                  <select
+                    value={messageChannel}
+                    onChange={(e) => setMessageChannel(e.target.value as MessageChannel)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none"
+                  >
+                    <option value="sms">문자(SMS)</option>
+                    <option value="kakao">카카오톡</option>
+                  </select>
+                </div>
+              </div>
+
+              {messageStage === 'review_request' && (
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <p className="text-xs text-blue-700 mb-1">리뷰 링크</p>
+                  <p className="text-xs text-blue-900 break-all font-mono">
+                    {messageReviewUrl ||
+                      '생성 중이거나 생성 실패. 복사 버튼을 다시 눌러 재시도하세요.'}
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">메시지 미리보기</label>
+                <textarea
+                  value={messagePreview}
+                  readOnly
+                  rows={10}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-800 resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCopyCustomerMessage}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition font-medium"
+                >
+                  <Copy className="w-4 h-4" />
+                  메시지 복사
+                </button>
+                <button
+                  onClick={() => {
+                    setShowMessageModal(false)
+                    setMessageRepair(null)
+                    setMessageReviewUrl('')
+                  }}
+                  className="px-4 py-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition font-medium"
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Review Request Modal */}
       {showReviewRequestModal && reviewRequestRepair && (
@@ -671,80 +936,111 @@ export function RepairsPage() {
                           <div className="flex items-center justify-between text-sm pl-4">
                             <span className="text-gray-600">ㄴ {svc.option.option_name}</span>
                             <span className="text-gray-900 font-medium">
-                              {svc.option_price === 0
-                                ? '기본'
-                                : `+₩${svc.option_price.toLocaleString()}`}
+                              {svc.option_price > 0
+                                ? `+₩${svc.option_price.toLocaleString()}`
+                                : '-'}
                             </span>
                           </div>
                         )}
                       </div>
                     ))}
+
+                    {(() => {
+                      const servicesTotal =
+                        selectedRepair.services?.reduce(
+                          (sum, svc) => sum + svc.service_price + svc.option_price,
+                          0
+                        ) || 0
+                      const shippingFee = Math.max(selectedRepair.total_amount - servicesTotal, 0)
+                      if (shippingFee <= 0) return null
+
+                      return (
+                        <div className="flex items-center justify-between text-sm px-1">
+                          <span className="text-gray-600">배송비</span>
+                          <span className="font-medium">₩{shippingFee.toLocaleString()}</span>
+                        </div>
+                      )
+                    })()}
                   </div>
                 </div>
 
                 {/* Controller Condition & Notes */}
-                {selectedRepair.issue_description && (() => {
-                  const desc = selectedRepair.issue_description
-                  const addressMatch = desc.match(/고객 주소:\s*(.+)/)
-                  const conditionsMatch = desc.match(/상태:\s*\[(.+?)\]/)
-                  const notesMatch = desc.match(/요청사항:\s*(.+?)(?:\n|$)/)
-                  const address = addressMatch ? addressMatch[1].trim() : null
-                  const conditions = conditionsMatch ? conditionsMatch[1].split(',').map((s) => s.trim()) : null
-                  const notes = notesMatch ? notesMatch[1].trim() : null
-                  const hasParsed = address || conditions || notes
+                {selectedRepair.issue_description &&
+                  (() => {
+                    const desc = selectedRepair.issue_description
+                    const addressMatch = desc.match(/고객 주소:\s*(.+)/)
+                    const conditionsMatch = desc.match(/상태:\s*\[(.+?)\]/)
+                    const notesMatch = desc.match(/요청사항:\s*(.+?)(?:\n|$)/)
+                    const address = addressMatch ? addressMatch[1].trim() : null
+                    const conditions = conditionsMatch
+                      ? conditionsMatch[1].split(',').map((s) => s.trim())
+                      : null
+                    const notes = notesMatch ? notesMatch[1].trim() : null
+                    const hasParsed = address || conditions || notes
 
-                  if (!hasParsed) {
+                    if (!hasParsed) {
+                      return (
+                        <div>
+                          <h3 className="text-sm font-semibold text-gray-500 mb-3">추가 정보</h3>
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <p className="text-sm text-gray-700 whitespace-pre-wrap">{desc}</p>
+                          </div>
+                        </div>
+                      )
+                    }
+
                     return (
-                      <div>
-                        <h3 className="text-sm font-semibold text-gray-500 mb-3">추가 정보</h3>
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <p className="text-sm text-gray-700 whitespace-pre-wrap">{desc}</p>
-                        </div>
-                      </div>
-                    )
-                  }
-
-                  return (
-                    <>
-                      {conditions && (
-                        <div>
-                          <h3 className="text-sm font-semibold text-gray-500 mb-3">컨트롤러 상태</h3>
-                          <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                            <div className="flex flex-wrap gap-2">
-                              {conditions.map((c) => (
-                                <span key={c} className="inline-block bg-white border border-gray-300 rounded-full px-3 py-1 text-sm font-medium">
-                                  {c}
-                                </span>
-                              ))}
-                            </div>
-                            {notes && (
-                              <div className="pt-3 border-t border-gray-200">
-                                <p className="text-xs font-medium text-gray-500 mb-1">추가 요청사항</p>
-                                <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
+                      <>
+                        {conditions && (
+                          <div>
+                            <h3 className="text-sm font-semibold text-gray-500 mb-3">
+                              컨트롤러 상태
+                            </h3>
+                            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                              <div className="flex flex-wrap gap-2">
+                                {conditions.map((c) => (
+                                  <span
+                                    key={c}
+                                    className="inline-block bg-white border border-gray-300 rounded-full px-3 py-1 text-sm font-medium"
+                                  >
+                                    {c}
+                                  </span>
+                                ))}
                               </div>
-                            )}
+                              {notes && (
+                                <div className="pt-3 border-t border-gray-200">
+                                  <p className="text-xs font-medium text-gray-500 mb-1">
+                                    추가 요청사항
+                                  </p>
+                                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                                    {notes}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      {!conditions && notes && (
-                        <div>
-                          <h3 className="text-sm font-semibold text-gray-500 mb-3">추가 요청사항</h3>
-                          <div className="bg-gray-50 rounded-lg p-4">
-                            <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
+                        )}
+                        {!conditions && notes && (
+                          <div>
+                            <h3 className="text-sm font-semibold text-gray-500 mb-3">
+                              추가 요청사항
+                            </h3>
+                            <div className="bg-gray-50 rounded-lg p-4">
+                              <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      {address && (
-                        <div>
-                          <h3 className="text-sm font-semibold text-gray-500 mb-3">배송 주소</h3>
-                          <div className="bg-gray-50 rounded-lg p-4">
-                            <p className="text-sm text-gray-700">{address}</p>
+                        )}
+                        {address && (
+                          <div>
+                            <h3 className="text-sm font-semibold text-gray-500 mb-3">배송 주소</h3>
+                            <div className="bg-gray-50 rounded-lg p-4">
+                              <p className="text-sm text-gray-700">{address}</p>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </>
-                  )
-                })()}
+                        )}
+                      </>
+                    )
+                  })()}
 
                 {/* Total & Status */}
                 <div className="border-t border-gray-200 pt-4">
@@ -854,20 +1150,52 @@ export function RepairsPage() {
                     {selectedRepairForManage.services.map((svc, index) => (
                       <div key={index} className="bg-gray-50 rounded-lg p-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold">{svc.service?.name || '서비스'}</span>
-                          <span className="text-sm font-semibold">₩{svc.service_price.toLocaleString()}</span>
+                          <span className="text-sm font-semibold">
+                            {svc.service?.name || '서비스'}
+                          </span>
+                          <span className="text-sm font-semibold">
+                            ₩{svc.service_price.toLocaleString()}
+                          </span>
                         </div>
                         {svc.option && (
                           <div className="flex items-center justify-between text-xs text-gray-500 mt-0.5 pl-3">
                             <span>ㄴ {svc.option.option_name}</span>
-                            <span>{svc.option_price === 0 ? '기본' : `+₩${svc.option_price.toLocaleString()}`}</span>
+                            <span>
+                              {svc.option_price > 0
+                                ? `+₩${svc.option_price.toLocaleString()}`
+                                : '-'}
+                            </span>
                           </div>
                         )}
                       </div>
                     ))}
+                    {(() => {
+                      const servicesTotal = selectedRepairForManage.services.reduce(
+                        (sum, svc) => sum + svc.service_price + svc.option_price,
+                        0
+                      )
+                      const currentTotal = editingPrice
+                        ? editedTotalAmount
+                        : selectedRepairForManage.total_amount
+                      const shippingFee = Math.max(currentTotal - servicesTotal, 0)
+                      if (shippingFee <= 0) return null
+
+                      return (
+                        <div className="flex items-center justify-between text-xs text-gray-600 px-1 pt-1">
+                          <span>배송비</span>
+                          <span className="font-medium">₩{shippingFee.toLocaleString()}</span>
+                        </div>
+                      )
+                    })()}
                     <div className="flex items-center justify-between pt-2 border-t border-gray-200">
                       <span className="text-sm font-semibold">총 금액</span>
-                      <span className="font-bold">₩{(editingPrice ? editedTotalAmount : selectedRepairForManage.total_amount).toLocaleString()}</span>
+                      <span className="font-bold">
+                        ₩
+                        {(editingPrice
+                          ? editedTotalAmount
+                          : selectedRepairForManage.total_amount
+                        ).toLocaleString()}
+                      </span>
                     </div>
                   </div>
 
@@ -881,7 +1209,9 @@ export function RepairsPage() {
                             <input
                               type="number"
                               value={editedTotalAmount}
-                              onChange={(e) => setEditedTotalAmount(Math.max(0, parseInt(e.target.value) || 0))}
+                              onChange={(e) =>
+                                setEditedTotalAmount(Math.max(0, parseInt(e.target.value) || 0))
+                              }
                               className="w-32 px-2 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                               disabled={updatingPrice}
                             />
@@ -922,44 +1252,52 @@ export function RepairsPage() {
               )}
 
               {/* Controller Condition */}
-              {selectedRepairForManage.issue_description && (() => {
-                const desc = selectedRepairForManage.issue_description
-                const conditionsMatch = desc.match(/상태:\s*\[(.+?)\]/)
-                const notesMatch = desc.match(/요청사항:\s*(.+?)(?:\n|$)/)
-                const addressMatch = desc.match(/고객 주소:\s*(.+)/)
-                const conditions = conditionsMatch ? conditionsMatch[1].split(',').map((s) => s.trim()) : null
-                const notes = notesMatch ? notesMatch[1].trim() : null
-                const address = addressMatch ? addressMatch[1].trim() : null
-                if (!conditions && !notes && !address) return null
-                return (
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 mb-3">컨트롤러 상태</h3>
-                    <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                      {conditions && (
-                        <div className="flex flex-wrap gap-2">
-                          {conditions.map((c) => (
-                            <span key={c} className="inline-block bg-white border border-gray-300 rounded-full px-3 py-1 text-sm font-medium">
-                              {c}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      {notes && (
-                        <div className={conditions ? 'pt-2 border-t border-gray-200' : ''}>
-                          <p className="text-xs font-medium text-gray-500 mb-1">추가 요청사항</p>
-                          <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
-                        </div>
-                      )}
-                      {address && (
-                        <div className={(conditions || notes) ? 'pt-2 border-t border-gray-200' : ''}>
-                          <p className="text-xs font-medium text-gray-500 mb-1">배송 주소</p>
-                          <p className="text-sm text-gray-700">{address}</p>
-                        </div>
-                      )}
+              {selectedRepairForManage.issue_description &&
+                (() => {
+                  const desc = selectedRepairForManage.issue_description
+                  const conditionsMatch = desc.match(/상태:\s*\[(.+?)\]/)
+                  const notesMatch = desc.match(/요청사항:\s*(.+?)(?:\n|$)/)
+                  const addressMatch = desc.match(/고객 주소:\s*(.+)/)
+                  const conditions = conditionsMatch
+                    ? conditionsMatch[1].split(',').map((s) => s.trim())
+                    : null
+                  const notes = notesMatch ? notesMatch[1].trim() : null
+                  const address = addressMatch ? addressMatch[1].trim() : null
+                  if (!conditions && !notes && !address) return null
+                  return (
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-500 mb-3">컨트롤러 상태</h3>
+                      <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                        {conditions && (
+                          <div className="flex flex-wrap gap-2">
+                            {conditions.map((c) => (
+                              <span
+                                key={c}
+                                className="inline-block bg-white border border-gray-300 rounded-full px-3 py-1 text-sm font-medium"
+                              >
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {notes && (
+                          <div className={conditions ? 'pt-2 border-t border-gray-200' : ''}>
+                            <p className="text-xs font-medium text-gray-500 mb-1">추가 요청사항</p>
+                            <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
+                          </div>
+                        )}
+                        {address && (
+                          <div
+                            className={conditions || notes ? 'pt-2 border-t border-gray-200' : ''}
+                          >
+                            <p className="text-xs font-medium text-gray-500 mb-1">배송 주소</p>
+                            <p className="text-sm text-gray-700">{address}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )
-              })()}
+                  )
+                })()}
 
               <div>
                 <h3 className="text-sm font-semibold text-gray-500 mb-3">상태</h3>
@@ -985,7 +1323,9 @@ export function RepairsPage() {
                         }
                         className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition ${
                           isSelected
-                            ? config.color + ' ring-2 ring-offset-1 ' + ringColors[value as RepairStatus]
+                            ? config.color +
+                              ' ring-2 ring-offset-1 ' +
+                              ringColors[value as RepairStatus]
                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                         }`}
                       >

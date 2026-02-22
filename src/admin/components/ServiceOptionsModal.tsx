@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, Edit, X, Check, PlusCircle, GripVertical, Upload, Image as ImageIcon } from 'lucide-react'
+import {
+  Plus,
+  Trash2,
+  Edit,
+  X,
+  Check,
+  PlusCircle,
+  GripVertical,
+  Upload,
+  Image as ImageIcon,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import {
@@ -34,6 +44,7 @@ import type { ControllerServiceWithOptions } from '@/types/database'
 
 interface SortableOptionItemProps {
   option: any
+  serviceBasePrice: number
   isEditing: boolean
   editingData: any
   onEdit: () => void
@@ -47,6 +58,7 @@ interface SortableOptionItemProps {
 
 function SortableOptionItem({
   option,
+  serviceBasePrice,
   isEditing,
   editingData,
   onEdit,
@@ -130,15 +142,30 @@ function SortableOptionItem({
             />
           </div>
           <div>
-            <Label htmlFor={`edit_price_${option.id}`}>추가 가격 (원)</Label>
+            <Label htmlFor={`edit_target_${option.id}`}>추천 대상 (선택)</Label>
             <Input
-              id={`edit_price_${option.id}`}
-              type="number"
-              value={editingData?.additional_price || ''}
+              id={`edit_target_${option.id}`}
+              value={editingData?.target_audience || ''}
               onChange={(e) =>
                 onEditingDataChange({
                   ...editingData,
-                  additional_price: Number(e.target.value) || 0,
+                  target_audience: e.target.value,
+                })
+              }
+              className="w-full"
+              placeholder="예: FPS 위주로 반응성을 중시하는 사용자"
+            />
+          </div>
+          <div>
+            <Label htmlFor={`edit_price_${option.id}`}>옵션 최종 가격 (원)</Label>
+            <Input
+              id={`edit_price_${option.id}`}
+              type="number"
+              value={editingData?.final_price ?? ''}
+              onChange={(e) =>
+                onEditingDataChange({
+                  ...editingData,
+                  final_price: Number(e.target.value) || 0,
                 })
               }
               className="w-full"
@@ -224,11 +251,21 @@ function SortableOptionItem({
                 {option.image_url && <ImageIcon className="w-4 h-4 text-gray-400" />}
               </div>
               <div className="text-sm text-gray-600">{option.option_description}</div>
+              {option.target_audience && (
+                <div className="text-xs text-gray-500 mt-1">
+                  추천 대상: {option.target_audience}
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <div className="text-sm text-gray-500">추가</div>
-                <div className="font-semibold">₩{option.additional_price.toLocaleString()}</div>
+                <div className="text-sm text-gray-500">최종가</div>
+                <div className="font-semibold">
+                  ₩
+                  {(
+                    option.final_price ?? serviceBasePrice + (option.additional_price ?? 0)
+                  ).toLocaleString()}
+                </div>
               </div>
               <button
                 onClick={onEdit}
@@ -277,7 +314,8 @@ export function ServiceOptionsModal({
     option_name: '',
     option_description: '',
     detailed_description: '',
-    additional_price: 0,
+    target_audience: '',
+    final_price: 0,
     image_url: null as string | null,
   })
 
@@ -286,7 +324,8 @@ export function ServiceOptionsModal({
     option_name?: string
     option_description?: string
     detailed_description?: string
-    additional_price?: number
+    target_audience?: string
+    final_price?: number
     image_url?: string | null
   } | null>(null)
 
@@ -384,13 +423,22 @@ export function ServiceOptionsModal({
         option_name: formData.option_name,
         option_description: formData.option_description,
         detailed_description: formData.detailed_description,
-        additional_price: Number(formData.additional_price) || 0,
+        target_audience: formData.target_audience || null,
+        final_price: Number(formData.final_price) || 0,
+        additional_price: Math.max(Number(formData.final_price) - service.base_price, 0),
         image_url: formData.image_url,
         is_active: true,
       })
 
       setLocalOptions([...localOptions, newOption])
-      setFormData({ option_name: '', option_description: '', detailed_description: '', additional_price: 0, image_url: null })
+      setFormData({
+        option_name: '',
+        option_description: '',
+        detailed_description: '',
+        target_audience: '',
+        final_price: 0,
+        image_url: null,
+      })
       toast.success('옵션이 추가되었습니다.')
     } catch (error) {
       console.error('Failed to add option:', error)
@@ -402,9 +450,16 @@ export function ServiceOptionsModal({
     if (!editingData) return
 
     try {
-      await onUpdateOption(optionId, editingData)
+      const finalPrice = Number(editingData.final_price ?? 0)
+      const payload = {
+        ...editingData,
+        final_price: finalPrice,
+        additional_price: Math.max(finalPrice - service.base_price, 0),
+      }
+
+      await onUpdateOption(optionId, payload)
       setLocalOptions(
-        localOptions.map((opt: any) => (opt.id === optionId ? { ...opt, ...editingData } : opt))
+        localOptions.map((opt: any) => (opt.id === optionId ? { ...opt, ...payload } : opt))
       )
       setEditingOptionId(null)
       setEditingData(null)
@@ -421,7 +476,8 @@ export function ServiceOptionsModal({
       option_name: option.option_name,
       option_description: option.option_description,
       detailed_description: option.detailed_description || '',
-      additional_price: option.additional_price,
+      target_audience: option.target_audience || '',
+      final_price: option.final_price ?? service.base_price + (option.additional_price ?? 0),
       image_url: option.image_url || null,
     })
   }
@@ -458,7 +514,7 @@ export function ServiceOptionsModal({
               <h3 className="font-semibold mb-2">{service.name}</h3>
               <p className="text-sm text-gray-600">{service.description}</p>
               <p className="text-sm text-gray-500 mt-1">
-                기본 가격: ₩{service.base_price.toLocaleString()}
+                단독 서비스 가격: ₩{service.base_price.toLocaleString()}
               </p>
             </div>
 
@@ -480,15 +536,15 @@ export function ServiceOptionsModal({
                     />
                   </div>
                   <div>
-                    <Label htmlFor="additional_price">추가 가격 (원) *</Label>
+                    <Label htmlFor="final_price">옵션 최종 가격 (원) *</Label>
                     <Input
-                      id="additional_price"
+                      id="final_price"
                       type="number"
-                      value={formData.additional_price}
+                      value={formData.final_price}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          additional_price: Number(e.target.value) || 0,
+                          final_price: Number(e.target.value) || 0,
                         })
                       }
                       placeholder="예: 15000"
@@ -521,6 +577,15 @@ export function ServiceOptionsModal({
                     }
                     className="w-full min-h-[80px] px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-0 focus:border-gray-400"
                     placeholder="서비스 상세보기에서 표시될 자세한 설명 (비어있으면 기본 설명 사용)"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="target_audience">추천 대상 (선택)</Label>
+                  <Input
+                    id="target_audience"
+                    value={formData.target_audience}
+                    onChange={(e) => setFormData({ ...formData, target_audience: e.target.value })}
+                    placeholder="예: FPS 위주로 반응성을 중시하는 사용자"
                   />
                 </div>
                 <div>
@@ -598,6 +663,7 @@ export function ServiceOptionsModal({
                         <SortableOptionItem
                           key={option.id}
                           option={option}
+                          serviceBasePrice={service.base_price}
                           isEditing={editingOptionId === option.id}
                           editingData={editingData}
                           onEdit={() => startEditing(option)}

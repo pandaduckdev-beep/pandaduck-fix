@@ -1,4 +1,12 @@
-import { Menu, Loader2, ChevronRight, Calendar, Gamepad2, Share2, MessageCircle } from 'lucide-react'
+import {
+  Menu,
+  Loader2,
+  ChevronRight,
+  Calendar,
+  Gamepad2,
+  Share2,
+  MessageCircle,
+} from 'lucide-react'
 import { Footer } from '@/app/components/Footer'
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -57,7 +65,7 @@ const fetchRepairLogs = async ({ pageParam = 0 }: { pageParam?: number }) => {
 
   const { data, error } = await supabase
     .from('repair_logs')
-    .select('id, title, summary, thumbnail_url, controller_model, repair_type, created_at, view_count')
+    .select('id, title, summary, controller_model, repair_type, created_at, view_count')
     .eq('is_public', true)
     .order('created_at', { ascending: false })
     .range(from, to)
@@ -74,7 +82,9 @@ const fetchRepairLogs = async ({ pageParam = 0 }: { pageParam?: number }) => {
 const fetchLogDetail = async (logId: string) => {
   const { data, error } = await supabase
     .from('repair_logs')
-    .select('*')
+    .select(
+      'id,title,content,summary,thumbnail_url,image_urls,controller_model,repair_type,is_public,view_count,naver_blog_url,naver_synced_at,created_at,updated_at'
+    )
     .eq('id', logId)
     .eq('is_public', true)
     .single()
@@ -89,28 +99,58 @@ export function RepairLogsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [detailLog, setDetailLog] = useState<RepairLog | null>(null)
+  const [thumbnailMap, setThumbnailMap] = useState<Record<string, string>>({})
   const { setRef } = useSlideUp(100) // 충분히 큰 값
 
   // URL 파라미터에서 선택된 로그 ID 가져오기
   const selectedLogId = searchParams.get('log')
 
   // 무한 스크롤 쿼리
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ['repairLogs'],
-    queryFn: fetchRepairLogs,
-    initialPageParam: 0,
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-  })
+  const { data, error, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ['repairLogs'],
+      queryFn: fetchRepairLogs,
+      initialPageParam: 0,
+      getNextPageParam: (lastPage) => lastPage.nextPage,
+      staleTime: 1000 * 60 * 5,
+      refetchOnWindowFocus: false,
+    })
 
   // 모든 로그 데이터를 평탄화
   const logs = data?.pages.flatMap((page) => page.data) || []
+
+  useEffect(() => {
+    const fetchListThumbnails = async () => {
+      const missingIds = logs.map((log) => log.id).filter((id) => !!id && !thumbnailMap[id])
+
+      if (missingIds.length === 0) return
+
+      const { data: rows, error } = await supabase
+        .from('repair_logs')
+        .select('id,thumbnail_url')
+        .in('id', missingIds)
+        .like('thumbnail_url', 'http%')
+
+      if (error) {
+        console.error('Failed to load list thumbnails:', error)
+        return
+      }
+
+      if (!rows || rows.length === 0) return
+
+      setThumbnailMap((prev) => {
+        const next = { ...prev }
+        for (const row of rows) {
+          if (row.id && row.thumbnail_url) {
+            next[row.id] = row.thumbnail_url
+          }
+        }
+        return next
+      })
+    }
+
+    fetchListThumbnails()
+  }, [logs, thumbnailMap])
 
   // 무한 스크롤 처리
   useEffect(() => {
@@ -118,7 +158,13 @@ export function RepairLogsPage() {
       const scrollPosition = window.innerHeight + window.scrollY
       const pageHeight = document.documentElement.scrollHeight
 
-      if (scrollPosition >= pageHeight - 1000 && hasNextPage && !isFetching && !isFetchingNextPage && !selectedLogId) {
+      if (
+        scrollPosition >= pageHeight - 1000 &&
+        hasNextPage &&
+        !isFetching &&
+        !isFetchingNextPage &&
+        !selectedLogId
+      ) {
         fetchNextPage()
       }
     }
@@ -131,12 +177,14 @@ export function RepairLogsPage() {
   const { data: detailData, isLoading: isLoadingDetail } = useQuery({
     queryKey: ['repairLogDetail', selectedLogId],
     queryFn: () => fetchLogDetail(selectedLogId!),
-    enabled: !!selectedLogId && !logs.find(l => l.id === selectedLogId && l.content),
+    enabled: !!selectedLogId,
     staleTime: 1000 * 60 * 5, // 5분
+    refetchOnWindowFocus: false,
   })
 
   // selectedLog 계산
-  const selectedLog = detailLog || detailData || logs.find(log => log.id === selectedLogId) || null
+  const selectedLog =
+    detailLog || detailData || logs.find((log) => log.id === selectedLogId) || null
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -188,27 +236,21 @@ export function RepairLogsPage() {
   useEffect(() => {
     if (selectedLogId) {
       document.body.style.overflow = 'hidden'
-
-      // 먼저 현재 리스트에서 찾기
-      const foundInList = logs.find(log => log.id === selectedLogId)
-
-      // 리스트에 있고 content가 있으면 detailLog로 설정
-      if (foundInList && foundInList.content) {
-        setDetailLog(foundInList)
-      }
     } else {
       document.body.style.overflow = ''
       setDetailLog(null)
     }
   }, [selectedLogId, logs])
 
-
   // 상세 보기 열기
-  const openDetail = useCallback((log: RepairLog) => {
-    setSearchParams({ log: log.id })
-    incrementViewCount(log.id)
-    document.body.style.overflow = 'hidden'
-  }, [setSearchParams, incrementViewCount])
+  const openDetail = useCallback(
+    (log: RepairLog) => {
+      setSearchParams({ log: log.id })
+      incrementViewCount(log.id)
+      document.body.style.overflow = 'hidden'
+    },
+    [setSearchParams, incrementViewCount]
+  )
 
   // 상세 보기 닫기
   const closeDetail = useCallback(() => {
@@ -277,10 +319,12 @@ export function RepairLogsPage() {
                   style={{ transitionDelay: `${Math.min(index * 0.05, 0.3)}s` }}
                 >
                   <div className="flex gap-4">
-                    {/* Thumbnail - 지연 로딩 */}
-                    {log.thumbnail_url ? (
+                    {thumbnailMap[log.id] ? (
                       <img
-                        src={getOptimizedThumbnailUrl(log.thumbnail_url, 200) || log.thumbnail_url}
+                        src={
+                          getOptimizedThumbnailUrl(thumbnailMap[log.id], 200) ||
+                          thumbnailMap[log.id]
+                        }
                         alt={log.title}
                         className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl flex-shrink-0 bg-gray-100"
                         loading="lazy"
@@ -313,9 +357,7 @@ export function RepairLogsPage() {
 
                       {/* Content Preview */}
                       {log.summary && (
-                        <p className="text-sm text-[#86868B] mb-2 line-clamp-2">
-                          {log.summary}
-                        </p>
+                        <p className="text-sm text-[#86868B] mb-2 line-clamp-2">{log.summary}</p>
                       )}
 
                       {/* Date */}
@@ -352,7 +394,12 @@ export function RepairLogsPage() {
             </div>
             <div className="space-y-3 sm:space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="w-full bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-5 animate-pulse slide-up" data-animate style={{ animationDelay: `${i * 0.1}s, ${i * 0.1}s` }}>
+                <div
+                  key={i}
+                  className="w-full bg-[#F5F5F7] rounded-[20px] sm:rounded-[28px] p-4 sm:p-5 animate-pulse slide-up"
+                  data-animate
+                  style={{ animationDelay: `${i * 0.1}s, ${i * 0.1}s` }}
+                >
                   <div className="flex gap-4">
                     <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#E5E5E5] rounded-xl flex-shrink-0"></div>
                     <div className="flex-1 min-w-0 space-y-2">
@@ -378,11 +425,7 @@ export function RepairLogsPage() {
 
       {/* CTA Section */}
       <section className="max-w-md mx-auto px-6 pb-8 sm:pb-12">
-        <div
-          ref={setRef(logs.length + 1)}
-          className="slide-up"
-          style={{ transitionDelay: '0s' }}
-        >
+        <div ref={setRef(logs.length + 1)} className="slide-up" style={{ transitionDelay: '0s' }}>
           <div className="bg-[#000000] text-white rounded-[20px] sm:rounded-[28px] p-6 sm:p-8 text-center space-y-3 sm:space-y-4">
             <h3 className="text-xl sm:text-2xl" style={{ fontWeight: 700 }}>
               전문가에게 맡기세요
@@ -504,15 +547,11 @@ export function RepairLogsPage() {
                 </div>
 
                 {/* Content */}
-                <div
-                  className="slide-up"
-                  data-animate
-                  style={{ animationDelay: '0.2s' }}
-                >
+                <div className="slide-up" data-animate style={{ animationDelay: '0.2s' }}>
                   <div
                     className="text-[#1d1d1f] repair-log-content"
                     dangerouslySetInnerHTML={{
-                      __html: optimizeContentImages(selectedLog.content || '')
+                      __html: optimizeContentImages(selectedLog.content || ''),
                     }}
                   />
                 </div>
@@ -543,12 +582,8 @@ export function RepairLogsPage() {
                   style={{ animationDelay: '0.5s' }}
                 >
                   <div className="text-center">
-                    <p className="text-xs font-medium text-gray-900 mb-1">
-                      PandaDuck Fix
-                    </p>
-                    <p className="text-xs text-[#86868B]">
-                      게임의 즐거움을 되찾는 순간까지
-                    </p>
+                    <p className="text-xs font-medium text-gray-900 mb-1">PandaDuck Fix</p>
+                    <p className="text-xs text-[#86868B]">게임의 즐거움을 되찾는 순간까지</p>
                   </div>
                 </div>
 

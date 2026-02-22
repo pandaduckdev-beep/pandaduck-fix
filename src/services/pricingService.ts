@@ -97,7 +97,12 @@ export async function getServicesWithPricing(
   const servicesWithPricing: ControllerServiceWithPricing[] = (services || []).map(
     (service: any) => ({
       ...service,
-      options: service.controller_service_options || [],
+      options: (service.controller_service_options || []).map((option: any) => ({
+        ...option,
+        final_price:
+          option.final_price ??
+          service.base_price + (option.pricing?.additional_price ?? option.additional_price ?? 0),
+      })),
     })
   )
 
@@ -141,14 +146,15 @@ export function calculateTotalPrice(
     const service = services.find((s) => s.id === serviceId)
     if (!service) return
 
-    total += service.base_price
-
     if (selectedOptionId && service.options) {
       const option = service.options.find((o) => o.id === selectedOptionId)
       if (option) {
-        total += option.additional_price
+        total += option.final_price ?? service.base_price + (option.additional_price ?? 0)
+        return
       }
     }
+
+    total += service.base_price
   })
 
   return total
