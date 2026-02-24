@@ -293,7 +293,8 @@ export default function RepairRequestDetailPage() {
   const config = statusConfig[repair.status]
   const servicesTotal =
     repair.services?.reduce((sum, svc) => sum + svc.service_price + svc.option_price, 0) || 0
-  const discount = servicesTotal - repair.total_amount
+  const discount = Math.max(servicesTotal - repair.total_amount, 0)
+  const shippingFee = Math.max(repair.total_amount - servicesTotal, 0)
 
   const shouldShowReviewButton = repair.status === 'completed' && !repair.has_review
 
@@ -569,6 +570,14 @@ export default function RepairRequestDetailPage() {
                   <span className="text-sm text-[#FF3B30]">할인</span>
                   <span className="text-sm text-[#FF3B30]" style={{ fontWeight: 600 }}>
                     -₩{discount.toLocaleString()}
+                  </span>
+                </div>
+              )}
+              {shippingFee > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-[#007AFF]">배송비</span>
+                  <span className="text-sm text-[#007AFF]" style={{ fontWeight: 600 }}>
+                    ₩{shippingFee.toLocaleString()}
                   </span>
                 </div>
               )}

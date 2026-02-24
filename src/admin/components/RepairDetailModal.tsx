@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { X, Printer } from 'lucide-react'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
@@ -27,6 +28,8 @@ interface RepairDetailModalProps {
 
 export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModalProps) {
   if (!isOpen) return null
+
+  const receiptContentRef = useRef<HTMLDivElement>(null)
 
   // Get address from structured fields, fallback to parsing
   const getCustomerAddress = () => {
@@ -72,7 +75,67 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
   const discount = Math.max(servicesTotal - repair.total_amount, 0)
 
   const handlePrint = () => {
-    window.print()
+    if (!receiptContentRef.current) return
+
+    const printWindow = window.open('', '_blank', 'width=900,height=1200')
+    if (!printWindow) return
+
+    const receiptHtml = receiptContentRef.current.outerHTML
+    const headStyles = Array.from(document.head.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map((node) => node.outerHTML)
+      .join('')
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html lang="ko">
+        <head>
+          <meta charset="utf-8" />
+          <title>수리 요청 내역서</title>
+          ${headStyles}
+          <style>
+            @page { size: A4; margin: 8mm; }
+            body { margin: 0; background: #fff; }
+            #print-root {
+              width: 100%;
+              max-width: none;
+              margin: 0 auto;
+              color: #111827;
+              font-size: 12px;
+              line-height: 1.3;
+            }
+            #print-root .p-8 { padding: 14px !important; }
+            #print-root .mb-8 { margin-bottom: 12px !important; }
+            #print-root .mt-10 { margin-top: 14px !important; }
+            #print-root .pt-6 { padding-top: 10px !important; }
+            #print-root .pb-6 { padding-bottom: 10px !important; }
+            #print-root .p-5 { padding: 10px !important; }
+            #print-root .p-4 { padding: 8px !important; }
+            #print-root .py-4 { padding-top: 8px !important; padding-bottom: 8px !important; }
+            #print-root .py-3 { padding-top: 6px !important; padding-bottom: 6px !important; }
+            #print-root .py-2 { padding-top: 4px !important; padding-bottom: 4px !important; }
+            #print-root .text-3xl { font-size: 24px !important; line-height: 1.15 !important; }
+            #print-root .text-2xl { font-size: 20px !important; line-height: 1.2 !important; }
+            #print-root .text-xl { font-size: 17px !important; line-height: 1.2 !important; }
+            #print-root .text-lg { font-size: 15px !important; line-height: 1.2 !important; }
+            #print-root .text-sm { font-size: 12px !important; }
+            #print-root .text-xs { font-size: 11px !important; }
+            #print-root table { width: 100%; border-collapse: collapse; }
+            #print-root tr { page-break-inside: avoid; }
+            #print-root .rounded-2xl,
+            #print-root .rounded-lg { border-radius: 10px !important; }
+          </style>
+        </head>
+        <body>
+          <div id="print-root">${receiptHtml}</div>
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
+    printWindow.focus()
+    setTimeout(() => {
+      printWindow.print()
+      printWindow.close()
+    }, 200)
   }
 
   return (
@@ -97,7 +160,7 @@ export function RepairDetailModal({ isOpen, onClose, repair }: RepairDetailModal
         </div>
 
         {/* Receipt Content */}
-        <div className="p-8">
+        <div ref={receiptContentRef} className="p-8">
           {/* Header */}
           <div className="text-center mb-8 border-b-2 border-black pb-6">
             <h1 className="text-3xl font-bold mb-2">PandaDuck Fix</h1>

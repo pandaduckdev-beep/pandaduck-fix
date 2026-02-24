@@ -11,6 +11,7 @@ import {
   Image as ImageIcon,
   ExternalLink,
   Search,
+  Loader2,
 } from 'lucide-react'
 import { useToast } from '@/hooks/useToast.tsx'
 import type { RepairLog } from '@/types/database'
@@ -18,6 +19,7 @@ import { RichTextEditor } from '@/components/common/RichTextEditor'
 import { resolveRepairLogThumbnailUrl } from '@/lib/repairLogThumbnail'
 
 type LogStatus = 'all' | 'public' | 'private'
+const QUERY_TIMEOUT_MS = 12000
 
 export default function RepairLogsPage() {
   const { success, error: showError } = useToast()
@@ -29,6 +31,15 @@ export default function RepairLogsPage() {
   const [editingLog, setEditingLog] = useState<RepairLog | null>(null)
   const [togglingLogId, setTogglingLogId] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+
+  const withTimeout = async <T,>(promise: Promise<T>, label: string): Promise<T> => {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        setTimeout(() => reject(new Error(`${label} timeout`)), QUERY_TIMEOUT_MS)
+      }),
+    ])
+  }
 
   // Form state
   const [formData, setFormData] = useState({
@@ -57,17 +68,20 @@ export default function RepairLogsPage() {
         query = query.eq('is_public', true)
       }
 
-      const { data, error } = await query
+      const { data, error } = await withTimeout(query, 'repair logs list')
 
       if (error) throw error
 
       if (statusFilter !== 'all' && (!data || data.length === 0)) {
-        const { data: allData, error: allError } = await supabase
-          .from('repair_logs')
-          .select(
-            'id,title,summary,controller_model,repair_type,is_public,view_count,naver_blog_url,created_at,updated_at'
-          )
-          .order('created_at', { ascending: false })
+        const { data: allData, error: allError } = await withTimeout(
+          supabase
+            .from('repair_logs')
+            .select(
+              'id,title,summary,controller_model,repair_type,is_public,view_count,naver_blog_url,created_at,updated_at'
+            )
+            .order('created_at', { ascending: false }),
+          'repair logs fallback list'
+        )
 
         if (allError) throw allError
 
@@ -134,11 +148,10 @@ export default function RepairLogsPage() {
 
   const openEditModal = async (log: RepairLog) => {
     try {
-      const { data, error } = await supabase
-        .from('repair_logs')
-        .select('*')
-        .eq('id', log.id)
-        .single()
+      const { data, error } = await withTimeout(
+        supabase.from('repair_logs').select('*').eq('id', log.id).single(),
+        'repair log detail'
+      )
 
       if (error) throw error
 
@@ -173,10 +186,17 @@ export default function RepairLogsPage() {
       const imgRegex = /<img[^>]+src=["']([^"']+)["']/i
       const match = formData.content.match(imgRegex)
       const thumbnailCandidate = formData.thumbnail_url || (match ? match[1] : null)
-      const thumbnailUrl = await resolveRepairLogThumbnailUrl(
-        thumbnailCandidate,
-        editingLog?.id || formData.title
-      )
+      let thumbnailUrl = thumbnailCandidate
+
+      try {
+        thumbnailUrl = await resolveRepairLogThumbnailUrl(
+          thumbnailCandidate,
+          editingLog?.id || formData.title
+        )
+      } catch (thumbnailError) {
+        console.error('Failed to upload thumbnail, fallback to source value:', thumbnailError)
+        showError('썸네일 업로드 실패', '원본 썸네일로 저장을 진행합니다.')
+      }
 
       if (editingLog) {
         const { error } = await supabase
@@ -438,7 +458,11 @@ export default function RepairLogsPage() {
           <div className="flex-1 overflow-y-auto bg-white safe-area-top">
             {/* Modal Header */}
             <div className="sticky top-0 bg-white border-b border-[rgba(0,0,0,0.06)] px-4 py-4 flex items-center justify-between z-10">
-              <button onClick={() => setIsModalOpen(false)} className="p-2 -ml-2 text-[#007AFF]">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                disabled={submitting}
+                className="p-2 -ml-2 text-[#007AFF] disabled:opacity-50"
+              >
                 취소
               </button>
               <h2 className="text-lg font-bold text-[#1D1D1F]">
@@ -447,11 +471,23 @@ export default function RepairLogsPage() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting || !formData.title.trim() || !formData.content.trim()}
-                className="p-2 -mr-2 text-[#007AFF] font-semibold disabled:opacity-50"
+                className="p-2 -mr-2 text-[#007AFF] font-semibold disabled:opacity-50 inline-flex items-center gap-1"
               >
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 {submitting ? '저장 중...' : '저장'}
               </button>
             </div>
+
+            {submitting && (
+              <div className="px-4 pt-2 pb-1 border-b border-[rgba(0,0,0,0.06)]">
+                <div className="w-full h-1.5 bg-[#E5E5EA] rounded-full overflow-hidden">
+                  <div className="h-full w-1/2 bg-[#007AFF] rounded-full animate-pulse" />
+                </div>
+                <p className="text-[11px] text-[#86868B] mt-1.5">
+                  저장 중입니다. 잠시만 기다려주세요...
+                </p>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="p-4 space-y-5">
               {/* Title */}

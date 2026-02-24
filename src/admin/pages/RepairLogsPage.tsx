@@ -17,6 +17,7 @@ import {
   ExternalLink,
   Copy,
   Download,
+  Loader2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { RepairLog } from '@/types/database'
@@ -25,6 +26,7 @@ import { RichTextEditor } from '@/components/common/RichTextEditor'
 import { resolveRepairLogThumbnailUrl } from '@/lib/repairLogThumbnail'
 
 type LogStatus = 'all' | 'public' | 'private'
+const QUERY_TIMEOUT_MS = 12000
 
 export function RepairLogsPage() {
   const [logs, setLogs] = useState<RepairLog[]>([])
@@ -38,6 +40,7 @@ export function RepairLogsPage() {
   const [naverBlogId, setNaverBlogId] = useState('')
   const [naverPosts, setNaverPosts] = useState<any[]>([])
   const [loadingNaverPosts, setLoadingNaverPosts] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   // Form state
   const [formData, setFormData] = useState({
@@ -54,10 +57,19 @@ export function RepairLogsPage() {
   const [controllerServices, setControllerServices] = useState<ControllerServiceWithOptions[]>([])
   const [loadingControllers, setLoadingControllers] = useState(false)
 
+  const withTimeout = async <T,>(promise: Promise<T>, label: string): Promise<T> => {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        setTimeout(() => reject(new Error(`${label} timeout`)), QUERY_TIMEOUT_MS)
+      }),
+    ])
+  }
+
   const loadControllerModels = async () => {
     try {
       setLoadingControllers(true)
-      const models = await fetchControllerModels()
+      const models = await withTimeout(fetchControllerModels(), 'controller models')
       setControllerModels(models)
     } catch (error) {
       console.error('Failed to load controller models:', error)
@@ -98,17 +110,20 @@ export function RepairLogsPage() {
         query = query.eq('is_public', true)
       }
 
-      const { data, error } = await query
+      const { data, error } = await withTimeout(query, 'repair logs list')
 
       if (error) throw error
 
       if (statusFilter !== 'all' && (!data || data.length === 0)) {
-        const { data: allData, error: allError } = await supabase
-          .from('repair_logs')
-          .select(
-            'id,title,summary,controller_model,repair_type,is_public,view_count,naver_blog_url,created_at,updated_at'
-          )
-          .order('created_at', { ascending: false })
+        const { data: allData, error: allError } = await withTimeout(
+          supabase
+            .from('repair_logs')
+            .select(
+              'id,title,summary,controller_model,repair_type,is_public,view_count,naver_blog_url,created_at,updated_at'
+            )
+            .order('created_at', { ascending: false }),
+          'repair logs fallback list'
+        )
 
         if (allError) throw allError
 
@@ -176,11 +191,10 @@ export function RepairLogsPage() {
 
   const openEditModal = async (log: RepairLog) => {
     try {
-      const { data, error } = await supabase
-        .from('repair_logs')
-        .select('*')
-        .eq('id', log.id)
-        .single()
+      const { data, error } = await withTimeout(
+        supabase.from('repair_logs').select('*').eq('id', log.id).single(),
+        'repair log detail'
+      )
 
       if (error) throw error
 
@@ -214,10 +228,18 @@ export function RepairLogsPage() {
     const thumbnailCandidate = match ? match[1] : null
 
     try {
-      const thumbnailUrl = await resolveRepairLogThumbnailUrl(
-        thumbnailCandidate,
-        editingLog?.id || formData.title
-      )
+      setSubmitting(true)
+      let thumbnailUrl = thumbnailCandidate
+
+      try {
+        thumbnailUrl = await resolveRepairLogThumbnailUrl(
+          thumbnailCandidate,
+          editingLog?.id || formData.title
+        )
+      } catch (thumbnailError) {
+        console.error('Failed to upload thumbnail, fallback to source value:', thumbnailError)
+        toast.warning('썸네일 최적화 업로드에 실패해 원본 값으로 저장합니다.')
+      }
 
       if (editingLog) {
         const { error } = await supabase
@@ -255,6 +277,8 @@ export function RepairLogsPage() {
     } catch (error) {
       console.error('Failed to save repair log:', error)
       toast.error('저장에 실패했습니다.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -726,11 +750,21 @@ export function RepairLogsPage() {
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
+                disabled={submitting}
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {submitting && (
+              <div className="px-6 pt-3 pb-1 border-b border-gray-100">
+                <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full w-1/2 bg-black rounded-full animate-pulse" />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">저장 중입니다. 잠시만 기다려주세요...</p>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {/* Title */}
@@ -841,15 +875,18 @@ export function RepairLogsPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  disabled={submitting}
+                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   취소
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+                  disabled={submitting}
+                  className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center gap-2"
                 >
-                  {editingLog ? '수정' : '등록'}
+                  {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {submitting ? '저장 중...' : editingLog ? '수정' : '등록'}
                 </button>
               </div>
             </form>

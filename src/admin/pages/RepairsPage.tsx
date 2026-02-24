@@ -85,34 +85,34 @@ interface MessageTemplateContext {
 
 const MESSAGE_TEMPLATES: Record<MessageStage, Record<MessageChannel, string>> = {
   received: {
-    sms: '[판다덕픽스] {{customerName}}님, 수리 접수가 완료되었습니다.\n접수번호: {{requestCode}}\n모델: {{modelName}}\n금액: {{totalAmount}}\n확인 후 진행 상태를 안내드리겠습니다.',
+    sms: '[판다덕픽스] {{customerName}}님, 접수해주셔서 감사합니다 :)\n수리 접수가 완료되었어요.\n접수번호: {{requestCode}}\n모델: {{modelName}}\n예상 비용: {{totalAmount}}\n진행 소식은 단계별로 바로 안내드릴게요.',
     kakao:
-      '안녕하세요 {{customerName}}님, 판다덕픽스입니다.\n수리 접수가 정상 완료되었습니다.\n\n- 접수번호: {{requestCode}}\n- 모델: {{modelName}}\n- 금액: {{totalAmount}}\n\n진행 상태는 단계별로 바로 안내드리겠습니다. 감사합니다.',
+      '안녕하세요 {{customerName}}님, 판다덕픽스입니다 :)\n수리 접수가 정상 완료되었어요.\n\n- 접수번호: {{requestCode}}\n- 모델: {{modelName}}\n- 예상 비용: {{totalAmount}}\n\n진행 상태는 단계마다 빠르게 알려드릴게요. 감사합니다!',
   },
   confirmed: {
-    sms: '[판다덕픽스] {{customerName}}님, 접수건 확인 완료되었습니다.\n{{today}} 기준 수리 대기열에 등록되었습니다.\n예상 완료일: {{etaDate}}',
+    sms: '[판다덕픽스] {{customerName}}님, 접수건 확인이 끝났어요.\n{{today}} 기준 수리 대기열에 등록되었습니다.\n예상 완료일: {{etaDate}}\n변동이 생기면 바로 안내드릴게요.',
     kakao:
-      '안녕하세요 {{customerName}}님, 판다덕픽스입니다.\n접수하신 건 확인을 마쳤고 수리 대기열에 등록되었습니다.\n\n- 접수번호: {{requestCode}}\n- 예상 완료일: {{etaDate}}\n\n변동 사항이 있으면 바로 안내드리겠습니다.',
+      '안녕하세요 {{customerName}}님, 판다덕픽스입니다 :)\n접수하신 건 확인을 마쳤고 수리 대기열에 등록되었어요.\n\n- 접수번호: {{requestCode}}\n- 예상 완료일: {{etaDate}}\n\n일정이 달라지면 바로 안내드리겠습니다.',
   },
   in_progress: {
-    sms: '[판다덕픽스] {{customerName}}님, 현재 수리가 진행 중입니다.\n진행 상태: 수리 작업 중\n완료 후 바로 안내드리겠습니다.',
+    sms: '[판다덕픽스] {{customerName}}님, 현재 수리를 진행하고 있어요.\n진행 상태: 수리 작업 중\n완료되는 즉시 안내드릴게요.',
     kakao:
-      '안녕하세요 {{customerName}}님, 판다덕픽스입니다.\n현재 고객님의 {{modelName}} 수리가 진행 중입니다.\n\n- 접수번호: {{requestCode}}\n- 진행 상태: 수리 작업 중\n\n완료 즉시 다음 안내를 드리겠습니다.',
+      '안녕하세요 {{customerName}}님, 판다덕픽스입니다 :)\n현재 고객님의 {{modelName}} 수리가 순조롭게 진행 중이에요.\n\n- 접수번호: {{requestCode}}\n- 진행 상태: 수리 작업 중\n\n완료 즉시 다음 안내 드리겠습니다.',
   },
   completed: {
-    sms: '[판다덕픽스] {{customerName}}님, 수리가 완료되었습니다.\n검수까지 마쳤으며 발송 준비 중입니다.\n필요 시 추가 안내드리겠습니다.',
+    sms: '[판다덕픽스] {{customerName}}님, 수리가 잘 완료되었어요.\n검수까지 마쳤고 현재 발송 준비 중입니다.\n발송되면 송장 정보도 바로 안내드릴게요.',
     kakao:
-      '안녕하세요 {{customerName}}님, 판다덕픽스입니다.\n수리가 완료되어 검수까지 마쳤습니다.\n\n- 접수번호: {{requestCode}}\n- 상태: 수리 완료\n\n발송 준비 후 송장 정보도 안내드리겠습니다.',
+      '안녕하세요 {{customerName}}님, 판다덕픽스입니다 :)\n수리가 완료되어 검수까지 모두 마쳤어요.\n\n- 접수번호: {{requestCode}}\n- 상태: 수리 완료\n\n발송 준비가 끝나면 송장 정보도 바로 안내드리겠습니다.',
   },
   shipped: {
-    sms: '[판다덕픽스] {{customerName}}님, 발송이 완료되었습니다.\n송장번호: [송장번호 입력]\n안전하게 받아보시길 바랍니다.',
+    sms: '[판다덕픽스] {{customerName}}님, 발송이 완료되었어요.\n송장번호: [송장번호 입력]\n안전하게 받아보시고, 수령 후 문제 있으면 편하게 연락주세요.',
     kakao:
-      '안녕하세요 {{customerName}}님, 판다덕픽스입니다.\n수리 완료품 발송이 완료되었습니다.\n\n- 송장번호: [송장번호 입력]\n- 접수번호: {{requestCode}}\n\n수령 후 이상 있으면 언제든 편하게 연락 주세요.',
+      '안녕하세요 {{customerName}}님, 판다덕픽스입니다 :)\n수리 완료품 발송이 완료되었어요.\n\n- 송장번호: [송장번호 입력]\n- 접수번호: {{requestCode}}\n\n받아보신 뒤 불편한 점이 있으면 언제든 편하게 연락 주세요.',
   },
   review_request: {
-    sms: '[판다덕픽스] {{customerName}}님, 이용해주셔서 감사합니다.\n아래 링크로 리뷰 남겨주시면 큰 도움이 됩니다.\n{{reviewUrl}}',
+    sms: '[판다덕픽스] {{customerName}}님, 이용해주셔서 정말 감사합니다 :)\n괜찮으셨다면 아래 링크에 짧은 리뷰 부탁드려요.\n{{reviewUrl}}',
     kakao:
-      '안녕하세요 {{customerName}}님 👋\n판다덕픽스를 이용해주셔서 감사합니다.\n서비스가 어떠셨는지 아래 링크로 리뷰를 남겨주시면 큰 도움이 됩니다.\n\n{{reviewUrl}}\n\n소중한 의견 반영해서 더 나은 서비스로 보답드리겠습니다 🙏',
+      '안녕하세요 {{customerName}}님 👋\n판다덕픽스를 이용해주셔서 진심으로 감사합니다.\n서비스가 괜찮으셨다면 아래 링크에 리뷰 한 줄 부탁드려요.\n\n{{reviewUrl}}\n\n남겨주신 의견은 꼼꼼히 반영해서 더 좋은 서비스로 보답드릴게요 🙏',
   },
 }
 
@@ -144,6 +144,7 @@ export function RepairsPage() {
   const [messageStage, setMessageStage] = useState<MessageStage>('received')
   const [messageChannel, setMessageChannel] = useState<MessageChannel>('sms')
   const [messageReviewUrl, setMessageReviewUrl] = useState('')
+  const [sendingMessage, setSendingMessage] = useState(false)
   const [adminNotes, setAdminNotes] = useState('')
   const [preRepairNotes, setPreRepairNotes] = useState('')
   const [postRepairNotes, setPostRepairNotes] = useState('')
@@ -527,6 +528,59 @@ export function RepairsPage() {
     }
   }
 
+  const handleSendCustomerMessage = async () => {
+    if (!messageRepair) return
+
+    if (messageChannel !== 'sms') {
+      toast.error(
+        '카카오톡 전송은 아직 자동 전송을 지원하지 않습니다. 메시지를 복사해서 사용해주세요.'
+      )
+      return
+    }
+
+    const messageText = buildCustomerMessage(messageRepair, messageStage, messageChannel).trim()
+    const recipient = messageRepair.customer_phone
+
+    if (!recipient) {
+      toast.error('수신 번호가 없어 전송할 수 없습니다.')
+      return
+    }
+
+    if (!messageText) {
+      toast.error('전송할 메시지 내용이 비어있습니다.')
+      return
+    }
+
+    try {
+      setSendingMessage(true)
+      const { data, error } = await supabase.functions.invoke('send-sms', {
+        body: {
+          repairRequestId: messageRepair.id,
+          stage: messageStage,
+          channel: messageChannel,
+          recipient,
+          message: messageText,
+        },
+      })
+
+      if (error) {
+        throw new Error(error.message || '문자 발송에 실패했습니다.')
+      }
+
+      if (!data?.success) {
+        const reason = data?.error || '문자 발송에 실패했습니다.'
+        throw new Error(reason)
+      }
+
+      toast.success('문자 발송이 완료되었습니다.')
+    } catch (error) {
+      console.error('Failed to send customer message:', error)
+      toast.error(error instanceof Error ? error.message : '문자 발송 중 오류가 발생했습니다.')
+    } finally {
+      setSendingMessage(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -799,6 +853,17 @@ export function RepairsPage() {
                 >
                   <Copy className="w-4 h-4" />
                   메시지 복사
+                </button>
+                <button
+                  onClick={handleSendCustomerMessage}
+                  disabled={sendingMessage || messageChannel !== 'sms'}
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium disabled:bg-blue-300 disabled:cursor-not-allowed"
+                  title={
+                    messageChannel !== 'sms' ? '현재는 SMS 자동 전송만 지원합니다.' : 'SMS 발송'
+                  }
+                >
+                  <Send className="w-4 h-4" />
+                  {sendingMessage ? '발송 중...' : '문자 보내기'}
                 </button>
                 <button
                   onClick={() => {

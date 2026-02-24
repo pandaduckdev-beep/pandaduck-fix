@@ -15,7 +15,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MenuDrawer } from '@/app/components/MenuDrawer'
 import { useSlideUp } from '@/hooks/useSlideUp'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
 import { SkeletonCard } from '@/components/common/Skeleton'
 
 // 썸네일 URL 최적화 함수 (RepairLogsPage와 동일)
@@ -46,12 +46,7 @@ const services = [
     icon: <Zap className="w-6 h-6" />,
     title: '스틱 쏠림(드리프트) 해결',
     description: 'TMR 센서로 영구적 해결',
-    features: [
-      'TMR 센서 교체',
-      '완벽한 0포인트 복원',
-      '정밀한 캘리브레이션',
-      '원활한 조작감 보장',
-    ],
+    features: ['TMR 센서 교체', '완벽한 0포인트 복원', '정밀한 캘리브레이션', '원활한 조작감 보장'],
     path: '/services/list',
   },
   {
@@ -152,11 +147,6 @@ export function HomeScreen() {
     },
   ])
   const { setRef } = useSlideUp(25)
-
-  const supabase = createClient(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_ANON_KEY
-  )
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -406,9 +396,7 @@ export function HomeScreen() {
                       {log.title}
                     </h3>
                     {log.summary && (
-                      <p className="text-sm text-[#86868B] mb-2 line-clamp-2">
-                        {log.summary}
-                      </p>
+                      <p className="text-sm text-[#86868B] mb-2 line-clamp-2">{log.summary}</p>
                     )}
                     {log.controller_model && (
                       <div className="flex items-center gap-2">
@@ -451,57 +439,57 @@ export function HomeScreen() {
             </>
           ) : (
             reviews.map((review, index) => (
-            <div
-              key={index}
-              ref={setRef(19 + index)}
-              className="slide-up bg-[#F5F5F7] rounded-[28px] p-6"
-              style={{ transitionDelay: `${index * 0.05}s` }}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <div className="flex items-center gap-1 mb-1">
-                    {Array.from({ length: review.rating }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-[#FFB800] text-[#FFB800]" />
-                    ))}
+              <div
+                key={index}
+                ref={setRef(19 + index)}
+                className="slide-up bg-[#F5F5F7] rounded-[28px] p-6"
+                style={{ transitionDelay: `${index * 0.05}s` }}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      {Array.from({ length: review.rating }).map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-[#FFB800] text-[#FFB800]" />
+                      ))}
+                    </div>
+                    <div className="text-sm text-[#86868B]">{review.service}</div>
                   </div>
-                  <div className="text-sm text-[#86868B]">{review.service}</div>
+                  <div className="text-sm whitespace-nowrap" style={{ fontWeight: 600 }}>
+                    {review.name}
+                  </div>
                 </div>
-                <div className="text-sm whitespace-nowrap" style={{ fontWeight: 600 }}>
-                  {review.name}
-                </div>
+
+                {/* 리뷰 이미지 */}
+                {review.images && review.images.length > 0 && (
+                  <div className="mb-3 flex gap-2 overflow-x-auto">
+                    {review.images.map((image: any, imgIndex: number) => {
+                      // 문자열이면 그대로 사용
+                      let imageUrl = null
+                      if (typeof image === 'string') {
+                        imageUrl = image
+                      }
+
+                      if (!imageUrl) return null
+
+                      return (
+                        <img
+                          key={imgIndex}
+                          src={imageUrl}
+                          alt={`리뷰 이미지 ${imgIndex + 1}`}
+                          className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none'
+                          }}
+                        />
+                      )
+                    })}
+                  </div>
+                )}
+
+                <p className="text-sm leading-relaxed">{review.content}</p>
               </div>
-
-              {/* 리뷰 이미지 */}
-              {review.images && review.images.length > 0 && (
-                <div className="mb-3 flex gap-2 overflow-x-auto">
-                  {review.images.map((image: any, imgIndex: number) => {
-                    // 문자열이면 그대로 사용
-                    let imageUrl = null
-                    if (typeof image === 'string') {
-                      imageUrl = image
-                    }
-
-                    if (!imageUrl) return null
-
-                    return (
-                      <img
-                        key={imgIndex}
-                        src={imageUrl}
-                        alt={`리뷰 이미지 ${imgIndex + 1}`}
-                        className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                        loading="lazy"
-                        decoding="async"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none'
-                        }}
-                      />
-                    )
-                  })}
-                </div>
-              )}
-
-              <p className="text-sm leading-relaxed">{review.content}</p>
-            </div>
             ))
           )}
         </div>
