@@ -144,6 +144,8 @@ export function RepairsPage() {
   const [messageStage, setMessageStage] = useState<MessageStage>('received')
   const [messageChannel, setMessageChannel] = useState<MessageChannel>('sms')
   const [messageReviewUrl, setMessageReviewUrl] = useState('')
+  const [messageDraft, setMessageDraft] = useState('')
+  const [isMessageEdited, setIsMessageEdited] = useState(false)
   const [sendingMessage, setSendingMessage] = useState(false)
   const [adminNotes, setAdminNotes] = useState('')
   const [preRepairNotes, setPreRepairNotes] = useState('')
@@ -257,6 +259,20 @@ export function RepairsPage() {
 
     ensureReviewUrl()
   }, [showMessageModal, messageRepair, messageStage, messageReviewUrl])
+
+  useEffect(() => {
+    if (!showMessageModal || !messageRepair) return
+    if (isMessageEdited) return
+
+    setMessageDraft(buildCustomerMessage(messageRepair, messageStage, messageChannel))
+  }, [
+    showMessageModal,
+    messageRepair,
+    messageStage,
+    messageChannel,
+    messageReviewUrl,
+    isMessageEdited,
+  ])
 
   const filteredRepairs = repairs.filter((repair) => {
     if (!searchTerm) return true
@@ -497,6 +513,8 @@ export function RepairsPage() {
     setMessageStage(initialStage)
     setMessageChannel('sms')
     setMessageReviewUrl('')
+    setMessageDraft(buildCustomerMessage(repair, initialStage, 'sms'))
+    setIsMessageEdited(false)
     setShowMessageModal(true)
 
     if (initialStage === 'review_request') {
@@ -519,7 +537,12 @@ export function RepairsPage() {
         setMessageReviewUrl(url)
       }
 
-      const text = buildCustomerMessage(messageRepair, messageStage, messageChannel)
+      const text = messageDraft.trim()
+      if (!text) {
+        toast.error('복사할 메시지 내용이 비어있습니다.')
+        return
+      }
+
       await copyToClipboard(text)
       toast.success(`${MESSAGE_STAGE_LABEL[messageStage]} 메시지가 복사되었습니다.`)
     } catch (error) {
@@ -538,7 +561,7 @@ export function RepairsPage() {
       return
     }
 
-    const messageText = buildCustomerMessage(messageRepair, messageStage, messageChannel).trim()
+    const messageText = messageDraft.trim()
     const recipient = messageRepair.customer_phone
 
     if (!recipient) {
@@ -588,10 +611,6 @@ export function RepairsPage() {
       </div>
     )
   }
-
-  const messagePreview = messageRepair
-    ? buildCustomerMessage(messageRepair, messageStage, messageChannel)
-    : ''
 
   return (
     <div>
@@ -782,6 +801,8 @@ export function RepairsPage() {
                     setShowMessageModal(false)
                     setMessageRepair(null)
                     setMessageReviewUrl('')
+                    setMessageDraft('')
+                    setIsMessageEdited(false)
                   }}
                   className="p-2 hover:bg-gray-100 rounded-lg transition"
                 >
@@ -802,7 +823,10 @@ export function RepairsPage() {
                   <label className="block text-sm text-gray-600 mb-1">단계</label>
                   <select
                     value={messageStage}
-                    onChange={(e) => setMessageStage(e.target.value as MessageStage)}
+                    onChange={(e) => {
+                      setMessageStage(e.target.value as MessageStage)
+                      setIsMessageEdited(false)
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none"
                   >
                     {(Object.keys(MESSAGE_STAGE_LABEL) as MessageStage[]).map((stage) => (
@@ -817,7 +841,10 @@ export function RepairsPage() {
                   <label className="block text-sm text-gray-600 mb-1">채널</label>
                   <select
                     value={messageChannel}
-                    onChange={(e) => setMessageChannel(e.target.value as MessageChannel)}
+                    onChange={(e) => {
+                      setMessageChannel(e.target.value as MessageChannel)
+                      setIsMessageEdited(false)
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-0 focus:border-gray-400 outline-none"
                   >
                     <option value="sms">문자(SMS)</option>
@@ -837,12 +864,15 @@ export function RepairsPage() {
               )}
 
               <div>
-                <label className="block text-sm text-gray-600 mb-1">메시지 미리보기</label>
+                <label className="block text-sm text-gray-600 mb-1">메시지 내용 (수정 가능)</label>
                 <textarea
-                  value={messagePreview}
-                  readOnly
+                  value={messageDraft}
+                  onChange={(e) => {
+                    setMessageDraft(e.target.value)
+                    setIsMessageEdited(true)
+                  }}
                   rows={10}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-800 resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-800 resize-none"
                 />
               </div>
 
@@ -870,6 +900,8 @@ export function RepairsPage() {
                     setShowMessageModal(false)
                     setMessageRepair(null)
                     setMessageReviewUrl('')
+                    setMessageDraft('')
+                    setIsMessageEdited(false)
                   }}
                   className="px-4 py-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition font-medium"
                 >
